@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="YourApplicationTheme" parent="AppTheme">
+        <item name="android:buttonStyle">@style/buttondelete</item>
+    </style>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="holoLight">#F0F0F0</color>
+    <color name="createandloginBackground">#F4F4F4</color>
+    <color name="phoneSignator">#006665</color>
+    <color name="phoneCreator">#5a9f9c</color>
+    <color name="phoneHshVleRcrdsTp">#122C3E</color>
+    <color name="cellBackgroundPhone">#FFFFFF</color>
+    <color name="cellBackgroundTablet">#F1F2F6</color>
+    <color name="actionbarbackground">#FFFFFF</color>
+    <color name="tabletTpeRcrdVleIDCrtr">#54606B</color>
+    <color name="tabletSignator">#002548</color>
+    <color name="cellSelected">#f2f2f2</color>
+    <color name="borderBackground">#dbdbdb</color>
+
+
+</resources>

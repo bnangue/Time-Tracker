@@ -1,0 +1,88 @@
+package com.bricefamily.alex.time_tracker;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+public class CreateNewEventActivity extends AppCompatActivity {
+
+    private TextView currenttime;
+    private EditText titeled,detailed,dateed,noteed,creatornameed;
+    private String titelstr,detailsstr,notestr,creatornamestr,datestr,status,currenttimestr;
+    EventObject eventObject;
+    DateEventObject dateEventObject;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_create_new_event);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+        String formattedDate = df.format(c.getTime());
+        currenttimestr=formattedDate;
+        Bundle extras = getIntent().getExtras();
+
+        if (extras != null) {
+            creatornamestr = extras.getString("username");
+        }
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+
+        currenttime=(TextView)findViewById(R.id.textVieweventcurrenttime);
+        currenttime.setText(currenttimestr);
+        titeled= (EditText)findViewById(R.id.editTexteventtitel);
+        detailed= (EditText)findViewById(R.id.editTexteventdetails);
+        dateed= (EditText)findViewById(R.id.editTexteventdate);
+        noteed= (EditText)findViewById(R.id.editTexteventnote);
+        creatornameed= (EditText)findViewById(R.id.editTexteventcreator);
+        creatornameed.setText(creatornamestr);
+    }
+
+    public void buttonCreateEventListener(View view){
+        titelstr=titeled.getText().toString();
+        detailsstr=detailed.getText().toString();
+        notestr=noteed.getText().toString();
+        datestr=dateed.getText().toString();
+        creatornamestr=creatornameed.getText().toString();
+
+        dateEventObject=new DateEventObject("23","02","2016");
+        status="1";
+        eventObject=new EventObject(titelstr,detailsstr,creatornamestr,currenttimestr,currenttimestr
+                ,dateEventObject.day,dateEventObject.month,dateEventObject.year,status);
+
+        createEvents(eventObject);
+    }
+    private void createEvents(EventObject eve){
+        ServerRequest serverRequest=new ServerRequest(this);
+        serverRequest.createEventinBackground(eve, new GetEventsCallbacks() {
+            @Override
+            public void done(EventObject returnedeventobject) {
+                finish();
+                startActivity(new Intent(CreateNewEventActivity.this,CentralPageActivity.class));
+            }
+        });
+        Toast.makeText(getApplicationContext(),"Event created",Toast.LENGTH_SHORT).show();
+    }
+}

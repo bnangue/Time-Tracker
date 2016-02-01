@@ -42,6 +42,11 @@ public class ServerRequest {
         progressDialog.setMessage("please wait.");
     }
 
+    public void createEventinBackground(EventObject eventObject, GetEventsCallbacks callbacks){
+        progressDialog.show();
+        new StoreEventsAsynckTacks(eventObject,callbacks).execute();
+
+    }
     public void storeUserDataInBackground(User user,GetUserCallbacks callbacks){
         progressDialog.show();
         new StoreUserDataAsynckTacks(user,callbacks).execute();
@@ -153,7 +158,7 @@ public class ServerRequest {
                OutputStream out=urlConnection.getOutputStream();
                 BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
                 String data =URLEncoder.encode("email","UTF-8")+"="+URLEncoder.encode(user.email,"UTF-8")+"&"+
-                        URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(user.password,"UTF-8");
+                        URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(String.valueOf(user.password.hashCode()),"UTF-8");
                 buff.write(data);
                 buff.flush();
                 buff.close();
@@ -195,5 +200,124 @@ public class ServerRequest {
 
     }
 
+
+    public class CreateTableForUserAsynckTask extends AsyncTask<Void,Void,String>{
+
+        User user;
+
+        public CreateTableForUserAsynckTask(User user){
+            this.user=user;
+        }
+        @Override
+        protected void onPostExecute(String aVoid) {
+            progressDialog.dismiss();
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            URL url;
+            HttpURLConnection urlConnection=null;
+            String reponse=null;
+
+            try {
+
+                url=new URL(SERVER_ADDRESS + "CreateTableTest.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                String data =URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(user.username,"UTF-8");
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line+"\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+
+                reponse=respons;
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                urlConnection.disconnect();
+            }
+            return reponse;
+        }
+    }
+
+
+    public class StoreEventsAsynckTacks extends AsyncTask<Void,Void,Void>{
+
+        EventObject eventObject;
+        GetEventsCallbacks eventsCallbacks;
+
+        public StoreEventsAsynckTacks( EventObject eventObject,GetEventsCallbacks callbacks){
+            this.eventsCallbacks=callbacks;
+            this.eventObject=eventObject;
+        }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progressDialog.dismiss();
+            eventsCallbacks.done(null);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            ArrayList<Pair<String,String>> data=new ArrayList<>();
+            data.add(new Pair<String, String>("eventTitel", eventObject.titel));
+            data.add(new Pair<String, String>("eventCreator", eventObject.creator));
+            data.add(new Pair<String, String>("eventDetails",eventObject.infotext));
+            data.add(new Pair<String, String>("eventDay", eventObject.eDay));
+            data.add(new Pair<String, String>("eventMonth", eventObject.eYear));
+            data.add(new Pair<String, String>("eventYear",eventObject.eMonth));
+            data.add(new Pair<String, String>("eventStatus",eventObject.eventStatus));
+
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try {
+
+                byte[] postData= getData(data).getBytes("UTF-8");
+                url=new URL(SERVER_ADDRESS + "CreateEvent.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", String.valueOf(postData.length));
+                urlConnection.setDoOutput(true);
+                urlConnection.getOutputStream().write(postData);
+
+                Reader reader= new BufferedReader(new InputStreamReader(urlConnection.getInputStream(),"UTF-8"));
+                StringBuilder bld =new StringBuilder();
+                String line=null;
+                for(int c=reader.read();c!=-1;c=reader.read()){
+                    bld.append(c);
+                }
+
+                line=bld.toString();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
 
 }

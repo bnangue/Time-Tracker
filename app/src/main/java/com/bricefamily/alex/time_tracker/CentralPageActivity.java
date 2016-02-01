@@ -192,6 +192,12 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Toast.makeText(getApplicationContext(),"item "+ listEvent.get(position).titel,Toast.LENGTH_SHORT).show();
+        Intent intent=new Intent(CentralPageActivity.this,EventDetailsActivity.class);
+        intent.putExtra("titel",listEvent.get(position).titel);
+        intent.putExtra("textinfo",listEvent.get(position).infotext);
+        intent.putExtra("time",listEvent.get(position).time);
+        intent.putExtra("creator",listEvent.get(position).creator);
+        startActivity(intent);
     }
 
 
@@ -222,11 +228,13 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
 
         }
-        mode.setTitle(count+ " dselected");
+        mode.setTitle(count + " selected");
     }
-    public void removeEvent(int position){
-        centralPageAdapter.remove(listEvent.get(position));
 
+    public void buttonCreateNewEventPressed(View view){
+        Intent intent =new Intent(CentralPageActivity.this,CreateNewEventActivity.class);
+        intent.putExtra("username",username);
+        startActivity(intent);
     }
 
     @Override

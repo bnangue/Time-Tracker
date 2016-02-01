@@ -4,14 +4,17 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
     private EditText emailed,passworded;
     private String emailstr,passwordstr;
     private PasswordChecker pwchecker;
@@ -27,6 +30,7 @@ public class LoginActivity extends ActionBarActivity {
 
         emailed =(EditText)findViewById(R.id.editTextemail);
         passworded=(EditText)findViewById(R.id.editTextpassword);
+        passworded.setOnEditorActionListener(this);
     }
 
     @Override
@@ -111,5 +115,18 @@ public class LoginActivity extends ActionBarActivity {
 
         Intent intent =new Intent(this, CreateUserActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)){
+            emailstr=emailed.getText().toString();
+            passwordstr=passworded.getText().toString();
+
+            User user =new User(emailstr,passwordstr);
+            authenticateuser(user);
+        }
+
+            return false;
     }
 }

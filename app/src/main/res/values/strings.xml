@@ -12,4 +12,9 @@
     <string name="drawerOpen"> </string>
     <string name="drawerClose"> </string>
     <string name="title_activity_preference">PreferenceActivity</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="title_activity_event_details">EventDetailsActivity</string>
+    <string name="action_share">share</string>
+    <string name="title_activity_complete_profile">CompleteProfileActivity</string>
+    <string name="title_activity_create_new_event">CreateNewEventActivity</string>
 </resources>

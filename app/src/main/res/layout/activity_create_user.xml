@@ -23,7 +23,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:hint="Enter Your Name"
+        android:hint="Enter Your Userame"
         android:ems="10"
         android:id="@+id/editTextcreatename"
         android:layout_centerVertical="true"

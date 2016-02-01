@@ -35,7 +35,7 @@ public class PreferenceActivity extends ActionBarActivity implements AdapterView
         items.add(new EntryItem("Help Center"));
         items.add(new EntryItem("FAQ"));
         items.add(new EntryItem("Licenses"));
-        items.add(new EntryItem("About us"));
+        items.add(new EntryItem("About us "));
 
         items.add(new SectionItem(""));
 

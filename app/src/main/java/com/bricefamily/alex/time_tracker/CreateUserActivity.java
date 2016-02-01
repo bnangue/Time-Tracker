@@ -3,14 +3,17 @@ package com.bricefamily.alex.time_tracker;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class CreateUserActivity extends ActionBarActivity {
+public class CreateUserActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
     private EditText emailed,usernameed,passworded,repeatpassworded;
     private String emailstr, passwordstr,repeatpasswordstr,usernamestr;
 
@@ -26,6 +29,7 @@ public class CreateUserActivity extends ActionBarActivity {
         usernameed=(EditText)findViewById(R.id.editTextcreatename);
         passworded=(EditText)findViewById(R.id.editTextcreatepassword);
         repeatpassworded=(EditText)findViewById(R.id.editTextrepeatpassword);
+        repeatpassworded.setOnEditorActionListener(this);
 
     }
 
@@ -68,8 +72,8 @@ public class CreateUserActivity extends ActionBarActivity {
         }
     }
 
-    private void register(User registeredData){
-        ServerRequest serverRequest =new ServerRequest(this);
+    private void register(final User registeredData){
+        final ServerRequest serverRequest =new ServerRequest(this);
         serverRequest.storeUserDataInBackground(registeredData, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
@@ -77,5 +81,27 @@ public class CreateUserActivity extends ActionBarActivity {
                     startActivity(new Intent(CreateUserActivity.this,LoginActivity.class));
                 }
         });
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)){
+            emailstr=emailed.getText().toString();
+            usernamestr=usernameed.getText().toString();
+            passwordstr=passworded.getText().toString();
+            repeatpasswordstr=repeatpassworded.getText().toString();
+            //do Mysql saving
+            if(pwChecker.checkIfValid(passwordstr,repeatpasswordstr)){
+
+                int password=passwordstr.hashCode();
+                User userRegistered=new User(usernamestr,emailstr,String.valueOf(password));
+                register(userRegistered);
+
+            }else{
+                Toast.makeText(this, "Password doesn't match", Toast.LENGTH_SHORT).show();
+
+            }
+        }
+            return false;
     }
 }

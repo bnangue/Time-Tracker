@@ -7,6 +7,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.view.ActionMode;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +27,7 @@ import java.util.Calendar;
 import java.util.List;
 
 
-public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener,CentralPageAdapter.OndeleteFromList {
+public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener,CentralPageAdapter.OndeleteFromList,  android.support.v7.view.ActionMode.Callback {
 
     ListView mDrawerList;
     RelativeLayout mDrawerpane;
@@ -41,12 +42,13 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     private ImageView profilePicture;
     ListView evnetListView;
     CentralPageAdapter centralPageAdapter;
-    List<EventObject> listEvent = new ArrayList<EventObject>();
+    SparseBooleanArray selected;
+    int[]selectedevent;
+    boolean[] selectionevents;
+    private ArrayList<EventObject> listEvent;
 
-    SparseBooleanArray sparseBooleanArray;
-    public  android.support.v7.view.ActionMode mactionMode;
     int count = 0;
-    Activity activity = this;
+    private android.support.v7.view.ActionMode mactionMode;
 
 
     @Override
@@ -56,11 +58,54 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         userLocalStore = new UserLocalStore(this);
         drawerTitle = title = getTitle();
 
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
-        String formattedDate = df.format(c.getTime());
-        fillList(formattedDate);
 
+
+        listEvent = new ArrayList<EventObject>();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            username = extras.getString("username");
+            listEvent=extras.getParcelableArrayList("eventlist");
+        }
+        prepareDrawerViews();
+        if(savedInstanceState!=null){
+            username=savedInstanceState.getString("user");
+            selectionevents=savedInstanceState.getBooleanArray("selectedevents");
+            listEvent=savedInstanceState.getParcelableArrayList("eventsArray");
+            count = savedInstanceState.getInt("numberOfSelectedevents");
+
+          //  selectedevent = savedInstanceState.getIntArray("selectedevent");
+
+            prepareOrientationchange();
+
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }else {
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+            String formattedDate = df.format(c.getTime());
+
+            prepareListview(listEvent);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+
+        }
+
+    }
+    void prepareOrientationchange(){
+        if( selectionevents.length!=0){
+            prepareListview(listEvent);
+            if(count!=0){
+                centralPageAdapter.setEventSelection(selectionevents);
+                mactionMode= startSupportActionMode(this);
+                mactionMode.setTitle(count + " selected");
+            }
+
+        }else{
+            prepareListview(listEvent);
+        }
+    }
+    void prepareDrawerViews(){
+        fillList();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
         mDrawerpane = (RelativeLayout) findViewById(R.id.drawerpane);
         mDrawerList = (ListView) findViewById(R.id.navlist);
@@ -69,8 +114,6 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         DrawerListAdapter adapter = new DrawerListAdapter(this, mNavItems);
         mDrawerList.setAdapter(adapter);
 
-        prepareListview(listEvent);
-
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -78,10 +121,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             }
         });
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawerOpen, R.string.drawerClose);
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            username = extras.getString("username");
-        }
+
         userName.setText(username);
         mDrawerToggle = new ActionBarDrawerToggle(this, // Host Activity
                 mDrawerLayout, // layout container for navigation drawer
@@ -102,35 +142,30 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
-    void prepareListview(List<EventObject> listEvent) {
+    void prepareListview(ArrayList<EventObject> listEvent) {
 
         evnetListView = (ListView) findViewById(R.id.listviewdetails);
         centralPageAdapter = new CentralPageAdapter(this, R.layout.central_page_item,listEvent);
         evnetListView.setAdapter(centralPageAdapter);
+        centralPageAdapter.notifyDataSetChanged();
+
         evnetListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         evnetListView.setOnItemClickListener(this);
         evnetListView.setMultiChoiceModeListener(this);
 
+        if(selectionevents==null){
+            selectionevents=new boolean[listEvent.size()];
+        }
+
     }
 
-    private void fillList(String formattedDate) {
+    private void fillList() {
         mNavItems.add(new NavItem("Home", "MeetUp Destination", R.drawable.colorhome));
         mNavItems.add(new NavItem("Preferences", "Change your preferences", R.drawable.colorsettings));
         mNavItems.add(new NavItem("About", "learn more about time-tracker", R.drawable.colornfo));
-        listEvent.add(new EventObject("Einkaufen", "wir müssen noch den Tag festlesgen", "Jacqueline", formattedDate));
-        listEvent.add(new EventObject("Tanken", "wir müssen noch den Tag festlesgen", "Brice", formattedDate));
-        listEvent.add(new EventObject("Kino Besuch", "wir müssen noch den Tag festlesgen", "Jacqueline", formattedDate));
-        listEvent.add(new EventObject("Urlaub", "wir müssen noch den Tag festlesgen", "Brice", formattedDate));
-        listEvent.add(new EventObject("Valentinestag", "wir müssen noch den Tag festlesgen", "Brice", formattedDate));
-        listEvent.add(new EventObject("Romantic Dinner", "wir müssen noch den Tag festlesgen", "Brice & Jacqueline", formattedDate));
-        listEvent.add(new EventObject("Abendessen", "wir müssen noch den Tag festlesgen", "Jacqueline", formattedDate));
-        listEvent.add(new EventObject("Taken", "wir müssen noch den Tag festlesgen", "Brice", formattedDate));
-        listEvent.add(new EventObject("Einkaufen", "wir müssen noch den Tag festlesgen", "Jacqueline", formattedDate));
-        listEvent.add(new EventObject("Geschirrspülen", "wir müssen noch den Tag festlesgen", "Jacqueline", formattedDate));
+
     }
 
     @Override
@@ -195,7 +230,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         Intent intent=new Intent(CentralPageActivity.this,EventDetailsActivity.class);
         intent.putExtra("titel",listEvent.get(position).titel);
         intent.putExtra("textinfo",listEvent.get(position).infotext);
-        intent.putExtra("time",listEvent.get(position).time);
+        intent.putExtra("time",listEvent.get(position).creationTime);
         intent.putExtra("creator",listEvent.get(position).creator);
         startActivity(intent);
     }
@@ -212,14 +247,17 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     public void onItemCheckedStateChanged(android.view.ActionMode mode, int position, long id, boolean checked) {
 
 
-        centralPageAdapter.toggleSelection(position);
+       // centralPageAdapter.toggleSelection(position);
 
         if(checked){
             count++;
+            selectionevents[position]=true;
             centralPageAdapter.setNewSelection(position,checked);
 
         }else {
             centralPageAdapter.removeSelection(position);
+            selectionevents[position]=false;
+
             if (count!=0){
                 count--;
             }else{
@@ -229,12 +267,14 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         }
         mode.setTitle(count + " selected");
+        centralPageAdapter.setEventSelection(selectionevents);
     }
 
     public void buttonCreateNewEventPressed(View view){
-        Intent intent =new Intent(CentralPageActivity.this,CreateNewEventActivity.class);
-        intent.putExtra("username",username);
+        Intent intent= new Intent(CentralPageActivity.this, CreateNewEventActivity.class);
+        intent.putExtra("username", username);
         startActivity(intent);
+
     }
 
     @Override
@@ -256,21 +296,17 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         switch (item.getItemId()) {
                 case R.id.menu_delete:
 
-                    SparseBooleanArray selected = centralPageAdapter.getSelectedIds();
+                     selected = centralPageAdapter.getSelectedIds();
                     int po=centralPageAdapter.getCount();
 
                     for (int i = po-1; i >=0; i--){
                         if (selected.get(i)) {
+                            selectionevents[i]=false;
                           centralPageAdapter.remove(listEvent.get(i));
+                            centralPageAdapter.setEventSelection(selectionevents);
                         }
                     }
-//                    for (int i=0; i<listEvent.size();i++){
-//                        if(centralPageAdapter.isPositionChecked(i)){
-//                           removeEvent(i);
-//                        }
-//
-//                    }
-//
+
                     centralPageAdapter.notifyDataSetChanged();
                     mode.finish(); // Action picked, so close the CAB
                     return true;
@@ -284,7 +320,10 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     public void onDestroyActionMode(android.view.ActionMode mode) {
 
         centralPageAdapter.clearSelection();
-        centralPageAdapter.removeSelection();
+       // centralPageAdapter.removeSelection();
+        selectionevents=new boolean[listEvent.size()];
+        centralPageAdapter.setEventSelection(selectionevents);
+        count=0;
 
     }
 
@@ -294,55 +333,71 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
 
     }
+    //Für Portr/Landsc Wechsel, Activity wird gekillt und Daten werden gesichert
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        selected=centralPageAdapter.getSelectedIds();
+        int[] selectedEvents=new int[centralPageAdapter.getSelectedCount()];
+        if(centralPageAdapter.getSelectedCount()>0){
+            for(int i=0;i<selected.size();i++){
+                if (selected.valueAt(i) == false)
+                    continue;
+                selectedEvents[i] = selected.keyAt(i);
+            }
+        }
 
-//    private final class ActionModeStarter implements android.support.v7.view.ActionMode.Callback {
-//
-//
-//        @Override
-//        public boolean onCreateActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
-//            MenuInflater inflater = mode.getMenuInflater();
-//            inflater.inflate(R.menu.contxt_menu, menu);
-//
-//            mactionMode = mode;
-//
-//            return true;
-//
-//        }
-//
-//        @Override
-//        public boolean onPrepareActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
-//            return false;
-//        }
-//
-//        @Override
-//        public boolean onActionItemClicked(android.support.v7.view.ActionMode mode, MenuItem item) {
-//            switch (item.getItemId()) {
-//                case R.id.menu_delete:
-//
-//                    for (Object Item : selectedItems) {
-//                        EventObject e = (EventObject) Item;
-//                        centralPageAdapter.removeEvent(e);
-//
-//                    }
-//                    centralPageAdapter.notifyDataSetChanged();
-//                    mode.finish(); // Action picked, so close the CAB
-//                    return true;
-//                default:
-//                    return false;
-//            }
-//
-//        }
-//
-//        @Override
-//        public void onDestroyActionMode(android.support.v7.view.ActionMode mode) {
-//
-//          mactionMode=null;
-//            selectedItems = new boolean[centralPageAdapter.getCount()];
-//            count = 0;
-//            centralPageAdapter.notifyDataSetChanged();
-//        }
-//
-//
-//    }
+        super.onSaveInstanceState(state);
+            //state.putIntArray("selectedevent", selectedEvents);
+            state.putBooleanArray("selectedevents",selectionevents);
+            state.putInt("numberOfSelectedevents", count);
+            state.putParcelableArrayList("eventsArray", listEvent);
+            state.putString("user", username);
 
+
+    }
+
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        count = 0;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.contxt_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+
+                selected = centralPageAdapter.getSelectedIds();
+                int po=centralPageAdapter.getCount();
+
+                for (int i = po-1; i >=0; i--){
+                    if (selected.get(i)) {
+                        centralPageAdapter.remove(listEvent.get(i));
+                    }
+                }
+
+                centralPageAdapter.notifyDataSetChanged();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        //centralPageAdapter.clearSelection();
+        // centralPageAdapter.removeSelection();
+        selectionevents=new boolean[listEvent.size()];
+        centralPageAdapter.setEventSelection(selectionevents);
+        count=0;
+    }
 }

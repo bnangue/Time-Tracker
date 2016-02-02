@@ -11,6 +11,7 @@ import android.util.Pair;
 import android.widget.Toast;
 
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -26,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by alex on 17.01.2016.
@@ -35,6 +37,8 @@ public class ServerRequest {
     public static final int CONNECTION_TIMEOUT=1000*15;
     public static final String SERVER_ADDRESS="http://time-tracker.comlu.com/";
 
+    private String time;
+
     public ServerRequest(Context context){
         progressDialog=new ProgressDialog(context);
         progressDialog.setCancelable(false);
@@ -42,6 +46,11 @@ public class ServerRequest {
         progressDialog.setMessage("please wait.");
     }
 
+
+    public void fetchAllevents(GetEventsCallbacks callbacks){
+        progressDialog.show();
+        new FetchAllEventsAsynckTacks(callbacks).execute();
+    }
     public void createEventinBackground(EventObject eventObject, GetEventsCallbacks callbacks){
         progressDialog.show();
         new StoreEventsAsynckTacks(eventObject,callbacks).execute();
@@ -170,7 +179,7 @@ public class ServerRequest {
                 BufferedReader reader=new BufferedReader(new InputStreamReader(in));
                 String line;
                 while((line=reader.readLine())!=null){
-                    bi.append(line+"\n");
+                    bi.append(line).append("\n");
                 }
                 reader.close();
                 in.close();
@@ -191,7 +200,9 @@ public class ServerRequest {
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
-                urlConnection.disconnect();
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
 
             return returneduser;
@@ -283,11 +294,11 @@ public class ServerRequest {
 
             ArrayList<Pair<String,String>> data=new ArrayList<>();
             data.add(new Pair<String, String>("eventTitel", eventObject.titel));
-            data.add(new Pair<String, String>("eventCreator", eventObject.creator));
             data.add(new Pair<String, String>("eventDetails",eventObject.infotext));
+            data.add(new Pair<String, String>("eventCreator", eventObject.creator));
             data.add(new Pair<String, String>("eventDay", eventObject.eDay));
-            data.add(new Pair<String, String>("eventMonth", eventObject.eYear));
-            data.add(new Pair<String, String>("eventYear",eventObject.eMonth));
+            data.add(new Pair<String, String>("eventMonth", eventObject.eMonth));
+            data.add(new Pair<String, String>("eventYear",eventObject.eYear));
             data.add(new Pair<String, String>("eventStatus",eventObject.eventStatus));
 
             URL url;
@@ -319,5 +330,113 @@ public class ServerRequest {
             return null;
         }
     }
+
+
+    public class FetchAllEventsAsynckTacks extends AsyncTask<Void,Void,ArrayList<EventObject>> {
+
+        GetEventsCallbacks eventsCallbacks;
+
+
+        public FetchAllEventsAsynckTacks( GetEventsCallbacks callbacks) {
+            this.eventsCallbacks = callbacks;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<EventObject> returnedevents) {
+            progressDialog.dismiss();
+            eventsCallbacks.done(returnedevents);
+            super.onPostExecute(returnedevents);
+        }
+
+        @Override
+        protected ArrayList<EventObject> doInBackground(Void... params) {
+
+            ArrayList<EventObject> returnedEvents=new ArrayList<>();
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try {
+                url=new URL(SERVER_ADDRESS + "FetchAllEvents.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+                JSONArray jsonArray= new JSONArray(respons);
+                returnedEvents= getDetails(jsonArray);
+
+
+                // fetch data to a jason object
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
+            }
+
+            return returnedEvents;
+        }
+
+
+    }
+
+    public ArrayList<EventObject> getDetails(JSONArray jsonArray){
+        ArrayList<EventObject> events=new ArrayList<>();
+
+        try {
+
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jo_inside = jsonArray.getJSONObject(i);
+
+                String titel = jo_inside.getString("eventTitel");
+                String infotext = jo_inside.getString("eventDetails");
+                String creator = jo_inside.getString("eventCreator");
+                String creationTime = jo_inside.getString("eventCreationtime");
+                String eDay = jo_inside.getString("eventDay");
+                String eMonth = jo_inside.getString("eventMonth");
+                String eYear = jo_inside.getString("eventYear");
+                String eventStatus = jo_inside.getString("eventStatus");
+
+
+                String[] creationtime=creationTime.split(" ");
+                DateEventObject dateEventObject=new DateEventObject(eDay,eMonth,eYear);
+
+                EventObject  object =new EventObject(titel, infotext, creator, creationtime[1],
+                        dateEventObject, eventStatus);
+                String t=object.titel;
+                String ifo=object.infotext;
+                if(t.equals(ifo)){
+
+                }
+                events.add(object);
+
+
+            }
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return events;
+
+    }
+
+
 
 }

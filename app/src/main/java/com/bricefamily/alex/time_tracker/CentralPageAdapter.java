@@ -24,10 +24,11 @@ import java.util.Set;
  */
 public class CentralPageAdapter extends ArrayAdapter<EventObject> {
     private Context context ;
-    private List<EventObject> list=new ArrayList<>();
+    private ArrayList<EventObject> list=new ArrayList<>();
     private int count=0;
     SparseBooleanArray mSelectedItemsIds;
     private HashMap<Integer, Boolean> mSelection = new HashMap<Integer, Boolean>();
+    boolean[] selectionEvent;
 
 
     public interface OndeleteFromList{
@@ -36,14 +37,20 @@ public class CentralPageAdapter extends ArrayAdapter<EventObject> {
 
     OndeleteFromList ondeleteFromList;
 
-    public CentralPageAdapter(Context context ,int resId,List<EventObject> list){
+    public CentralPageAdapter(Context context ,int resId,ArrayList<EventObject> list){
         super(context,resId,list);
         this.list=list;
         mSelectedItemsIds=new SparseBooleanArray();
+        selectionEvent=new boolean[list.size()];
         this.context=context;
 
     }
 
+    void setEventSelection(boolean[] events){
+        selectionEvent=events;
+        notifyDataSetChanged();
+
+    }
     public void toggleSelection(int position)
     {
         selectView(position, !mSelectedItemsIds.get(position));
@@ -119,13 +126,17 @@ public class CentralPageAdapter extends ArrayAdapter<EventObject> {
             holder=(Holder)convertView.getTag();
         }
 
+        String titeeel=list.get(position).titel;
+        String infoteext=list.get(position).infotext;
+        String creato=list.get(position).creator;
+        String dtimes=list.get(position).creationTime;
 
-        holder.creator.setText(list.get(position).creator);
-        holder.titel.setText(list.get(position).titel);
-        holder.infotext.setText(list.get(position).infotext);
-        holder.dtime.setText(list.get(position).time);
+        holder.creator.setText(creato);
+        holder.titel.setText(titeeel);
+        holder.infotext.setText(infoteext);
+        holder.dtime.setText(dtimes);
 
-        if(mSelection.get(position)!=null){
+        if(selectionEvent[position]){
             convertView.setBackgroundColor(context.getResources().getColor(R.color.phoneCreator));
         }else{
             convertView.setBackgroundColor(context.getResources().getColor(R.color.white));

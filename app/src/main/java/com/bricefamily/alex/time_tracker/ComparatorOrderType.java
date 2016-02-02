@@ -8,8 +8,8 @@ import java.util.Comparator;
 public class ComparatorOrderType implements Comparator<EventObject> {
     @Override
     public int compare(EventObject lhs, EventObject rhs) {
-        String orderType1= lhs.time;
-        String orderType2=rhs.time;
+        String orderType1= lhs.creationTime;
+        String orderType2=rhs.creationTime;
 
         int idf = orderType1.compareTo(orderType2);
 

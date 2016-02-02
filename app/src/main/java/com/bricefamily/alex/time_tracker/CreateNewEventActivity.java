@@ -13,7 +13,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class CreateNewEventActivity extends AppCompatActivity {
 
@@ -67,10 +69,11 @@ public class CreateNewEventActivity extends AppCompatActivity {
         datestr=dateed.getText().toString();
         creatornamestr=creatornameed.getText().toString();
 
-        dateEventObject=new DateEventObject("23","02","2016");
+        String[] date=datestr.split("[.]");
+        dateEventObject=new DateEventObject(date[0],date[1],date[2]);
         status="1";
-        eventObject=new EventObject(titelstr,detailsstr,creatornamestr,currenttimestr,currenttimestr
-                ,dateEventObject.day,dateEventObject.month,dateEventObject.year,status);
+        eventObject=new EventObject(titelstr,detailsstr,creatornamestr,currenttimestr
+                ,dateEventObject,status);
 
         createEvents(eventObject);
     }
@@ -78,9 +81,11 @@ public class CreateNewEventActivity extends AppCompatActivity {
         ServerRequest serverRequest=new ServerRequest(this);
         serverRequest.createEventinBackground(eve, new GetEventsCallbacks() {
             @Override
-            public void done(EventObject returnedeventobject) {
+            public void done(ArrayList<EventObject> returnedeventobject) {
                 finish();
-                startActivity(new Intent(CreateNewEventActivity.this,CentralPageActivity.class));
+                Intent  intent=new Intent(CreateNewEventActivity.this,CentralPageActivity.class);
+                intent.putExtra("username",creatornamestr);
+                startActivity(intent);
             }
         });
         Toast.makeText(getApplicationContext(),"Event created",Toast.LENGTH_SHORT).show();

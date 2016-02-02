@@ -22,7 +22,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         if(bundle!=null){
             time=bundle.getString("time");
             titel=bundle.getString("titel");
-            infotext=bundle.getString("infotext");
+            infotext=bundle.getString("textinfo");
             creator=bundle.getString("creator");
 
         }

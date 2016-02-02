@@ -13,6 +13,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class LoginActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
     private EditText emailed,passworded;
@@ -86,9 +89,9 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         serverRequest.fetchUserDataInBackground(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
-                if(returneduser==null){
+                if (returneduser == null) {
                     showdialg();
-                }else{
+                } else {
                     logUserIn(returneduser);
                 }
             }
@@ -101,16 +104,39 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         userLocalStore.storeUserData(returneduser);
         userLocalStore.setUserLoggedIn(true);
 
-        Intent intent=new Intent(this,CentralPageActivity.class);
-        intent.putExtra("username",returneduser.username);
-        startActivity(intent);
+        getEventsFromDatabase(returneduser);
+
     }
     private void showdialg(){
         AlertDialog.Builder alert= new AlertDialog.Builder(this);
         alert.setMessage("Incorrect user data");
+        alert.setPositiveButton("OK", null);
+        alert.show();
+    }
+    private void showdialg2(){
+        AlertDialog.Builder alert= new AlertDialog.Builder(this);
+        alert.setMessage("Uneable to fetch data form DataBase");
         alert.setPositiveButton("OK",null);
         alert.show();
     }
+    void  getEventsFromDatabase(final User returneduser){
+
+        ServerRequest serverRequest=new ServerRequest(this);
+        serverRequest.fetchAllevents(new GetEventsCallbacks() {
+            @Override
+            public void done(ArrayList<EventObject> returnedeventobject) {
+                if (returnedeventobject != null) {
+                    Intent intent=new Intent(LoginActivity.this,CentralPageActivity.class);
+                    intent.putExtra("username",returneduser.username);
+                    intent.putExtra("eventlist", returnedeventobject);
+                    startActivity(intent);
+                }else{
+                    showdialg2();
+                }
+            }
+        });
+    }
+
     public  void buttonCreateUserPressed(View view ){
 
         Intent intent =new Intent(this, CreateUserActivity.class);

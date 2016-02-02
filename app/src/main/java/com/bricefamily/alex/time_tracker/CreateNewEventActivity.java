@@ -1,5 +1,6 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -82,12 +83,20 @@ public class CreateNewEventActivity extends AppCompatActivity {
         serverRequest.createEventinBackground(eve, new GetEventsCallbacks() {
             @Override
             public void done(ArrayList<EventObject> returnedeventobject) {
-                finish();
-                Intent  intent=new Intent(CreateNewEventActivity.this,CentralPageActivity.class);
-                intent.putExtra("username",creatornamestr);
-                startActivity(intent);
+                showdialg(creatornamestr);
             }
         });
         Toast.makeText(getApplicationContext(),"Event created",Toast.LENGTH_SHORT).show();
+    }
+    void startCentralPage(String username){
+        Intent  intent=new Intent(CreateNewEventActivity.this,CentralPageActivity.class);
+        intent.putExtra("username", creatornamestr);
+        startActivity(intent);
+    }
+    private void showdialg(String username){
+        AlertDialog.Builder alert= new AlertDialog.Builder(this);
+        alert.setMessage("New Event successfully created by "+ username);
+        alert.setPositiveButton("OK", null);
+        alert.show();
     }
 }

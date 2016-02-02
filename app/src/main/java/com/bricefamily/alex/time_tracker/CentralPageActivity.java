@@ -147,7 +147,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     void prepareListview(ArrayList<EventObject> listEvent) {
 
         evnetListView = (ListView) findViewById(R.id.listviewdetails);
-        centralPageAdapter = new CentralPageAdapter(this, R.layout.central_page_item,listEvent);
+        centralPageAdapter = new CentralPageAdapter(this,listEvent);
         evnetListView.setAdapter(centralPageAdapter);
         centralPageAdapter.notifyDataSetChanged();
 
@@ -252,10 +252,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         if(checked){
             count++;
             selectionevents[position]=true;
-            centralPageAdapter.setNewSelection(position,checked);
 
         }else {
-            centralPageAdapter.removeSelection(position);
             selectionevents[position]=false;
 
             if (count!=0){
@@ -296,13 +294,11 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         switch (item.getItemId()) {
                 case R.id.menu_delete:
 
-                     selected = centralPageAdapter.getSelectedIds();
                     int po=centralPageAdapter.getCount();
 
                     for (int i = po-1; i >=0; i--){
                         if (selected.get(i)) {
                             selectionevents[i]=false;
-                          centralPageAdapter.remove(listEvent.get(i));
                             centralPageAdapter.setEventSelection(selectionevents);
                         }
                     }
@@ -319,8 +315,6 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     @Override
     public void onDestroyActionMode(android.view.ActionMode mode) {
 
-        centralPageAdapter.clearSelection();
-       // centralPageAdapter.removeSelection();
         selectionevents=new boolean[listEvent.size()];
         centralPageAdapter.setEventSelection(selectionevents);
         count=0;
@@ -336,19 +330,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     //Für Portr/Landsc Wechsel, Activity wird gekillt und Daten werden gesichert
     @Override
     protected void onSaveInstanceState(Bundle state) {
-        selected=centralPageAdapter.getSelectedIds();
-        int[] selectedEvents=new int[centralPageAdapter.getSelectedCount()];
-        if(centralPageAdapter.getSelectedCount()>0){
-            for(int i=0;i<selected.size();i++){
-                if (selected.valueAt(i) == false)
-                    continue;
-                selectedEvents[i] = selected.keyAt(i);
-            }
-        }
 
         super.onSaveInstanceState(state);
-            //state.putIntArray("selectedevent", selectedEvents);
-            state.putBooleanArray("selectedevents",selectionevents);
+         state.putBooleanArray("selectedevents",selectionevents);
             state.putInt("numberOfSelectedevents", count);
             state.putParcelableArrayList("eventsArray", listEvent);
             state.putString("user", username);
@@ -375,12 +359,10 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         switch (item.getItemId()) {
             case R.id.menu_delete:
 
-                selected = centralPageAdapter.getSelectedIds();
                 int po=centralPageAdapter.getCount();
 
                 for (int i = po-1; i >=0; i--){
                     if (selected.get(i)) {
-                        centralPageAdapter.remove(listEvent.get(i));
                     }
                 }
 

@@ -22,12 +22,10 @@ import java.util.Set;
 /**
  * Created by praktikum on 28/01/16.
  */
-public class CentralPageAdapter extends ArrayAdapter<EventObject> {
+public class CentralPageAdapter extends BaseAdapter{
     private Context context ;
     private ArrayList<EventObject> list=new ArrayList<>();
     private int count=0;
-    SparseBooleanArray mSelectedItemsIds;
-    private HashMap<Integer, Boolean> mSelection = new HashMap<Integer, Boolean>();
     boolean[] selectionEvent;
 
 
@@ -37,10 +35,8 @@ public class CentralPageAdapter extends ArrayAdapter<EventObject> {
 
     OndeleteFromList ondeleteFromList;
 
-    public CentralPageAdapter(Context context ,int resId,ArrayList<EventObject> list){
-        super(context,resId,list);
+    public CentralPageAdapter(Context context ,ArrayList<EventObject> list){
         this.list=list;
-        mSelectedItemsIds=new SparseBooleanArray();
         selectionEvent=new boolean[list.size()];
         this.context=context;
 
@@ -51,63 +47,25 @@ public class CentralPageAdapter extends ArrayAdapter<EventObject> {
         notifyDataSetChanged();
 
     }
-    public void toggleSelection(int position)
-    {
-        selectView(position, !mSelectedItemsIds.get(position));
-    }
-
-    public void removeSelection() {
-        mSelectedItemsIds = new SparseBooleanArray();
-        notifyDataSetChanged();
-    }
-
-    public void selectView(int position, boolean value)
-    {
-        if(value)
-            mSelectedItemsIds.put(position, value);
-        else
-            mSelectedItemsIds.delete(position);
-
-        notifyDataSetChanged();
-    }
-
-    public int getSelectedCount() {
-        return mSelectedItemsIds.size();// mSelectedCount;
-    }
-
-    public SparseBooleanArray getSelectedIds() {
-        return mSelectedItemsIds;
-    }
-
-
-    public void setNewSelection(int position, boolean value) {
-        mSelection.put(position, value);
-        notifyDataSetChanged();
-    }
-
-    public boolean isPositionChecked(int position) {
-        Boolean result = mSelection.get(position);
-        return result == null ? false : result;
-    }
-
-    public Set<Integer> getCurrentCheckedPosition() {
-        return mSelection.keySet();
-    }
-
-
-    public void removeSelection(int position) {
-        mSelection.remove(position);
-        notifyDataSetChanged();
-    }
-
-    public void clearSelection() {
-        mSelection = new HashMap<Integer, Boolean>();
-        notifyDataSetChanged();
-    }
 
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public int getCount() {
+        return list.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return list.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup parent) {
 
         final Holder holder;
         if(convertView==null){
@@ -119,6 +77,7 @@ public class CentralPageAdapter extends ArrayAdapter<EventObject> {
             holder.titel=(TextView)convertView.findViewById(R.id.itemTitel);
             holder.infotext=(TextView)convertView.findViewById(R.id.itmeinfotext);
             holder.dtime=(TextView)convertView.findViewById(R.id.itemtime);
+            holder.checker=(CheckBox)convertView.findViewById(R.id.checkBoxcentralpage);
 
             convertView.setTag(holder);
         }else{
@@ -135,39 +94,42 @@ public class CentralPageAdapter extends ArrayAdapter<EventObject> {
         holder.titel.setText(titeeel);
         holder.infotext.setText(infoteext);
         holder.dtime.setText(dtimes);
+        holder.checker.setChecked(false);
+
 
         if(selectionEvent[position]){
-            convertView.setBackgroundColor(context.getResources().getColor(R.color.phoneCreator));
+            holder.checker.setChecked(true);
+            convertView.setBackgroundColor(context.getResources().getColor(R.color.cellselect));
         }else{
+            holder.checker.setChecked(false);
             convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
         }
 
+        final View finalConvertView = convertView;
+        holder.checker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(holder.checker.isChecked()){
+                    selectionEvent[position]=true;
+                    finalConvertView.setBackgroundColor(context.getResources().getColor(R.color.cellselect));
+
+                }else {
+                    selectionEvent[position]=false;
+                    finalConvertView.setBackgroundColor(context.getResources().getColor(R.color.white));
+
+                }
+            }
+        });
+
         return convertView;
     }
-
-    public void addEvent(EventObject event) {
-        list.add(event);
-        notifyDataSetChanged();
-        Toast.makeText(context, "New event added!" , Toast.LENGTH_LONG).show();
-    }
-
-    public void removeEvent(int position) {
-        // super.remove(object);
-        list.remove(position);
-        removeSelection(position);
-
-    }
-
-    public List<EventObject> getLaptops() {
-        return list;
-    }
-
 
     static class Holder {
         public TextView titel;
         public TextView infotext;
         public TextView creator;
         public TextView dtime;
+        public CheckBox checker;
 
     }
 }

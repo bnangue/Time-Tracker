@@ -1,6 +1,7 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -70,13 +71,17 @@ public class CreateNewEventActivity extends AppCompatActivity {
         datestr=dateed.getText().toString();
         creatornamestr=creatornameed.getText().toString();
 
-        String[] date=datestr.split("[.]");
-        dateEventObject=new DateEventObject(date[0],date[1],date[2]);
-        status="1";
-        eventObject=new EventObject(titelstr,detailsstr,creatornamestr,currenttimestr
-                ,dateEventObject,status);
+        if(titelstr.isEmpty() || datestr.isEmpty()|| creatornamestr.isEmpty()||notestr.isEmpty()){
+            Toast.makeText(getApplicationContext(),"Please fill empty filed",Toast.LENGTH_SHORT).show();
+        }else{
+            String[] date=datestr.split("[.]");
+            dateEventObject=new DateEventObject(date[0],date[1],date[2]);
+            status="1";
+            eventObject=new EventObject(titelstr,detailsstr,creatornamestr,currenttimestr
+                    ,dateEventObject,status);
 
-        createEvents(eventObject);
+            createEvents(eventObject);
+        }
     }
     private void createEvents(EventObject eve){
         ServerRequest serverRequest=new ServerRequest(this);
@@ -89,14 +94,43 @@ public class CreateNewEventActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(),"Event created",Toast.LENGTH_SHORT).show();
     }
     void startCentralPage(String username){
-        Intent  intent=new Intent(CreateNewEventActivity.this,CentralPageActivity.class);
-        intent.putExtra("username", creatornamestr);
-        startActivity(intent);
+        getEventsFromDatabase(creatornamestr);
     }
     private void showdialg(String username){
         AlertDialog.Builder alert= new AlertDialog.Builder(this);
         alert.setMessage("New Event successfully created by "+ username);
-        alert.setPositiveButton("OK", null);
+        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                titeled.setText("");
+                detailed.setText("");
+                dateed.setText("");
+                noteed.setText("");
+            }
+        });
         alert.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+       getEventsFromDatabase(creatornamestr);
+    }
+    void  getEventsFromDatabase(final String username){
+
+        ServerRequest serverRequest=new ServerRequest(this);
+        serverRequest.fetchAllevents(new GetEventsCallbacks() {
+            @Override
+            public void done(ArrayList<EventObject> returnedeventobject) {
+                if (returnedeventobject != null) {
+                    Intent intent = new Intent(CreateNewEventActivity.this, CentralPageActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.putExtra("username",username);
+                    intent.putExtra("eventlist", returnedeventobject);
+                    startActivity(intent);
+                } else {
+
+                }
+            }
+        });
     }
 }

@@ -29,21 +29,23 @@ public class CentralPageAdapter extends BaseAdapter{
     boolean[] selectionEvent;
 
 
-    public interface OndeleteFromList{
-        void delete(int position);
+    public interface OnEventSelected{
+        void selected(int count,boolean[] events);
     }
 
-    OndeleteFromList ondeleteFromList;
+    OnEventSelected onEventSelected;
 
-    public CentralPageAdapter(Context context ,ArrayList<EventObject> list){
+    public CentralPageAdapter(Context context ,ArrayList<EventObject> list,OnEventSelected onEventSelected){
         this.list=list;
         selectionEvent=new boolean[list.size()];
         this.context=context;
+        this.onEventSelected=onEventSelected;
 
     }
 
-    void setEventSelection(boolean[] events){
+    void setEventSelection(boolean[] events,int countE){
         selectionEvent=events;
+        count=countE;
         notifyDataSetChanged();
 
     }
@@ -112,10 +114,22 @@ public class CentralPageAdapter extends BaseAdapter{
                 if(holder.checker.isChecked()){
                     selectionEvent[position]=true;
                     finalConvertView.setBackgroundColor(context.getResources().getColor(R.color.cellselect));
+                    count++;
+                    if(onEventSelected!=null){
+                        onEventSelected.selected(count,selectionEvent);
 
+                    }
                 }else {
                     selectionEvent[position]=false;
                     finalConvertView.setBackgroundColor(context.getResources().getColor(R.color.white));
+                    if(count!=0){
+                        count--;
+                    }
+                    if(onEventSelected!=null){
+                        onEventSelected.selected(count,selectionEvent);
+
+                    }
+
 
                 }
             }

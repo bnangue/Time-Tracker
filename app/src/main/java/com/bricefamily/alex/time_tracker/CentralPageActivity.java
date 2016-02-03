@@ -22,6 +22,7 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.logging.Handler;
 
 
 public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  android.support.v7.view.ActionMode.Callback {
@@ -61,6 +62,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             username = extras.getString("username");
             listEvent=extras.getParcelableArrayList("eventlist");
         }
+       // refresh(username);
         prepareDrawerViews();
         if(savedInstanceState!=null){
             username=savedInstanceState.getString("user");
@@ -327,6 +329,19 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         centralPageAdapter.setEventSelection(selectionevents,countevent);
     }
+
+    void refresh(final String username){
+        final android.os.Handler h=new android.os.Handler();
+        final int delay=1000;
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getEventsFromDatabase(username);
+                h.postDelayed(this,delay);
+            }
+        },delay);
+    }
+
 
     void  getEventsFromDatabase(final String username){
 

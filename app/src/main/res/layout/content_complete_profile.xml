@@ -111,4 +111,23 @@
         android:layout_below="@+id/buttoncancelCompleteprofile"
         android:layout_centerHorizontal="true" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageViewprofilepic"
+        android:src="@drawable/greyinfo"
+        android:background="@color/createandloginBackground"
+        android:layout_below="@+id/editTextphonenumbCompleteprofile"
+        android:layout_toLeftOf="@+id/textViewaboutCompleteprofile"
+        android:layout_toStartOf="@+id/textViewaboutCompleteprofile" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Picture"
+        android:id="@+id/textViewCompleteprofilepicture"
+        android:layout_below="@+id/editTextphonenumbCompleteprofile"
+       android:layout_alignParentLeft="true" />
+
 </RelativeLayout>

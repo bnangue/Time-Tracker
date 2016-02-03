@@ -1,7 +1,11 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -19,6 +23,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -62,8 +70,10 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             username = extras.getString("username");
             listEvent=extras.getParcelableArrayList("eventlist");
         }
-       // refresh(username);
+        UserProfilePicture u=new UserProfilePicture(username,null);
+        getUserPicture(u);
         prepareDrawerViews();
+
         if(savedInstanceState!=null){
             username=savedInstanceState.getString("user");
             selectionevents=savedInstanceState.getBooleanArray("selectedevents");
@@ -103,6 +113,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     }
     void prepareDrawerViews(){
         fillList();
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
         mDrawerpane = (RelativeLayout) findViewById(R.id.drawerpane);
         mDrawerList = (ListView) findViewById(R.id.navlist);
@@ -266,6 +277,67 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     }
 
 
+    void getUserPicture(final UserProfilePicture u){
+        if(u.username!=null|| !u.username.isEmpty()){
+
+            ServerRequest serverRequest=new ServerRequest(this);
+            serverRequest.fetchUserPicture(u, new GetImageCallBacks() {
+                @Override
+                public void done(String reponse) {
+
+                }
+
+                @Override
+                public void image(UserProfilePicture reponse) {
+                    if(reponse!=null){
+                        Bitmap bitmap=reponse.uProfilePicture;
+                        profilePicture.setImageBitmap(bitmap);
+                        storeimageLocaly(reponse.uProfilePicture);
+                    }else{
+                        Toast.makeText(getApplicationContext(),"No Picture save for this user",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
+        }
+
+    }
+    private String  storeimageLocaly(Bitmap picture) {
+
+        ContextWrapper cw=new ContextWrapper(getApplicationContext());
+        File directory=cw.getDir("ProfilePictures", Context.MODE_PRIVATE);
+        if(!directory.exists()){
+            directory.mkdirs();
+        }
+        File file=new File(directory,"profile.jpg");
+
+        FileOutputStream fos=null;
+
+        if(file.exists()){
+            file.delete();
+            file=new File(directory,"profile.jpg");
+        }
+        try {
+            fos=new FileOutputStream(file);
+            picture=BitmapFactory.decodeFile(file.getName());
+            picture.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try {
+                fos.flush();
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return directory.getAbsolutePath();
+    }
+
+
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -305,7 +377,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         mactionMode=null;
         countevent =0;
         selectionevents=new boolean[listEvent.size()];
-        centralPageAdapter.setEventSelection(selectionevents,countevent);
+        centralPageAdapter.setEventSelection(selectionevents, countevent);
     }
 
 

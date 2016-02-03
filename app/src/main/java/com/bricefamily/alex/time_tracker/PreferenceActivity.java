@@ -1,5 +1,8 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 
@@ -17,14 +22,18 @@ public class PreferenceActivity extends ActionBarActivity implements AdapterView
     ArrayList<Item> items = new ArrayList<Item>();
 
     private ListView listView;
+    private UserLocalStore userLocalStore;
+    UserProfilePicture profilePicture;
+    User user;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preference);
 
+        userLocalStore=new UserLocalStore(this);
         listView =(ListView)findViewById(R.id.listpreference);
         items.add(new SectionItem("Your account"));
-        items.add(new EntryItem("My account "));
+        items.add(new EntryItem("My account"));
         items.add(new EntryItem("Community settings"));
         items.add(new EntryItem("Notification"));
         items.add(new EntryItem("Privacy settings"));
@@ -39,6 +48,9 @@ public class PreferenceActivity extends ActionBarActivity implements AdapterView
 
         items.add(new SectionItem(""));
 
+
+         user=userLocalStore.getLoggedInUser();
+        profilePicture=new UserProfilePicture(user.username,null);
 
 
         PreferenceListAdapter adapter = new PreferenceListAdapter(this, items);
@@ -76,10 +88,23 @@ public class PreferenceActivity extends ActionBarActivity implements AdapterView
         if(!items.get(position).isSection()){
 
             EntryItem item = (EntryItem)items.get(position);
-
-            Toast.makeText(this, "You clicked " + item.title, Toast.LENGTH_SHORT).show();
-
+            String titel=item.title;
+            switch (titel){
+                case "My account":
+                    Intent intent=new Intent(PreferenceActivity.this,CompleteProfileActivity.class);
+                    intent.putExtra("username",user.username);
+                    startActivity(intent);
+                    break;
+                default:
+                    Toast.makeText(this, "You clicked " + item.title, Toast.LENGTH_SHORT).show();
+                    break;
+            }
 
         }
+    }
+
+
+    void  getEventsFromDatabase(UserProfilePicture profilePicture){
+
     }
 }

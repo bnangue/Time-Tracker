@@ -1,7 +1,11 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -13,26 +17,33 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class LoginActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
-    private EditText emailed,passworded;
-    private String emailstr,passwordstr;
+    private EditText emailed, passworded;
+    private String emailstr, passwordstr;
     private PasswordChecker pwchecker;
 
-    private  UserLocalStore userLocalStore;
+    private UserLocalStore userLocalStore;
+    UserProfilePicture userProfilePicture;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        userLocalStore=new UserLocalStore(this);
+        userLocalStore = new UserLocalStore(this);
 
-        pwchecker=new PasswordChecker();
+        pwchecker = new PasswordChecker();
 
-        emailed =(EditText)findViewById(R.id.editTextemail);
-        passworded=(EditText)findViewById(R.id.editTextpassword);
+        emailed = (EditText) findViewById(R.id.editTextemail);
+        passworded = (EditText) findViewById(R.id.editTextpassword);
         passworded.setOnEditorActionListener(this);
     }
 
@@ -45,21 +56,24 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     @Override
     protected void onStart() {
         super.onStart();
-        if(authenticate()==true){
+        if (authenticate() == true) {
             displayUserdetails();
         }
 
     }
 
-    private void displayUserdetails(){
-        User user=userLocalStore.getLoggedInUser();
+    private void displayUserdetails() {
+        User user = userLocalStore.getLoggedInUser();
         emailed.setText(user.email);
         passworded.setText(user.password);
+        userProfilePicture = new UserProfilePicture(user.username, null);
     }
+
     //true if user logged in
-    private boolean authenticate(){
+    private boolean authenticate() {
         return userLocalStore.getUserLoggedIn();
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -75,17 +89,17 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         return super.onOptionsItemSelected(item);
     }
 
-    public  void buttonLoginPressed(View view){
-        emailstr=emailed.getText().toString();
-        passwordstr=passworded.getText().toString();
+    public void buttonLoginPressed(View view) {
+        emailstr = emailed.getText().toString();
+        passwordstr = passworded.getText().toString();
 
-        User user =new User(emailstr,passwordstr);
+        User user = new User(emailstr, passwordstr);
         authenticateuser(user);
 
     }
 
-    private void authenticateuser(User user){
-        ServerRequest serverRequest=new ServerRequest(this);
+    private void authenticateuser(User user) {
+        ServerRequest serverRequest = new ServerRequest(this);
         serverRequest.fetchUserDataInBackground(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
@@ -99,7 +113,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
     }
 
-    private void logUserIn(User returneduser){
+    private void logUserIn(User returneduser) {
 
         userLocalStore.storeUserData(returneduser);
         userLocalStore.setUserLoggedIn(true);
@@ -107,52 +121,56 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         getEventsFromDatabase(returneduser);
 
     }
-    private void showdialg(){
-        AlertDialog.Builder alert= new AlertDialog.Builder(this);
+
+    private void showdialg() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setMessage("Incorrect user data");
         alert.setPositiveButton("OK", null);
         alert.show();
     }
-    private void showdialg2(){
-        AlertDialog.Builder alert= new AlertDialog.Builder(this);
+
+    private void showdialg2() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setMessage("Uneable to fetch data form DataBase");
-        alert.setPositiveButton("OK",null);
+        alert.setPositiveButton("OK", null);
         alert.show();
     }
-    void  getEventsFromDatabase(final User returneduser){
 
-        ServerRequest serverRequest=new ServerRequest(this);
+    void getEventsFromDatabase(final User returneduser) {
+
+        ServerRequest serverRequest = new ServerRequest(this);
         serverRequest.fetchAllevents(new GetEventsCallbacks() {
             @Override
             public void done(ArrayList<EventObject> returnedeventobject) {
                 if (returnedeventobject != null) {
-                    Intent intent=new Intent(LoginActivity.this,CentralPageActivity.class);
-                    intent.putExtra("username",returneduser.username);
+                    Intent intent = new Intent(LoginActivity.this, CentralPageActivity.class);
+                    intent.putExtra("username", returneduser.username);
                     intent.putExtra("eventlist", returnedeventobject);
                     startActivity(intent);
-                }else{
+                } else {
                     showdialg2();
                 }
             }
         });
     }
 
-    public  void buttonCreateUserPressed(View view ){
+    public void buttonCreateUserPressed(View view) {
 
-        Intent intent =new Intent(this, CreateUserActivity.class);
+        Intent intent = new Intent(this, CreateUserActivity.class);
         startActivity(intent);
     }
 
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)){
-            emailstr=emailed.getText().toString();
-            passwordstr=passworded.getText().toString();
+        if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+            emailstr = emailed.getText().toString();
+            passwordstr = passworded.getText().toString();
 
-            User user =new User(emailstr,passwordstr);
+            User user = new User(emailstr, passwordstr);
             authenticateuser(user);
         }
 
-            return false;
+        return false;
     }
 }
+

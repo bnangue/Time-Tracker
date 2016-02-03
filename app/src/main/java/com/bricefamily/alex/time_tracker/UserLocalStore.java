@@ -25,8 +25,9 @@ public class UserLocalStore {
     public User getLoggedInUser(){
         String email=userLocalDataBase.getString("email", "");
         String password=userLocalDataBase.getString("password","");
+        String username=userLocalDataBase.getString("username", "");
 
-        User storeduser=new User(email,password);
+        User storeduser=new User(username,email,password);
         return storeduser;
     }
     //call with true if logged in

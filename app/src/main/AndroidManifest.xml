@@ -4,8 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="ANDROID.PERMISSION.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -41,6 +41,10 @@
         <activity
             android:name=".CreateNewEventActivity"
             android:label="@string/title_activity_create_new_event"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ProfileOverviewActivity"
+            android:label="@string/title_activity_profile_overview"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

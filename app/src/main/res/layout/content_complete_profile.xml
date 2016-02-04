@@ -26,6 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="cancel"
+        style="?android:attr/borderlessButtonStyle"
         android:onClick="buttonCancelCompleteprofile"
         android:id="@+id/buttoncancelCompleteprofile"
         android:layout_alignBaseline="@+id/buttonsaveCompleteprofile"
@@ -61,10 +62,11 @@
         android:hint="first name"
         android:ems="10"
         android:id="@+id/editTextfirstnameCompletprofile"
-        android:layout_below="@+id/textView2"
+        android:layout_below="@+id/imageViewprofilepic"
         android:layout_marginTop="20dp"
         android:layout_alignLeft="@+id/editTextAddress"
-        android:layout_alignStart="@+id/editTextAddress" />
+        android:layout_alignStart="@+id/editTextAddress"
+        />
 
     <EditText
         android:layout_width="match_parent"
@@ -111,23 +113,21 @@
         android:layout_below="@+id/buttoncancelCompleteprofile"
         android:layout_centerHorizontal="true" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        app:civ_border="true"
+        app:civ_border_width="4dp"
+        app:civ_border_color="#ffff"
         android:id="@+id/imageViewprofilepic"
-        android:src="@drawable/greyinfo"
-        android:background="@color/createandloginBackground"
-        android:layout_below="@+id/editTextphonenumbCompleteprofile"
-        android:layout_toLeftOf="@+id/textViewaboutCompleteprofile"
-        android:layout_toStartOf="@+id/textViewaboutCompleteprofile" />
+        android:layout_marginTop="10dp"
+        android:src="@mipmap/ic_launcher"
+        android:layout_below="@+id/textView2"
+        android:layout_toLeftOf="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Picture"
-        android:id="@+id/textViewCompleteprofilepicture"
-        android:layout_below="@+id/editTextphonenumbCompleteprofile"
-       android:layout_alignParentLeft="true" />
+        />
+
+
 
 </RelativeLayout>

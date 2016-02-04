@@ -62,6 +62,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     CentralPageAdapter centralPageAdapter;
     boolean[] selectionevents;
     private ArrayList<EventObject> listEvent;
+    FloatingActionButton fab;
 
     int countevent = 0;
     private android.support.v7.view.ActionMode mactionMode;
@@ -71,18 +72,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_central_page);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), username, Toast.LENGTH_SHORT);
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+         fab = (FloatingActionButton) findViewById(R.id.fab);
+
         userLocalStore = new UserLocalStore(this);
         mtitel=drawerTitle = title = getTitle();
 
@@ -422,8 +414,11 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         if(countevent!=0){
             mactionMode.setTitle(countevent + " selected");
+            fab.setVisibility(View.INVISIBLE);
+
         }else {
             mactionMode.finish();
+            fab.setVisibility(View.VISIBLE);
             mactionMode=null;
             countevent=0;
         }

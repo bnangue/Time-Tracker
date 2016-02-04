@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -25,11 +27,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class CompleteProfileActivity extends AppCompatActivity implements View.OnClickListener {
-
-    public static final String UPLOAD_KEY = "image";
-    public static final String TAG = "MY MESSAGE";
 
     private int PICK_IMAGE_REQUEST = 1;
 
@@ -174,13 +174,13 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
                 filePath = data.getData();
                 try {
                     bitmap = decodeBitmap(filePath,getApplicationContext());
-                    Uri tempUri = getImageUri(getApplicationContext(), bitmap);
 
-                    // CALL THIS METHOD TO GET THE ACTUAL PATH
-                    File finalFile = new File(getRealPathFromURI(tempUri));
+                    int degree= ImageOrientationUtil.getExifRotation(ImageOrientationUtil.getFromMediaUri(getApplicationContext()
+                    ,getContentResolver(),filePath));
+                  Bitmap  bittmap=rotateImage(bitmap,degree);
 
-                    profileopic.setImageBitmap(bitmap);
-                    userPicture=new UserProfilePicture(username,bitmap);
+                    profileopic.setImageBitmap(bittmap);
+                    userPicture=new UserProfilePicture(username,bittmap);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -189,26 +189,21 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
 
 
 
-    public Uri getImageUri(Context inContext, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
     }
 
-    public String getRealPathFromURI(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        cursor.moveToFirst();
-        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-        return cursor.getString(idx);
-    }
 
     private boolean  storeimageLocaly(Bitmap picture) {
 
 
         FileOutputStream fos=null;
         try {
-                fos=openFileOutput("profile.png",Context.MODE_PRIVATE);
+            fos=openFileOutput("profile.png",Context.MODE_PRIVATE);
             picture.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.close();
             return true;

@@ -1,0 +1,139 @@
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerlayout">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:id="@+id/maincontent"
+        android:layout_height="wrap_content" >
+
+        <RelativeLayout
+            android:id="@+id/userheadaer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="20dp"
+            android:background="#34343c73">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/usernamemainpage"
+                android:text="Brice "
+                android:layout_marginLeft="5dp"
+                android:layout_alignParentLeft="true"
+                android:textColor="#ff2113ff"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/usernameinfo"
+                android:text="Brice "
+                android:textColor="#ff2725ff"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginRight="5dp"
+                android:layout_alignParentRight="true"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/linearlayoutlistview"
+            android:layout_below="@+id/userheadaer"
+            android:layout_above="@+id/buttonsetNewEntry">
+
+            <ListView
+                android:id="@+id/listviewdetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                >
+
+            </ListView>
+        </LinearLayout>
+
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:id="@+id/drawerpane"
+        android:gravity="start"
+        android:clickable="true">
+
+        <RelativeLayout
+            android:layout_width="280dp"
+            android:layout_height="120dp"
+            android:id="@+id/profilebox"
+            android:background="@color/material_blue_grey_800"
+            android:padding="2dp"
+            >
+
+            <com.mikhaellopez.circularimageview.CircularImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                app:civ_border="true"
+                app:civ_border_width="4dp"
+                app:civ_border_color="#ffff"
+                android:id="@+id/avatar"
+                android:src="@mipmap/ic_launcher"
+                android:layout_toLeftOf="@+id/linearLayout"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:onClick="openProfileOverviewClick"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:orientation="vertical"
+                android:id="@+id/linearLayout"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="42dp"
+                android:layout_marginEnd="42dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/username"
+                    android:text="Brice "
+                    android:textColor="#fff"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/desc"
+                    android:text="View Profile "
+                    android:gravity="bottom"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#fff"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/navlist"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/profilebox"
+            android:choiceMode="singleChoice"
+            android:background="#ffffffff">
+
+        </ListView>
+
+    </RelativeLayout>
+
+</android.support.v4.widget.DrawerLayout>

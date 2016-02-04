@@ -6,11 +6,13 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.ActionMode;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -71,7 +73,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             listEvent=extras.getParcelableArrayList("eventlist");
         }
         UserProfilePicture u=new UserProfilePicture(username,null);
-        getUserPicture(u);
+       // getUserPicture(u);
         prepareDrawerViews();
 
         if(savedInstanceState!=null){
@@ -114,11 +116,17 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     void prepareDrawerViews(){
         fillList();
 
+        Bitmap bitmap=getThumbnail("profile.png");
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
         mDrawerpane = (RelativeLayout) findViewById(R.id.drawerpane);
         mDrawerList = (ListView) findViewById(R.id.navlist);
         userName = (TextView) findViewById(R.id.username);
         profilePicture = (ImageView) findViewById(R.id.avatar);
+        if(bitmap!=null){
+
+            profilePicture.setImageBitmap(bitmap);
+        }
         DrawerListAdapter adapter = new DrawerListAdapter(this, mNavItems);
         mDrawerList.setAdapter(adapter);
 
@@ -277,65 +285,57 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     }
 
 
-    void getUserPicture(final UserProfilePicture u){
-        if(u.username!=null|| !u.username.isEmpty()){
 
-            ServerRequest serverRequest=new ServerRequest(this);
-            serverRequest.fetchUserPicture(u, new GetImageCallBacks() {
-                @Override
-                public void done(String reponse) {
+    public boolean isSdReadable() {
 
-                }
+        boolean mExternalStorageAvailable = false;
+        String state = Environment.getExternalStorageState();
 
-                @Override
-                public void image(UserProfilePicture reponse) {
-                    if(reponse!=null){
-                        Bitmap bitmap=reponse.uProfilePicture;
-                        profilePicture.setImageBitmap(bitmap);
-                        storeimageLocaly(reponse.uProfilePicture);
-                    }else{
-                        Toast.makeText(getApplicationContext(),"No Picture save for this user",Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-            });
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+// We can read and write the media
+            mExternalStorageAvailable = true;
+            Log.i("isSdReadable", "External storage card is readable.");
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+// We can only read the media
+            Log.i("isSdReadable", "External storage card is readable.");
+            mExternalStorageAvailable = true;
+        } else {
+// Something else is wrong. It may be one of many other
+// states, but all we need to know is we can neither read nor write
+            mExternalStorageAvailable = false;
         }
 
+        return mExternalStorageAvailable;
     }
-    private String  storeimageLocaly(Bitmap picture) {
-
-        ContextWrapper cw=new ContextWrapper(getApplicationContext());
-        File directory=cw.getDir("ProfilePictures", Context.MODE_PRIVATE);
-        if(!directory.exists()){
-            directory.mkdirs();
-        }
-        File file=new File(directory,"profile.jpg");
-
-        FileOutputStream fos=null;
-
-        if(file.exists()){
-            file.delete();
-            file=new File(directory,"profile.jpg");
-        }
-        try {
-            fos=new FileOutputStream(file);
-            picture=BitmapFactory.decodeFile(file.getName());
-            picture.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 
 
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
+    public Bitmap getThumbnail(String filename) {
+
+        //String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD + APP_THUMBNAIL_PATH_SD_CARD;
+        Bitmap thumbnail = null;
+
+// Look for the file on the external storage
+        //try {
+        //if (tools.isSdReadable() == true) {
+        //thumbnail = BitmapFactory.decodeFile(fullPath + "/" + filename);
+        // }
+        // } catch (Exception e) {
+        // Log.e("getThumbnail() on external storage", e.getMessage());
+        // }
+
+// If no file on external storage, look in internal storage
+        // if (thumbnail == null) {
             try {
-                fos.flush();
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                File filePath = getFileStreamPath(filename);
+                FileInputStream fi = new FileInputStream(filePath);
+                thumbnail = BitmapFactory.decodeStream(fi);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        }
 
-        return directory.getAbsolutePath();
+        return thumbnail;
     }
+
 
 
     @Override

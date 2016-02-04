@@ -17,9 +17,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,26 +77,81 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
         phonenumbed= (EditText)findViewById(R.id.editTextphonenumbCompleteprofile);
     }
     public  void buttonSaveCompleteprofile(View view){
-        if(userPicture!=null){
-            ServerRequest serverRequest=new ServerRequest(this);
-            serverRequest.saveprofilepicture(userPicture, new GetImageCallBacks() {
-                @Override
-                public void done(String reponse) {
-                    if(reponse.contains("Image upload successfully")){
-                        storeimageLocaly(userPicture.uProfilePicture);
+        Bitmap bitmap=getThumbnail("profile.png");
+        if(bitmap==null){
+            if(userPicture!=null){
+                ServerRequest serverRequest=new ServerRequest(this);
+                serverRequest.saveprofilepicture(userPicture, new GetImageCallBacks() {
+                    @Override
+                    public void done(String reponse) {
+                        if(reponse.contains("Image upload successfully")){
+                            if(storeimageLocaly(userPicture.uProfilePicture))
+                                Toast.makeText(getApplicationContext(),"Profile picture successfully added",Toast.LENGTH_SHORT).show();
+                        }
+
                     }
 
-                }
+                    @Override
+                    public void image(UserProfilePicture reponse) {
 
-                @Override
-                public void image(UserProfilePicture reponse) {
+                    }
+                });
 
-                }
-            });
+            }
+
+        }else {
+            if(userPicture!=null){
+                ServerRequest serverRequest=new ServerRequest(this);
+                serverRequest.updateUserPicture(userPicture, new GetImageCallBacks() {
+                    @Override
+                    public void done(String reponse) {
+                        if (reponse.contains("Profile picture successfully updated")) {
+                            if(storeimageLocaly(userPicture.uProfilePicture))
+                                Toast.makeText(getApplicationContext(),"Profile picture successfully updated",Toast.LENGTH_SHORT).show();
+
+                        }
+
+                    }
+
+                    @Override
+                    public void image(UserProfilePicture reponse) {
+
+                    }
+                });
+
+            }
 
         }
 
+
     }
+    public Bitmap getThumbnail(String filename) {
+
+        //String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD + APP_THUMBNAIL_PATH_SD_CARD;
+        Bitmap thumbnail = null;
+
+// Look for the file on the external storage
+        //try {
+        //if (tools.isSdReadable() == true) {
+        //thumbnail = BitmapFactory.decodeFile(fullPath + "/" + filename);
+        // }
+        // } catch (Exception e) {
+        // Log.e("getThumbnail() on external storage", e.getMessage());
+        // }
+
+// If no file on external storage, look in internal storage
+        // if (thumbnail == null) {
+        try {
+            File filePath = getFileStreamPath(filename);
+            FileInputStream fi = new FileInputStream(filePath);
+            thumbnail = BitmapFactory.decodeStream(fi);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return thumbnail;
+    }
+
     public  void buttonCancelCompleteprofile(View view){
 
         finish();
@@ -146,37 +203,21 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
         return cursor.getString(idx);
     }
 
-    private String  storeimageLocaly(Bitmap picture) {
+    private boolean  storeimageLocaly(Bitmap picture) {
 
-        ContextWrapper cw=new ContextWrapper(getApplicationContext());
-        File directory=cw.getDir("ProfilePictures",Context.MODE_PRIVATE);
-        if(!directory.exists()){
-            directory.mkdirs();
-        }
-        File file=new File(directory,"profile.jpg");
 
         FileOutputStream fos=null;
-
-        if(file.exists()){
-            file.delete();
-           file=new File(directory,"profile.jpg");
-        }
         try {
-                fos=new FileOutputStream(file);
-            picture.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos=openFileOutput("profile.png",Context.MODE_PRIVATE);
+            picture.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+            return true;
 
 
         }catch (Exception e){
             e.printStackTrace();
-        }finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return false;
         }
-
-        return directory.getAbsolutePath();
     }
 
 

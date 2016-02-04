@@ -51,6 +51,10 @@ public class ServerRequest {
     }
 
 
+    public  void updateUserPicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
+        progressDialog.show();
+        new UpdateUserPicturesAsynckTacks(userProfilePicture,callBacks).execute();
+    }
     public void fetchUserPicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
         progressDialog.show();
         new FetchUserPictureAsynckTacks(userProfilePicture,callBacks).execute();
@@ -614,6 +618,83 @@ public class ServerRequest {
 
     }
 
+
+
+    public class UpdateUserPicturesAsynckTacks extends AsyncTask<Void,Void,String>{
+
+        UserProfilePicture profilePicture;
+        GetImageCallBacks imageCallBacks;
+
+        public UpdateUserPicturesAsynckTacks(UserProfilePicture profilePicture, GetImageCallBacks callbacks){
+            this.imageCallBacks=callbacks;
+            this.profilePicture=profilePicture;
+        }
+        @Override
+        protected void onPostExecute(String reponse) {
+            progressDialog.dismiss();
+            imageCallBacks.done(reponse);
+            super.onPostExecute(reponse);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            Bitmap bitmap=profilePicture.uProfilePicture;
+
+            String uploadimage=getStringImage(bitmap);
+            String uname=profilePicture.username;
+
+            ArrayList<Pair<String,String>> data=new ArrayList<>();
+            data.add(new Pair<String, String>("username", uname));
+            data.add(new Pair<String, String>("Image", uploadimage));
+
+            // String data = "{ image_data: \"" + uploadimage.toString() + "\", uploadedBy: \"1\" }";
+            String line="";
+            URL url;
+            HttpURLConnection urlConnection;
+            try {
+
+                //String dataPosted=getData(data);
+                byte[] postData= getData(data).getBytes("UTF-8");
+                url=new URL(SERVER_ADDRESS + "UpdatePictures.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", String.valueOf(postData.length));
+                urlConnection.setDoOutput(true);
+                urlConnection.getOutputStream().write(postData);
+                //  BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                //String data =URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(profilePicture.username,"UTF-8")+"&"+
+                //        URLEncoder.encode("Image","UTF-8")+"="+URLEncoder.encode(String.valueOf(uploadimage),"UTF-8");
+                //// buff.flush();
+                // buff.close();
+                urlConnection.getOutputStream().close();
+
+                int responsecode=urlConnection.getResponseCode();
+                if(responsecode==HttpURLConnection.HTTP_OK){
+                    InputStream in =urlConnection.getInputStream();
+
+                    BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                    StringBuilder bld =new StringBuilder();
+                    String il;
+                    while((il=reader.readLine())!=null){
+                        bld.append(il);
+                    }
+                    line=bld.toString();
+                }else{
+                    line="Error";
+                }
+
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return line;
+        }
+    }
 
     public String getStringImage(Bitmap bmp){
         try {

@@ -45,6 +45,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         emailed = (EditText) findViewById(R.id.editTextemail);
         passworded = (EditText) findViewById(R.id.editTextpassword);
         passworded.setOnEditorActionListener(this);
+
     }
 
     @Override
@@ -58,6 +59,15 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         super.onStart();
         if (authenticate() == true) {
             displayUserdetails();
+            Bitmap bitmap= getThumbnail("profile.png");
+            if(bitmap==null){
+                if(userProfilePicture!=null){
+                    getUserPicture(userProfilePicture);
+                }else {
+                    Toast.makeText(getApplicationContext(),"Error loading picture",Toast.LENGTH_SHORT).show();
+                }
+
+            }
         }
 
     }
@@ -172,5 +182,76 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
         return false;
     }
+
+    public Bitmap getThumbnail(String filename) {
+
+        //String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD + APP_THUMBNAIL_PATH_SD_CARD;
+        Bitmap thumbnail = null;
+
+// Look for the file on the external storage
+        //try {
+        //if (tools.isSdReadable() == true) {
+        //thumbnail = BitmapFactory.decodeFile(fullPath + "/" + filename);
+        // }
+        // } catch (Exception e) {
+        // Log.e("getThumbnail() on external storage", e.getMessage());
+        // }
+
+// If no file on external storage, look in internal storage
+        // if (thumbnail == null) {
+        try {
+            File filePath = getFileStreamPath(filename);
+            FileInputStream fi = new FileInputStream(filePath);
+            thumbnail = BitmapFactory.decodeStream(fi);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return thumbnail;
+    }
+
+    void getUserPicture(final UserProfilePicture u){
+        if(u.username!=null|| !u.username.isEmpty()){
+
+            ServerRequest serverRequest=new ServerRequest(this);
+            serverRequest.fetchUserPicture(u, new GetImageCallBacks() {
+                @Override
+                public void done(String reponse) {
+
+                }
+
+                @Override
+                public void image(UserProfilePicture reponse) {
+                    if (reponse != null) {
+                        Bitmap bitmap = reponse.uProfilePicture;
+                        //profilePicture.setImageBitmap(bitmap);
+                         storeimageLocaly(reponse.uProfilePicture);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "No Picture save for this user", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
+        }
+
+    }
+
+    private boolean  storeimageLocaly(Bitmap picture) {
+
+
+        FileOutputStream fos=null;
+        try {
+            fos=openFileOutput("profile.png",Context.MODE_PRIVATE);
+            picture.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+            return true;
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
 

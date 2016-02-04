@@ -6,12 +6,19 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.media.ExifInterface;
 import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,6 +32,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mikhaellopez.circularimageview.CircularImageView;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.logging.Handler;
+import java.util.logging.Logger;
 
 
 public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  android.support.v7.view.ActionMode.Callback {
@@ -45,9 +55,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     private UserLocalStore userLocalStore;
     private String username;
     private CharSequence drawerTitle;
-    private CharSequence title;
+    private CharSequence title,mtitel;
     private TextView userName;
-    private ImageView profilePicture;
+    private CircularImageView profilePicture;
     ListView evnetListView;
     CentralPageAdapter centralPageAdapter;
     boolean[] selectionevents;
@@ -61,8 +71,20 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_central_page);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), username, Toast.LENGTH_SHORT);
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
         userLocalStore = new UserLocalStore(this);
-        drawerTitle = title = getTitle();
+        mtitel=drawerTitle = title = getTitle();
 
 
 
@@ -81,8 +103,6 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             selectionevents=savedInstanceState.getBooleanArray("selectedevents");
             listEvent=savedInstanceState.getParcelableArrayList("eventsArray");
             countevent = savedInstanceState.getInt("numberOfSelectedevents");
-
-          //  selectedevent = savedInstanceState.getIntArray("selectedevent");
 
             prepareOrientationchange();
 
@@ -113,6 +133,11 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             prepareListview(listEvent);
         }
     }
+
+    public void openProfileOverviewClick(View view){
+        Intent intent= new Intent(CentralPageActivity.this,ProfileOverviewActivity.class);
+        startActivity(intent);
+    }
     void prepareDrawerViews(){
         fillList();
 
@@ -122,7 +147,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         mDrawerpane = (RelativeLayout) findViewById(R.id.drawerpane);
         mDrawerList = (ListView) findViewById(R.id.navlist);
         userName = (TextView) findViewById(R.id.username);
-        profilePicture = (ImageView) findViewById(R.id.avatar);
+        profilePicture = (CircularImageView) findViewById(R.id.avatar);
         if(bitmap!=null){
 
             profilePicture.setImageBitmap(bitmap);
@@ -146,13 +171,11 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 R.string.drawerClose) // Close Drawer Description
         {
             public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
                 getSupportActionBar().setTitle(title);
                 invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
                 getSupportActionBar().setTitle(drawerTitle);
                 invalidateOptionsMenu();
             }
@@ -183,6 +206,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         mNavItems.add(new NavItem("About", "learn more about time-tracker", R.drawable.colornfo));
 
     }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -236,6 +260,12 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     }
 
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu){
+        boolean drawerOpen =mDrawerLayout.isDrawerOpen(mDrawerpane);
+        menu.findItem(R.id.action_settings).setVisible(drawerOpen);
+        return super.onPrepareOptionsMenu(menu);
+    }
     public void buttonCreateNewEventPressed(View view){
         Intent intent= new Intent(CentralPageActivity.this, CreateNewEventActivity.class);
         intent.putExtra("username", username);
@@ -255,20 +285,13 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Toast.makeText(getApplicationContext(),"item "+ listEvent.get(position).titel,Toast.LENGTH_SHORT).show();
         Intent intent=new Intent(CentralPageActivity.this,EventDetailsActivity.class);
-        intent.putExtra("titel",listEvent.get(position).titel);
-        intent.putExtra("textinfo",listEvent.get(position).infotext);
-        intent.putExtra("time",listEvent.get(position).creationTime);
-        intent.putExtra("creator",listEvent.get(position).creator);
+        intent.putExtra("titel", listEvent.get(position).titel);
+        intent.putExtra("textinfo", listEvent.get(position).infotext);
+        intent.putExtra("time", listEvent.get(position).creationTime);
+        intent.putExtra("creator", listEvent.get(position).creator);
         startActivity(intent);
     }
 
-
-//    void showActionMode(){
-//        mactionMode=startSupportActionMode(new ActionModeStarter());
-//    }
-//    void closeActionMode(){
-//        mactionMode.finish();
-//    }
 
 
     //Für Portr/Landsc Wechsel, Activity wird gekillt und Daten werden gesichert
@@ -325,17 +348,23 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
 // If no file on external storage, look in internal storage
         // if (thumbnail == null) {
+
+        Bitmap bitmap;
             try {
+
                 File filePath = getFileStreamPath(filename);
                 FileInputStream fi = new FileInputStream(filePath);
-                thumbnail = BitmapFactory.decodeStream(fi);
+                bitmap = BitmapFactory.decodeStream(fi);
+
+
+               thumbnail=bitmap;
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
 
         return thumbnail;
     }
-
 
 
     @Override

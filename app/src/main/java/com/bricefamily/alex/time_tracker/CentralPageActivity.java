@@ -284,7 +284,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         intent.putExtra("day",listEvent.get(position).eDay);
         intent.putExtra("month", listEvent.get(position).eMonth);
         intent.putExtra("year",listEvent.get(position).eYear);
-        intent.putExtra("hash",listEvent.get(position).eventHash);
+        intent.putExtra("hash", listEvent.get(position).eventHash);
 
 
         startActivity(intent);
@@ -297,7 +297,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     protected void onSaveInstanceState(Bundle state) {
 
         super.onSaveInstanceState(state);
-         state.putBooleanArray("selectedevents",selectionevents);
+         state.putBooleanArray("selectedevents", selectionevents);
             state.putInt("numberOfSelectedevents", countevent);
             state.putParcelableArrayList("eventsArray", listEvent);
             state.putString("user", username);
@@ -383,11 +383,46 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         switch (item.getItemId()) {
             case R.id.menu_delete:
 
-                int po=centralPageAdapter.getCount();
 
-                for (int i = po-1; i >=0; i--){
-                    if (listEvent.get(i)==null) {
+
+
+                int size=0;
+                for (int i = selectionevents.length-1; i >=0; i--) {
+                    if (selectionevents[i]) {
+                        size++;
                     }
+                }
+                final int[] eventtodelete= new int[size];
+                int j=0;
+                for (int i = 0; i <selectionevents.length; i++){
+                    if(selectionevents[i]){
+
+                        eventtodelete[j]=i;
+                        j++;
+                    }
+                }
+                for(int k=0;k<eventtodelete.length;k++){
+                    String hash=listEvent.get(eventtodelete[k]).eventHash;
+                    ServerRequest serverRequest=new ServerRequest(this);
+                    final int finalK = k;
+                    serverRequest.deleteEvents(listEvent.get(eventtodelete[k]), new GetEventsCallbacks() {
+                        @Override
+                        public void done(ArrayList<EventObject> returnedeventobject) {
+
+                        }
+
+                        @Override
+                        public void updated(String reponse) {
+
+                            if (reponse.contains("Event successfully deleted")) {
+                                listEvent.remove(eventtodelete[finalK]);
+                                centralPageAdapter.notifyDataSetChanged();
+
+
+                            }
+
+                        }
+                    },hash);
                 }
 
                 centralPageAdapter.notifyDataSetChanged();

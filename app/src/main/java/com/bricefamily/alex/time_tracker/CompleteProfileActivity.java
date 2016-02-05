@@ -84,7 +84,7 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
         Bitmap bitmap=getThumbnail("profile.png");
         if(bitmap==null){
             if(userPicture!=null){
-                ServerRequest serverRequest=new ServerRequest(this);
+                ServerRequestUser serverRequest=new ServerRequestUser(this);
                 serverRequest.saveprofilepicture(userPicture, new GetImageCallBacks() {
                     @Override
                     public void done(String reponse) {
@@ -105,7 +105,7 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
 
         }else {
             if(userPicture!=null){
-                ServerRequest serverRequest=new ServerRequest(this);
+                ServerRequestUser serverRequest=new ServerRequestUser(this);
                 serverRequest.updateUserPicture(userPicture, new GetImageCallBacks() {
                     @Override
                     public void done(String reponse) {

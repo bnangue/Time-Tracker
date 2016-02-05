@@ -109,7 +109,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     }
 
     private void authenticateuser(User user) {
-        ServerRequest serverRequest = new ServerRequest(this);
+        ServerRequestUser serverRequest = new ServerRequestUser(this);
         serverRequest.fetchUserDataInBackground(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
@@ -218,7 +218,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     void getUserPicture(final UserProfilePicture u){
         if(u.username!=null|| !u.username.isEmpty()){
 
-            ServerRequest serverRequest=new ServerRequest(this);
+            ServerRequestUser serverRequest=new ServerRequestUser(this);
             serverRequest.fetchUserPicture(u, new GetImageCallBacks() {
                 @Override
                 public void done(String reponse) {

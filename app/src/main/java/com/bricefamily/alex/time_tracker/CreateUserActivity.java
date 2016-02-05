@@ -73,12 +73,12 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
     }
 
     private void register(final User registeredData){
-        final ServerRequest serverRequest =new ServerRequest(this);
+        final ServerRequestUser serverRequest =new ServerRequestUser(this);
         serverRequest.storeUserDataInBackground(registeredData, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 
-                    startActivity(new Intent(CreateUserActivity.this,LoginActivity.class));
+                    startActivity(new Intent(CreateUserActivity.this, LoginActivity.class));
                 }
         });
     }

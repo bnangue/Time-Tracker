@@ -44,6 +44,10 @@ public class ServerRequestUser {
         progressDialog.setMessage("please wait.");
     }
 
+    public void deleteUser(User user,GetUserCallbacks callbacks){
+        progressDialog.show();
+        new DeleteUserAsynckTasks(user,callbacks).execute();
+    }
     public  void updateUserPicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
         progressDialog.show();
         new UpdateUserPicturesAsynckTacks(userProfilePicture,callBacks).execute();
@@ -454,6 +458,69 @@ public class ServerRequestUser {
 
 
 
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return line;
+        }
+    }
+
+
+    public class DeleteUserAsynckTasks extends AsyncTask<Void,Void,String>{
+
+        User user;
+        GetUserCallbacks userCallbacks;
+
+        public DeleteUserAsynckTasks(User user, GetUserCallbacks callbacks){
+            this.user=user;
+            this.userCallbacks=callbacks;
+        }
+        @Override
+        protected void onPostExecute(String aVoid) {
+            progressDialog.dismiss();
+            userCallbacks.deleted(aVoid);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+
+            URL url;
+            String line=null;
+            HttpURLConnection urlConnection=null;
+            try {
+
+                url=new URL(SERVER_ADDRESS + "DeleteUser.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                String data =URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(user.username,"UTF-8");
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+                urlConnection.getOutputStream().close();
+                int responsecode=urlConnection.getResponseCode();
+                if(responsecode==HttpURLConnection.HTTP_OK){
+                    InputStream in =urlConnection.getInputStream();
+
+                    BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                    StringBuilder bld =new StringBuilder();
+                    String il;
+                    while((il=reader.readLine())!=null){
+                        bld.append(il);
+                    }
+                    line=bld.toString();
+                }else{
+                    line="Error";
+                }
             }catch (Exception e){
                 e.printStackTrace();
             }

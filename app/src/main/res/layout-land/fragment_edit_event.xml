@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+
+    <LinearLayout
+        android:id="@+id/linibutton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:weightSum="2"
+        android:clickable="true">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Save changes"
+            android:id="@+id/button"
+            style="@style/buttondelete"
+            android:backgroundTint="@color/cellSelected"
+            android:onClick="buttonUpdateEventListener"
+             />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_weight="1"
+
+            android:id="@+id/buttoncancel"
+            style="@style/buttondelete"
+            android:onClick="buttoncancelUpdateListener"
+             />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/linibutton"
+        android:layout_alignParentTop="true">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Click Cancel to leave"
+                android:id="@+id/textViewcreateeventtitel"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Titel"
+                android:id="@+id/textViewEventttiel"
+                android:layout_marginTop="9dp"
+                android:layout_below="@+id/textViewcreateeventtitel"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignRight="@+id/textVieweventcreator"
+                android:layout_alignEnd="@+id/textVieweventcreator" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Creator"
+                android:id="@+id/textVieweventcreator"
+                android:layout_below="@+id/textViewEventttiel"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Details"
+                android:id="@+id/textVieweventdetails"
+                android:layout_below="@+id/textVieweventcreator"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Date"
+                android:id="@+id/textVieweventdate"
+                android:layout_below="@+id/textVieweventdetails"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Note"
+                android:id="@+id/textVieweventnote"
+                android:layout_marginTop="30dp"
+                android:layout_below="@+id/textVieweventdate"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Creation Time"
+                android:id="@+id/textVieweventcreationtime"
+                android:layout_below="@+id/textVieweventnote"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="15dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="current time"
+                android:id="@+id/textVieweventcurrenttime"
+                android:layout_alignBottom="@+id/textVieweventcreationtime"
+                android:layout_toRightOf="@+id/textVieweventcreationtime"
+                android:layout_toEndOf="@+id/textVieweventcreationtime"
+                android:layout_marginLeft="17dp"
+                android:layout_marginStart="17dp" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textAutoComplete"
+                android:ems="10"
+                android:id="@+id/editTexteventnote"
+                android:hint="set some keyword for your event"
+                android:textSize="12sp"
+                android:layout_alignBottom="@+id/textVieweventnote"
+                android:layout_alignLeft="@+id/editTexteventdate"
+                android:layout_alignStart="@+id/editTexteventdate"
+                android:layout_alignRight="@+id/imageButton"
+                android:layout_alignEnd="@+id/imageButton" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="date"
+                android:ems="10"
+                android:id="@+id/editTexteventdate"
+                android:hint="set a date  for your event"
+                android:textSize="12sp"
+                android:layout_above="@+id/textVieweventnote"
+                android:layout_alignLeft="@+id/editTexteventdetails"
+                android:layout_alignStart="@+id/editTexteventdetails"
+                android:layout_toLeftOf="@+id/imageButton"
+                android:layout_toStartOf="@+id/imageButton" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:ems="10"
+                android:id="@+id/editTexteventdetails"
+                android:hint="describ your event"
+                android:textSize="12sp"
+                android:layout_alignBottom="@+id/textVieweventdetails"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignLeft="@+id/editTexteventcreator"
+                android:layout_alignStart="@+id/editTexteventcreator" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:text="Name"
+                android:textSize="12sp"
+                android:ems="10"
+                android:id="@+id/editTexteventcreator"
+                android:layout_above="@+id/textVieweventdetails"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginLeft="20dp"
+                android:layout_alignLeft="@+id/editTexteventtitel"
+                android:layout_alignStart="@+id/editTexteventtitel" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/editTexteventtitel"
+                android:hint="enter a titel for your event"
+                android:textSize="12sp"
+                android:layout_above="@+id/textVieweventcreator"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toEndOf="@+id/textViewEventttiel"
+                android:layout_toRightOf="@+id/textViewEventttiel" />
+
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageButton"
+                android:layout_alignBottom="@+id/editTexteventdate"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:src="@mipmap/ic_calendar"
+                android:background="@color/white"
+                android:layout_below="@+id/textVieweventdetails"
+                android:layout_toRightOf="@+id/textViewcreateeventtitel"
+                android:layout_toEndOf="@+id/textViewcreateeventtitel" />
+        </RelativeLayout>
+
+    </ScrollView>
+
+
+
+</RelativeLayout>

@@ -11,7 +11,7 @@
     <color name="actionbarbackground">#FFFFFF</color>
     <color name="tabletTpeRcrdVleIDCrtr">#54606B</color>
     <color name="tabletSignator">#002548</color>
-    <color name="cellSelected">#f5cb4b</color>
+    <color name="cellSelected">#cf0c81f7</color>
     <color name="borderBackground">#dbdbdb</color>
     <color name="cellselect">#f7f3cb</color>
 

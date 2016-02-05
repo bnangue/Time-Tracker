@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -19,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CreateNewEventActivity extends AppCompatActivity {
+public class CreateNewEventActivity extends AppCompatActivity implements DatePickerFragment.OnDateGetActivity, TextView.OnEditorActionListener {
 
     private TextView currenttime;
     private EditText titeled,detailed,dateed,noteed,creatornameed;
@@ -60,6 +63,7 @@ public class CreateNewEventActivity extends AppCompatActivity {
         detailed= (EditText)findViewById(R.id.editTexteventdetails);
         dateed= (EditText)findViewById(R.id.editTexteventdate);
         noteed= (EditText)findViewById(R.id.editTexteventnote);
+        noteed.setOnEditorActionListener(this);
         creatornameed= (EditText)findViewById(R.id.editTexteventcreator);
         creatornameed.setText(creatornamestr);
     }
@@ -77,8 +81,10 @@ public class CreateNewEventActivity extends AppCompatActivity {
             String[] date=datestr.split("[.]");
             dateEventObject=new DateEventObject(date[0],date[1],date[2]);
             status="1";
+            int eventHashcode=(titelstr+creatornamestr+currenttimestr).hashCode();
+
             eventObject=new EventObject(titelstr,detailsstr,creatornamestr,currenttimestr
-                    ,dateEventObject,status);
+                    ,dateEventObject,status,String.valueOf(eventHashcode));
 
             createEvents(eventObject);
         }
@@ -90,8 +96,17 @@ public class CreateNewEventActivity extends AppCompatActivity {
             public void done(ArrayList<EventObject> returnedeventobject) {
                 showdialg(creatornamestr);
             }
+
+            @Override
+            public void updated(String reponse) {
+
+            }
         });
         Toast.makeText(getApplicationContext(),"Event created",Toast.LENGTH_SHORT).show();
+    }
+    public void onDatePickerclicked(View view){
+        DialogFragment fragmentDatePicker=new DatePickerFragment();
+        fragmentDatePicker.show(getSupportFragmentManager(),"datePickerActivty");
     }
     void startCentralPage(String username){
         getEventsFromDatabase(creatornamestr);
@@ -131,6 +146,43 @@ public class CreateNewEventActivity extends AppCompatActivity {
 
                 }
             }
+
+            @Override
+            public void updated(String reponse) {
+
+            }
         });
+    }
+
+    @Override
+    public void dateSetactivity(int year, int month, int day) {
+        dateed.setText(new StringBuilder().append(day).append(".")
+        .append(month +1).append(".").append(year));
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+            titelstr=titeled.getText().toString();
+            detailsstr=detailed.getText().toString();
+            notestr=noteed.getText().toString();
+            datestr=dateed.getText().toString();
+            creatornamestr=creatornameed.getText().toString();
+
+            if(titelstr.isEmpty() || datestr.isEmpty()|| creatornamestr.isEmpty()||notestr.isEmpty()){
+                Toast.makeText(getApplicationContext(),"Please fill empty filed",Toast.LENGTH_SHORT).show();
+            }else{
+                String[] date=datestr.split("[.]");
+                dateEventObject=new DateEventObject(date[0],date[1],date[2]);
+                status="1";
+                int eventHashcode=(titelstr+creatornamestr+currenttimestr).hashCode();
+
+                eventObject=new EventObject(titelstr,detailsstr,creatornamestr,currenttimestr
+                        ,dateEventObject,status,String.valueOf(eventHashcode));
+
+                createEvents(eventObject);
+            }
+        }
+        return false;
     }
 }

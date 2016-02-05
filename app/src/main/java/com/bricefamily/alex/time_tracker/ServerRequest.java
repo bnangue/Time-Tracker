@@ -1,23 +1,18 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.UrlQuerySanitizer;
 import android.os.AsyncTask;
-import android.os.Debug;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -31,7 +26,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by alex on 17.01.2016.
@@ -50,6 +44,15 @@ public class ServerRequest {
         progressDialog.setMessage("please wait.");
     }
 
+    public void fetchcurrentevent(EventObject eventObject,GetEventsCallbacks callbacks){
+        progressDialog.show();
+        new FetchCurrentEventAsynckTacks(eventObject,callbacks);
+
+    }
+    public void updateEvents(EventObject eventObject,GetEventsCallbacks callBacks,String hash){
+        progressDialog.show();
+        new UpdateEventsAsynckTacks(eventObject,callBacks,hash).execute();
+    }
 
     public  void updateUserPicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
         progressDialog.show();
@@ -317,6 +320,8 @@ public class ServerRequest {
             data.add(new Pair<String, String>("eventMonth", eventObject.eMonth));
             data.add(new Pair<String, String>("eventYear",eventObject.eYear));
             data.add(new Pair<String, String>("eventStatus",eventObject.eventStatus));
+            data.add(new Pair<String, String>("eventHash",eventObject.eventHash));
+
 
             URL url;
             HttpURLConnection urlConnection=null;
@@ -428,13 +433,14 @@ public class ServerRequest {
                 String eMonth = jo_inside.getString("eventMonth");
                 String eYear = jo_inside.getString("eventYear");
                 String eventStatus = jo_inside.getString("eventStatus");
+                String eventHash = jo_inside.getString("eventHash");
 
 
                 String[] creationtime=creationTime.split(" ");
                 DateEventObject dateEventObject=new DateEventObject(eDay,eMonth,eYear);
 
-                EventObject  object =new EventObject(titel, infotext, creator, creationtime[1],
-                        dateEventObject, eventStatus);
+                EventObject  object =new EventObject(titel, infotext, creator, creationtime[0],
+                        dateEventObject, eventStatus,eventHash);
                 String t=object.titel;
                 String ifo=object.infotext;
                 if(t.equals(ifo)){
@@ -695,6 +701,143 @@ public class ServerRequest {
             return line;
         }
     }
+
+    public class UpdateEventsAsynckTacks extends AsyncTask<Void,Void,String>{
+
+        EventObject eventObject;
+        GetEventsCallbacks eventsCallbacks;
+        String hash;
+
+        public UpdateEventsAsynckTacks(EventObject eventObject, GetEventsCallbacks callbacks,String hash){
+            this.eventsCallbacks=callbacks;
+            this.eventObject=eventObject;
+            this.hash=hash;
+        }
+        @Override
+        protected void onPostExecute(String aVoid) {
+            progressDialog.dismiss();
+            eventsCallbacks.updated(aVoid);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            ArrayList<Pair<String,String>> data=new ArrayList<>();
+            data.add(new Pair<String, String>("eventTitel", eventObject.titel));
+            data.add(new Pair<String, String>("eventDetails",eventObject.infotext));
+            data.add(new Pair<String, String>("eventCreator", eventObject.creator));
+            data.add(new Pair<String, String>("eventDay", eventObject.eDay));
+            data.add(new Pair<String, String>("eventMonth", eventObject.eMonth));
+            data.add(new Pair<String, String>("eventYear",eventObject.eYear));
+            data.add(new Pair<String, String>("eventStatus",eventObject.eventStatus));
+            data.add(new Pair<String, String>("eventHash",eventObject.eventHash));
+            data.add(new Pair<String, String>("currentHash",hash));
+
+
+
+            URL url;
+            String line=null;
+            HttpURLConnection urlConnection=null;
+            try {
+
+                byte[] postData= getData(data).getBytes("UTF-8");
+                url=new URL(SERVER_ADDRESS + "UpdateEvents.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", String.valueOf(postData.length));
+                urlConnection.setDoOutput(true);
+                urlConnection.getOutputStream().write(postData);
+
+                urlConnection.getOutputStream().close();
+                int responsecode=urlConnection.getResponseCode();
+                if(responsecode==HttpURLConnection.HTTP_OK){
+                    InputStream in =urlConnection.getInputStream();
+
+                    BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                    StringBuilder bld =new StringBuilder();
+                    String il;
+                    while((il=reader.readLine())!=null){
+                        bld.append(il);
+                    }
+                    line=bld.toString();
+                }else{
+                    line="Error";
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return line;
+        }
+    }
+
+    public class FetchCurrentEventAsynckTacks extends AsyncTask<Void,Void,ArrayList<EventObject>> {
+
+        GetEventsCallbacks eventsCallbacks;
+
+        EventObject eventObject;
+
+        public FetchCurrentEventAsynckTacks(EventObject eventObject, GetEventsCallbacks callbacks) {
+            this.eventsCallbacks = callbacks;
+            this.eventObject=eventObject;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<EventObject> returnedevents) {
+            progressDialog.dismiss();
+            eventsCallbacks.done(returnedevents);
+            super.onPostExecute(returnedevents);
+        }
+
+        @Override
+        protected ArrayList<EventObject> doInBackground(Void... params) {
+
+            ArrayList<EventObject> returnedEvents=new ArrayList<>();
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try {
+                url=new URL(SERVER_ADDRESS + "FetchEventsDetails.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+                JSONArray jsonArray= new JSONArray(respons);
+                returnedEvents= getDetails(jsonArray);
+
+
+                // fetch data to a jason object
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
+            }
+
+            return returnedEvents;
+        }
+
+
+    }
+
 
     public String getStringImage(Bitmap bmp){
         try {

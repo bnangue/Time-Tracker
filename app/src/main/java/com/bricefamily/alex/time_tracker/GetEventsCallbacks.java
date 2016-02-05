@@ -8,5 +8,6 @@ import java.util.List;
  */
 interface GetEventsCallbacks {
     public abstract void done( ArrayList<EventObject> returnedeventobject);
+    void updated(String reponse);
 
 }

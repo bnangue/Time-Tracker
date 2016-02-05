@@ -31,10 +31,6 @@
             android:name=".PreferenceActivity"
             android:label="@string/title_activity_preference" />
         <activity
-            android:name=".EventDetailsActivity"
-            android:label="@string/title_activity_event_details"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".CompleteProfileActivity"
             android:label="@string/title_activity_complete_profile"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -45,6 +41,10 @@
         <activity
             android:name=".ProfileOverviewActivity"
             android:label="@string/title_activity_profile_overview"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".DetailsEventsActivity"
+            android:label="@string/title_activity_details_events"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

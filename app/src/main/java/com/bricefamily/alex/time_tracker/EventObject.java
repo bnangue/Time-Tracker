@@ -14,8 +14,9 @@ import java.util.List;
  * Created by praktikum on 28/01/16.
  */
 public class EventObject implements Parcelable {
-     String titel,infotext,creator,creationTime,eDay,eMonth,eYear;
+     String titel,infotext,creator,creationTime,eDay,eMonth,eYear,eventHash;
     String eventStatus;
+    int eventHashcode;
     DateEventObject dateEventObject;
     public EventObject(String titel,String infotext,String creator){
         this.titel=titel;
@@ -46,11 +47,12 @@ public class EventObject implements Parcelable {
         eMonth=in.readString();
         eYear=in.readString();
         eventStatus=in.readString();
+        eventHash=in.readString();
 
     }
 
     public EventObject(String titel, String infotext, String creator, String creationTime,
-                       DateEventObject dateEventObject, String eventStatus) {
+                       DateEventObject dateEventObject, String eventStatus,String eventHash) {
         this.titel=titel;
         this.infotext=infotext;
         this.creator=creator;
@@ -60,6 +62,7 @@ public class EventObject implements Parcelable {
         this.eMonth=dateEventObject.month;
         this.eYear=dateEventObject.year;
         this.eventStatus=eventStatus;
+        this.eventHash= eventHash;
     }
 
     @Override
@@ -79,6 +82,7 @@ public class EventObject implements Parcelable {
         dest.writeString(eMonth);
         dest.writeString(eYear);
         dest.writeString(eventStatus);
+        dest.writeString(eventHash);
     }
     public static final Parcelable.Creator<EventObject> CREATOR = new Parcelable.Creator<EventObject>() {
         public EventObject createFromParcel(Parcel in) {

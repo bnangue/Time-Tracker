@@ -161,6 +161,11 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
                     showdialg2();
                 }
             }
+
+            @Override
+            public void updated(String reponse) {
+
+            }
         });
     }
 

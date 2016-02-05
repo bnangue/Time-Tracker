@@ -276,11 +276,17 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Toast.makeText(getApplicationContext(),"item "+ listEvent.get(position).titel,Toast.LENGTH_SHORT).show();
-        Intent intent=new Intent(CentralPageActivity.this,EventDetailsActivity.class);
+        Intent intent=new Intent(CentralPageActivity.this,DetailsEventsActivity.class);
         intent.putExtra("titel", listEvent.get(position).titel);
         intent.putExtra("textinfo", listEvent.get(position).infotext);
         intent.putExtra("time", listEvent.get(position).creationTime);
         intent.putExtra("creator", listEvent.get(position).creator);
+        intent.putExtra("day",listEvent.get(position).eDay);
+        intent.putExtra("month", listEvent.get(position).eMonth);
+        intent.putExtra("year",listEvent.get(position).eYear);
+        intent.putExtra("hash",listEvent.get(position).eventHash);
+
+
         startActivity(intent);
     }
 
@@ -363,6 +369,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.contxt_menu, menu);
+        fab.setVisibility(View.INVISIBLE);
         return true;
     }
 
@@ -399,6 +406,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         countevent =0;
         selectionevents=new boolean[listEvent.size()];
         centralPageAdapter.setEventSelection(selectionevents, countevent);
+        fab.setVisibility(View.VISIBLE);
     }
 
 
@@ -423,7 +431,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             countevent=0;
         }
 
-        centralPageAdapter.setEventSelection(selectionevents,countevent);
+        centralPageAdapter.setEventSelection(selectionevents, countevent);
     }
 
     void refresh(final String username){
@@ -433,9 +441,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             @Override
             public void run() {
                 getEventsFromDatabase(username);
-                h.postDelayed(this,delay);
+                h.postDelayed(this, delay);
             }
-        },delay);
+        }, delay);
     }
 
 
@@ -455,6 +463,13 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                 }
             }
+
+            @Override
+            public void updated(String reponse) {
+
+            }
         });
     }
+
+
 }

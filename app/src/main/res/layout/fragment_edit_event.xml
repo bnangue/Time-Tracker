@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.bricefamily.alex.time_tracker.CreateNewEventActivity"
-    tools:showIn="@layout/activity_create_new_event"
     android:background="@color/white">
 
 
@@ -19,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Fill the fields to create a new event"
+            android:text="Click Cancel to leave"
             android:id="@+id/textViewcreateeventtitel"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />
@@ -141,10 +140,10 @@
             android:hint="describ your event"
             android:textSize="12sp"
             android:layout_alignBottom="@+id/textVieweventdetails"
-            android:layout_alignLeft="@+id/textViewcreateeventtitel"
-            android:layout_alignStart="@+id/textViewcreateeventtitel"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:layout_alignLeft="@+id/editTexteventcreator"
+            android:layout_alignStart="@+id/editTexteventcreator" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -157,8 +156,9 @@
             android:layout_above="@+id/textVieweventdetails"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_alignLeft="@+id/editTexteventdetails"
-            android:layout_alignStart="@+id/editTexteventdetails" />
+            android:layout_marginLeft="20dp"
+            android:layout_alignLeft="@+id/editTexteventtitel"
+            android:layout_alignStart="@+id/editTexteventtitel" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -167,21 +167,32 @@
             android:hint="enter a titel for your event"
             android:textSize="12sp"
             android:layout_above="@+id/textVieweventcreator"
-            android:layout_alignLeft="@+id/editTexteventcreator"
-            android:layout_alignStart="@+id/editTexteventcreator"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@+id/textViewEventttiel"
+            android:layout_toRightOf="@+id/textViewEventttiel" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create Event"
+            android:text="Save changes"
             android:id="@+id/button"
             style="@style/buttondelete"
             android:backgroundTint="@color/cellSelected"
             android:layout_below="@+id/textVieweventcreationtime"
             android:layout_marginTop="26dp"
-            android:onClick="buttonCreateEventListener"
+            android:onClick="buttonUpdateEventListener"
+            android:layout_alignRight="@+id/editTexteventnote"
+            android:layout_alignEnd="@+id/editTexteventnote" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:id="@+id/buttoncancel"
+            style="@style/buttondelete"
+            android:layout_below="@+id/button"
+            android:layout_marginTop="16dp"
+            android:onClick="buttoncancelUpdateListener"
             android:layout_alignRight="@+id/editTexteventnote"
             android:layout_alignEnd="@+id/editTexteventnote" />
 
@@ -193,7 +204,6 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:src="@mipmap/ic_calendar"
-            android:onClick="onDatePickerclicked"
             android:background="@color/white"
             android:layout_below="@+id/textVieweventdetails"
             android:layout_toRightOf="@+id/textViewcreateeventtitel"

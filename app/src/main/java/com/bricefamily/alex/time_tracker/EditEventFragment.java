@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -24,8 +26,7 @@ import java.util.Calendar;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EditEventFragment extends Fragment implements View.OnClickListener ,DialogFragmentDatePicker.OnDateGet
-{
+public class EditEventFragment extends Fragment implements View.OnClickListener ,DialogFragmentDatePicker.OnDateGet, TextView.OnEditorActionListener {
 
 
     private TextView currenttime;
@@ -83,6 +84,7 @@ public class EditEventFragment extends Fragment implements View.OnClickListener 
         dateed.setText(dat);
         noteed= (EditText)v.findViewById(R.id.editTexteventnote);
         noteed.setText(not);
+        noteed.setOnEditorActionListener(this);
         creatornameed= (EditText)v.findViewById(R.id.editTexteventcreator);
         creatornameed.setText(userLocalStore.getLoggedInUser().username);
         creatornameed.setEnabled(false);
@@ -192,5 +194,14 @@ public class EditEventFragment extends Fragment implements View.OnClickListener 
     public void dateSet(int year, int month, int day) {
         dateed.setText(new StringBuilder().append(day).append(".")
                 .append(month +1).append(".").append(year));
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)){
+            uevent();
+        }
+
+            return false;
     }
 }

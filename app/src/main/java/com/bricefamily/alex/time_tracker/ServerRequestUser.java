@@ -45,28 +45,40 @@ public class ServerRequestUser {
     }
 
     public void deleteUser(User user,GetUserCallbacks callbacks){
+        progressDialog.setTitle("Deleting all your data...");
+
         progressDialog.show();
         new DeleteUserAsynckTasks(user,callbacks).execute();
     }
     public  void updateUserPicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
+        progressDialog.setTitle("Updating your profile picture...");
+
         progressDialog.show();
         new UpdateUserPicturesAsynckTacks(userProfilePicture,callBacks).execute();
     }
     public void fetchUserPicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
+        progressDialog.setTitle("Downloading data...");
+
         progressDialog.show();
         new FetchUserPictureAsynckTacks(userProfilePicture,callBacks).execute();
 
     }
     public  void saveprofilepicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
+        progressDialog.setTitle("Saving your Profile picture...");
+
         progressDialog.show();
         new StoreProfilePicturesAsynckTacks(userProfilePicture,callBacks).execute();
     }
 
     public void storeUserDataInBackground(User user,GetUserCallbacks callbacks){
+        progressDialog.setTitle("Creating account...");
+
         progressDialog.show();
         new StoreUserDataAsynckTacks(user,callbacks).execute();
     }
     public void fetchUserDataInBackground(User user ,GetUserCallbacks callbacks){
+        progressDialog.setTitle("Logging user...");
+
         progressDialog.show();
         new FetchUserDataAsynckTacks(user,callbacks).execute();
     }

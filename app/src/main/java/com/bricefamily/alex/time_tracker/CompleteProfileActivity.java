@@ -15,10 +15,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
@@ -29,7 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class CompleteProfileActivity extends AppCompatActivity implements View.OnClickListener {
+public class CompleteProfileActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener {
 
     private int PICK_IMAGE_REQUEST = 1;
 
@@ -75,6 +78,7 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
         ageed= (EditText)findViewById(R.id.editTextageCompleteprofile);
         postalcodeed= (EditText)findViewById(R.id.editTextAddress);
         phonenumbed= (EditText)findViewById(R.id.editTextphonenumbCompleteprofile);
+        phonenumbed.setOnEditorActionListener(this);
     }
     public  void buttonSaveCompleteprofile(View view){
         Bitmap bitmap=getThumbnail("profile.png");
@@ -247,4 +251,12 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
     }
 
 
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+            //do something to save user changes
+        }
+
+            return false;
+    }
 }

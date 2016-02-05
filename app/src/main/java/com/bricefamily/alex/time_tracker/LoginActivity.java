@@ -103,12 +103,12 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         emailstr = emailed.getText().toString();
         passwordstr = passworded.getText().toString();
 
-        User user = new User(emailstr, passwordstr);
-        authenticateuser(user);
+        User user = new User(emailstr, passwordstr,true);
+        updatestatus(user);
 
     }
 
-    private void authenticateuser(User user) {
+    private void authenticateuser(final User user) {
         ServerRequestUser serverRequest = new ServerRequestUser(this);
         serverRequest.fetchUserDataInBackground(user, new GetUserCallbacks() {
             @Override
@@ -116,13 +116,46 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
                 if (returneduser == null) {
                     showdialg();
                 } else {
-                    logUserIn(returneduser);
+                    logUserIn(user);
                 }
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
             }
         });
 
     }
 
+    private void updatestatus(final User user){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.updtaestatus(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+                if(reponse.contains("Status successfully updated")){
+                    authenticateuser(user);
+
+                }
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
+    }
     private void logUserIn(User returneduser) {
 
         userLocalStore.storeUserData(returneduser);
@@ -181,7 +214,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             emailstr = emailed.getText().toString();
             passwordstr = passworded.getText().toString();
 
-            User user = new User(emailstr, passwordstr);
+            User user = new User(emailstr, passwordstr,true);
             authenticateuser(user);
         }
 

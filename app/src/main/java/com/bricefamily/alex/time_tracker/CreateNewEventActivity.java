@@ -102,7 +102,6 @@ public class CreateNewEventActivity extends AppCompatActivity implements DatePic
 
             }
         });
-        Toast.makeText(getApplicationContext(),"Event created",Toast.LENGTH_SHORT).show();
     }
     public void onDatePickerclicked(View view){
         DialogFragment fragmentDatePicker=new DatePickerFragment();

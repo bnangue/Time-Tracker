@@ -19,7 +19,7 @@ public class UserLocalStore {
         spEditor.putString("email",user.email);
         spEditor.putString("username",user.username);
         spEditor.putString("password",user.password);
-        spEditor.commit();
+        spEditor.apply();
     }
 
     public User getLoggedInUser(){
@@ -27,25 +27,24 @@ public class UserLocalStore {
         String password=userLocalDataBase.getString("password","");
         String username=userLocalDataBase.getString("username", "");
 
-        User storeduser=new User(username,email,password);
-        return storeduser;
+        return new User(username,email,password);
     }
     //call with true if logged in
     public void setUserLoggedIn(boolean loggedIn){
         SharedPreferences.Editor spEditor=userLocalDataBase.edit();
         spEditor.putBoolean("loggedIn",loggedIn);
-        spEditor.commit();
+        spEditor.apply();
 
     }
 
     public void clearUserData(){
         SharedPreferences.Editor spEditor=userLocalDataBase.edit();
         spEditor.clear();
-        spEditor.commit();
+        spEditor.apply();
     }
 
     public boolean getUserLoggedIn(){
-        if(userLocalDataBase.getBoolean("loggedIn",false)==true){
+        if(userLocalDataBase.getBoolean("loggedIn", false)){
             return true;
         }else {
             return false;

@@ -1,14 +1,20 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +44,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        prepareView();
         userLocalStore = new UserLocalStore(this);
 
         pwchecker = new PasswordChecker();
@@ -48,12 +55,40 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    public void prepareView() {
 
+        getWindow().getDecorView().setBackgroundColor(Color.WHITE); //Hintergrund der View
+
+        android.support.v7.app.ActionBar ab = getSupportActionBar();
+
+        //Disablen des Zurück Pfeils
+        if (findViewById(android.R.id.home) != null) {
+            findViewById(android.R.id.home).setVisibility(View.GONE);
+        }
+
+        LayoutInflater inflator = (LayoutInflater) getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
+        View view = inflator.inflate(R.layout.actionbarbackground, null);
+
+
+        //center des ActionBar Titles
+        android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+
+        try {
+            ab.setDisplayShowCustomEnabled(true);
+            ab.setDisplayShowTitleEnabled(false);
+            ab.setCustomView(view, params);
+            ab.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.cellSelected)));
+        } catch (NullPointerException e) {
+            Log.w("ActionBar Error", e.getMessage());
+        }
+        try {
+            //ab Android 5.0
+            ab.setElevation(0);
+        } catch (NullPointerException e) {
+            Log.w("ActionBar Error", e.getMessage());
+        }
+
+    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -84,26 +119,12 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         return userLocalStore.getUserLoggedIn();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     public void buttonLoginPressed(View view) {
         emailstr = emailed.getText().toString();
         passwordstr = passworded.getText().toString();
 
-        User user = new User(emailstr, passwordstr,true);
+        User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
         updatestatus(user);
 
     }
@@ -116,7 +137,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
                 if (returneduser == null) {
                     showdialg();
                 } else {
-                    logUserIn(user);
+                    logUserIn(returneduser);
                 }
             }
 
@@ -214,7 +235,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             emailstr = emailed.getText().toString();
             passwordstr = passworded.getText().toString();
 
-            User user = new User(emailstr, passwordstr,true);
+            User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
             authenticateuser(user);
         }
 

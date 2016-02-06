@@ -230,7 +230,8 @@ public class ServerRequestUser {
                     String username=null;
                     if(jsonObject.has("username")){
                         username=jsonObject.getString("username");
-                        returneduser=new User(username,user.email,user.password);
+                        int stat=jsonObject.getInt("onlineStatus");
+                        returneduser=new User(username,user.email,user.password,stat);
                     }
 
                 }

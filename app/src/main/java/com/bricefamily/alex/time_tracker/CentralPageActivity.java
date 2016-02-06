@@ -1,32 +1,29 @@
 package com.bricefamily.alex.time_tracker;
 
-import android.content.Context;
-import android.content.ContextWrapper;
+import android.app.ActionBar;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.media.ExifInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -36,16 +33,12 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
 
 
-public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  android.support.v7.view.ActionMode.Callback {
+public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  ActionMode.Callback {
 
     ListView mDrawerList;
     RelativeLayout mDrawerpane;
@@ -60,6 +53,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     private CircularImageView profilePicture;
     ListView evnetListView;
     CentralPageAdapter centralPageAdapter;
+    private Menu menu;
+    boolean hideOptions=false;
     boolean[] selectionevents;
     private ArrayList<EventObject> listEvent;
     FloatingActionButton fab;
@@ -73,6 +68,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_central_page);
 
+        prepareView();
          fab = (FloatingActionButton) findViewById(R.id.fab);
 
         userLocalStore = new UserLocalStore(this);
@@ -92,6 +88,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         if(savedInstanceState!=null){
             username=savedInstanceState.getString("user");
+            hideOptions=savedInstanceState.getBoolean("hideOptions");
             selectionevents=savedInstanceState.getBooleanArray("selectedevents");
             listEvent=savedInstanceState.getParcelableArrayList("eventsArray");
             countevent = savedInstanceState.getInt("numberOfSelectedevents");
@@ -118,6 +115,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             if(countevent !=0){
                 centralPageAdapter.setEventSelection(selectionevents,countevent);
                 mactionMode= startSupportActionMode(this);
+                if(hideOptions){
+                    hideOption(R.id.menu_delete);
+                }
                 mactionMode.setTitle(countevent + " selected");
             }
 
@@ -139,7 +139,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         mDrawerpane = (RelativeLayout) findViewById(R.id.drawerpane);
         mDrawerList = (ListView) findViewById(R.id.navlist);
         userName = (TextView) findViewById(R.id.username);
-        profilePicture = (CircularImageView) findViewById(R.id.avatar);
+        profilePicture = (CircularImageView) findViewById(R.id.avatarfriend);
         if(bitmap!=null){
 
             profilePicture.setImageBitmap(bitmap);
@@ -182,9 +182,15 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         evnetListView.setAdapter(centralPageAdapter);
         centralPageAdapter.notifyDataSetChanged();
 
-        evnetListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        evnetListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+        evnetListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                return onLongListItemClick(view, position, id);
+            }
+        });
+
         evnetListView.setOnItemClickListener(this);
-       // evnetListView.setMultiChoiceModeListener(this);
 
         if(selectionevents==null){
             selectionevents=new boolean[listEvent.size()];
@@ -192,8 +198,40 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
 
+    private void updatestatus(final User user){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.updtaestatus(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+                if (reponse.contains("Status successfully updated")) {
+                    Intent intent = new Intent(CentralPageActivity.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
+    }
+    protected boolean onLongListItemClick(View v, int pos, long id) {
+
+        showFilterPopup(v);
+        return true;
+    }
+
+
     private void fillList() {
         mNavItems.add(new NavItem("Home", "MeetUp Destination", R.drawable.colorhome));
+        mNavItems.add(new NavItem("Group", "meet your friends", R.drawable.groupuser));
         mNavItems.add(new NavItem("Preferences", "Change your preferences", R.drawable.colorsettings));
         mNavItems.add(new NavItem("About", "learn more about time-tracker", R.drawable.colornfo));
 
@@ -236,12 +274,12 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                 break;
             case R.id.action_logout:
+                User user=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0);
+
+                updatestatus(user);
                 userLocalStore.clearUserData();
                 userLocalStore.setUserLoggedIn(false);
 
-                Intent intent = new Intent(CentralPageActivity.this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
                 break;
             case R.id.action_refresh:
                 getEventsFromDatabase(username);
@@ -249,6 +287,40 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    public void prepareView() {
+
+        getWindow().getDecorView().setBackgroundColor(Color.WHITE); //Hintergrund der View
+
+        android.support.v7.app.ActionBar ab = getSupportActionBar();
+
+        //Disablen des Zurück Pfeils
+        if (findViewById(android.R.id.home) != null) {
+            findViewById(android.R.id.home).setVisibility(View.GONE);
+        }
+
+        LayoutInflater inflator = (LayoutInflater) getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
+        View view = inflator.inflate(R.layout.actionbarbackground, null);
+
+
+        //center des ActionBar Titles
+        android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+
+        try {
+            ab.setDisplayShowCustomEnabled(true);
+            ab.setDisplayShowTitleEnabled(false);
+            ab.setCustomView(view, params);
+            ab.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.cellSelected)));
+        } catch (NullPointerException e) {
+            Log.w("ActionBar Error", e.getMessage());
+        }
+        try {
+            //ab Android 5.0
+            ab.setElevation(0);
+        } catch (NullPointerException e) {
+            Log.w("ActionBar Error", e.getMessage());
+        }
+
     }
 
 
@@ -265,11 +337,54 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
     private void selecItemFromDrawer(int position) {
-        startActivity(new Intent(CentralPageActivity.this, PreferenceActivity.class));
-        mDrawerList.setItemChecked(position, true);
-        setTitle(mNavItems.get(position).mTitel);
+        String titel=mNavItems.get(position).mTitel;
 
-        mDrawerLayout.closeDrawer(mDrawerpane);
+        switch (titel){
+            case "Home":
+                mDrawerList.setItemChecked(position, true);
+                mDrawerLayout.closeDrawer(mDrawerpane);
+                break;
+            case "Preferences":
+                startActivity(new Intent(CentralPageActivity.this, PreferenceActivity.class));
+                mDrawerList.setItemChecked(position, true);
+                mDrawerLayout.closeDrawer(mDrawerpane);
+                break;
+            case "About":
+                mDrawerList.setItemChecked(position, true);
+                mDrawerLayout.closeDrawer(mDrawerpane);
+                break;
+            case "Group":
+                fetchuserlist();
+                mDrawerList.setItemChecked(position, true);
+                mDrawerLayout.closeDrawer(mDrawerpane);
+                break;
+            default: return;
+        }
+
+    }
+
+    private void fetchuserlist(){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+                if (reponse.size() != 0) {
+                    Intent intent = new Intent(CentralPageActivity.this, UserListActivity.class);
+                    intent.putExtra("userlist", reponse);
+                    startActivity(intent);
+                }
+            }
+        });
     }
 
 
@@ -281,9 +396,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         intent.putExtra("textinfo", listEvent.get(position).infotext);
         intent.putExtra("time", listEvent.get(position).creationTime);
         intent.putExtra("creator", listEvent.get(position).creator);
-        intent.putExtra("day",listEvent.get(position).eDay);
+        intent.putExtra("day", listEvent.get(position).eDay);
         intent.putExtra("month", listEvent.get(position).eMonth);
-        intent.putExtra("year",listEvent.get(position).eYear);
+        intent.putExtra("year", listEvent.get(position).eYear);
         intent.putExtra("hash", listEvent.get(position).eventHash);
 
 
@@ -301,6 +416,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             state.putInt("numberOfSelectedevents", countevent);
             state.putParcelableArrayList("eventsArray", listEvent);
             state.putString("user", username);
+        state.putBoolean("hideOptions", hideOptions);
 
 
     }
@@ -364,9 +480,18 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         return thumbnail;
     }
 
+    private void hideOption(int id){
+        MenuItem item=menu.findItem(id);
+        item.setVisible(false);
+    }
+    private void showOption(int id){
+        MenuItem item=menu.findItem(id);
+        item.setVisible(false);
+    }
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        this.menu=menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.contxt_menu, menu);
         fab.setVisibility(View.INVISIBLE);
@@ -453,6 +578,30 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         if(mactionMode==null){
             mactionMode=startSupportActionMode(this);
+            int size=0;
+            for (int i = selectionevents.length-1; i >=0; i--) {
+                if (selectionevents[i]) {
+                    size++;
+                }
+            }
+            final int[] eventtodelete= new int[size];
+            int j=0;
+            for (int i = 0; i <selectionevents.length; i++){
+                if(selectionevents[i]){
+
+                    eventtodelete[j]=i;
+                    j++;
+                }
+            }
+            for(int k=0;k<eventtodelete.length;k++){
+                if(!listEvent.get(eventtodelete[k]).creator.equals(userLocalStore.getLoggedInUser().username)){
+                    hideOption(R.id.menu_delete);
+                    hideOptions=true;
+                    break;
+                }
+
+            }
+
         }
 
         if(countevent!=0){
@@ -460,6 +609,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             fab.setVisibility(View.INVISIBLE);
 
         }else {
+            hideOptions=false;
+            showOption(R.id.menu_delete);
             mactionMode.finish();
             fab.setVisibility(View.VISIBLE);
             mactionMode=null;
@@ -506,5 +657,29 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         });
     }
 
+
+    private void showFilterPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        // Inflate the menu from xml
+        popup.getMenuInflater().inflate(R.menu.popupmenu, popup.getMenu());
+        // Setup menu item selection
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_keyword:
+                        Toast.makeText(CentralPageActivity.this, "share", Toast.LENGTH_SHORT).show();
+                        return true;
+                    case R.id.menu_popularity:
+                        Toast.makeText(CentralPageActivity.this, "delete!", Toast.LENGTH_SHORT).show();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+        // Handle dismissal with: popup.setOnDismissListener(...);
+        // Show the menu
+        popup.show();
+    }
 
 }

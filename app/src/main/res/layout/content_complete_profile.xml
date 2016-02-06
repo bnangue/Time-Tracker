@@ -16,6 +16,8 @@
         android:id="@+id/buttonsaveCompleteprofile"
         android:layout_marginRight="53dp"
         android:layout_marginEnd="53dp"
+        style="@style/buttondelete"
+
         android:onClick="buttonSaveCompleteprofile"
         android:layout_marginBottom="100dp"
         android:layout_alignParentBottom="true"
@@ -26,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="cancel"
-        style="?android:attr/borderlessButtonStyle"
+        style="@style/buttondelete"
         android:onClick="buttonCancelCompleteprofile"
         android:id="@+id/buttoncancelCompleteprofile"
         android:layout_alignBaseline="@+id/buttonsaveCompleteprofile"

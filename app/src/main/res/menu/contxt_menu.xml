@@ -14,4 +14,10 @@
         app:showAsAction="ifRoom|withText"
         android:title="@string/menu_share"
         android:icon="@android:drawable/ic_menu_share"/>
+    <item
+        android:id="@+id/menu_download"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/menu_download"
+        android:icon="@mipmap/ic_download"/>
 </menu>

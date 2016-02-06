@@ -44,7 +44,7 @@
             android:orientation="vertical"
             android:id="@+id/linearlayoutlistview"
             android:layout_below="@+id/userheadaer"
-            android:layout_above="@+id/buttonsetNewEntry">
+            >
 
             <ListView
                 android:id="@+id/listviewdetails"
@@ -69,7 +69,7 @@
             android:layout_width="280dp"
             android:layout_height="120dp"
             android:id="@+id/profilebox"
-            android:background="@color/material_blue_grey_800"
+            android:background="@color/cellSelected"
             android:padding="2dp"
             >
 
@@ -79,7 +79,7 @@
                 app:civ_border="true"
                 app:civ_border_width="4dp"
                 app:civ_border_color="#ffff"
-                android:id="@+id/avatar"
+                android:id="@+id/avatarfriend"
                 android:src="@mipmap/ic_launcher"
                 android:layout_toLeftOf="@+id/linearLayout"
                 android:layout_alignParentLeft="true"

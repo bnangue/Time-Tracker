@@ -77,7 +77,7 @@
                 app:civ_border="true"
                 app:civ_border_width="4dp"
                 app:civ_border_color="#ffff"
-                android:id="@+id/avatar"
+                android:id="@+id/avatarfriend"
                 android:src="@mipmap/ic_launcher"
                 android:layout_toLeftOf="@+id/linearLayout"
                 android:layout_alignParentLeft="true"

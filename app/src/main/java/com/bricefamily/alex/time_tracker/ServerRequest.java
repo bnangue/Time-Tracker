@@ -45,21 +45,30 @@ public class ServerRequest {
 
     }
 
+
     public void deleteEvents(EventObject eventObject,GetEventsCallbacks callbacks,String hash){
+        progressDialog.setTitle("Deleting record...");
+
         progressDialog.show();
         new DeleteEventsAsynckTasks(eventObject,callbacks,hash).execute();
     }
     public void updateEvents(EventObject eventObject,GetEventsCallbacks callBacks,String hash){
+        progressDialog.setTitle("Updating record...");
+
         progressDialog.show();
         new UpdateEventsAsynckTacks(eventObject,callBacks,hash).execute();
     }
 
 
     public void fetchAllevents(GetEventsCallbacks callbacks){
+        progressDialog.setTitle("Downloading data...");
+
         progressDialog.show();
         new FetchAllEventsAsynckTacks(callbacks).execute();
     }
     public void createEventinBackground(EventObject eventObject, GetEventsCallbacks callbacks){
+        progressDialog.setTitle("Record in creation...");
+
         progressDialog.show();
         new StoreEventsAsynckTacks(eventObject,callbacks).execute();
 
@@ -513,6 +522,8 @@ public class ServerRequest {
             return line;
         }
     }
+
+
 
 
 

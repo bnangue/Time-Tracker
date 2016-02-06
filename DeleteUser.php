@@ -5,11 +5,9 @@ if(!$con){
   die("Connection failed: " . mysqli_connect_error());
 }
     $username=$_POST["username"];   
+     
    
-   $password=$_POST["password"];
-  
-   
-   $statement= "DELETE FROM Users WHERE username='$username' AND password ='$password'";
+   $statement= "DELETE ProfilePictures,Users FROM ProfilePictures,Users WHERE Users.username=ProfilePictures.username AND Users.username='$username'";
    if(mysqli_query($con, $statement)){
     echo "User successfully deleted";
    }else{ 

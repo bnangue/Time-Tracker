@@ -44,6 +44,21 @@ public class ServerRequestUser {
         progressDialog.setMessage("please wait.");
     }
 
+    public  void updtaestatus(User user , GetUserCallbacks callbacks){
+        progressDialog.setTitle("Logging...");
+        progressDialog.show();
+        new UpdateUserStatusAsynckTacks(user ,callbacks).execute();
+    }
+    public void fetchallUsers(GetUserCallbacks callbacks){
+        progressDialog.setTitle("Loading...");
+        progressDialog.show();
+        new FetchAllUsersAsynckTacks(callbacks).execute();
+    }
+    public void deleteAlleventfromUser(User user , GetEventsCallbacks callbacks){
+        progressDialog.setTitle("Deleting all your records...");
+        progressDialog.show();
+        new DeleteAllEventsOnAccountDeletedAsynckTasks(user,callbacks).execute();
+    }
     public void deleteUser(User user,GetUserCallbacks callbacks){
         progressDialog.setTitle("Deleting all your data...");
 
@@ -63,6 +78,8 @@ public class ServerRequestUser {
         new FetchUserPictureAsynckTacks(userProfilePicture,callBacks).execute();
 
     }
+
+
     public  void saveprofilepicture(UserProfilePicture userProfilePicture,GetImageCallBacks callBacks){
         progressDialog.setTitle("Saving your Profile picture...");
 
@@ -541,6 +558,73 @@ public class ServerRequestUser {
     }
 
 
+    public class UpdateUserStatusAsynckTacks extends AsyncTask<Void,Void,String>
+    {
+
+        User user;
+        GetUserCallbacks getUserCallbacks;
+
+        public UpdateUserStatusAsynckTacks(User user, GetUserCallbacks callbacks){
+            this.getUserCallbacks=callbacks;
+            this.user=user;
+        }
+        @Override
+        protected void onPostExecute(String reponse) {
+            progressDialog.dismiss();
+            getUserCallbacks.deleted(reponse);
+            super.onPostExecute(reponse);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            String line="";
+            URL url;
+            HttpURLConnection urlConnection;
+            try {
+                url=new URL(SERVER_ADDRESS + "UpdateOnlineStatus.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                String data =URLEncoder.encode("email","UTF-8")+"="+URLEncoder.encode(user.email,"UTF-8")+"&"+
+                        URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(String.valueOf(user.password.hashCode()),"UTF-8")
+                        +"&"+
+                        URLEncoder.encode("onlineStatus","UTF-8")+"="+URLEncoder.encode(String.valueOf(user.status),"UTF-8");
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+
+                int responsecode=urlConnection.getResponseCode();
+                if(responsecode==HttpURLConnection.HTTP_OK){
+                    InputStream in =urlConnection.getInputStream();
+
+                    BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                    StringBuilder bld =new StringBuilder();
+                    String il;
+                    while((il=reader.readLine())!=null){
+                        bld.append(il);
+                    }
+                    line=bld.toString();
+                }else{
+                    line="Error";
+                }
+
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return line;
+        }
+    }
+
     public String getStringImage(Bitmap bmp){
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -569,5 +653,174 @@ public class ServerRequestUser {
     {
         byte[] decodedByte = Base64.decode(input, 0);
         return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
+    }
+
+    public class DeleteAllEventsOnAccountDeletedAsynckTasks extends AsyncTask<Void,Void,String>{
+
+        User user;
+        GetEventsCallbacks eventsCallbacks;
+
+        public DeleteAllEventsOnAccountDeletedAsynckTasks(User user, GetEventsCallbacks callbacks){
+            this.eventsCallbacks=callbacks;
+            this.user=user;
+        }
+        @Override
+        protected void onPostExecute(String aVoid) {
+            progressDialog.dismiss();
+            eventsCallbacks.updated(aVoid);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            ArrayList<Pair<String,String>> data=new ArrayList<>();
+
+            data.add(new Pair<String, String>("eventCreator", user.username));
+
+
+
+            URL url;
+            String line=null;
+            HttpURLConnection urlConnection=null;
+            try {
+
+                byte[] postData= getData(data).getBytes("UTF-8");
+                url=new URL(SERVER_ADDRESS + "DeleteEventsOnAccountDeleted.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", String.valueOf(postData.length));
+                urlConnection.setDoOutput(true);
+                urlConnection.getOutputStream().write(postData);
+
+                urlConnection.getOutputStream().close();
+                int responsecode=urlConnection.getResponseCode();
+                if(responsecode==HttpURLConnection.HTTP_OK){
+                    InputStream in =urlConnection.getInputStream();
+
+                    BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                    StringBuilder bld =new StringBuilder();
+                    String il;
+                    while((il=reader.readLine())!=null){
+                        bld.append(il);
+                    }
+                    line=bld.toString();
+                }else{
+                    line="Error";
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return line;
+        }
+    }
+
+
+    public class FetchAllUsersAsynckTacks extends AsyncTask<Void,Void,ArrayList<User>> {
+
+        GetUserCallbacks userCallbacks;
+
+
+        public FetchAllUsersAsynckTacks(GetUserCallbacks callbacks) {
+            this.userCallbacks = callbacks;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<User> returnedevents) {
+            progressDialog.dismiss();
+            userCallbacks.userlist(returnedevents);
+            super.onPostExecute(returnedevents);
+        }
+
+        @Override
+        protected ArrayList<User> doInBackground(Void... params) {
+
+            ArrayList<User> returnedEvents=new ArrayList<>();
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try {
+                url=new URL(SERVER_ADDRESS + "FetchAllUserAndPictures.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+                JSONArray jsonArray= new JSONArray(respons);
+                returnedEvents= getDetails(jsonArray);
+
+
+                // fetch data to a jason object
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
+            }
+
+            return returnedEvents;
+        }
+
+
+    }
+
+    public ArrayList<User> getDetails(JSONArray jsonArray){
+        ArrayList<User> events=new ArrayList<>();
+
+        try {
+
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jo_inside = jsonArray.getJSONObject(i);
+
+                String username = jo_inside.getString("username");
+                String email = jo_inside.getString("email");
+                String password = jo_inside.getString("password");
+                String firstname = jo_inside.getString("firstname");
+                String lastname = jo_inside.getString("lastname");
+                int  status = jo_inside.getInt("onlineStatus");
+
+
+                User  object =new User(username, email, password, firstname,
+                        lastname,status);
+
+                events.add(object);
+
+
+            }
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return events;
+
+    }
+
+    private int getstatusInteger(boolean status){
+        if(status){
+            return 1;
+
+        }else {
+            return 0;
+        }
     }
 }

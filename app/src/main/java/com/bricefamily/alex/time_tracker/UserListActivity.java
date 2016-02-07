@@ -1,10 +1,14 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.content.Intent;
+import android.support.v4.app.Fragment;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
@@ -127,10 +131,10 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
         // countevent=countevent+1;
         // selected(countevent, selectionevents);
         // centralPageAdapter.notifyDataSetChanged();
-        showFilterPopup(v);
+        showFilterPopup(v,pos);
         return true;
     }
-    private void showFilterPopup(View v) {
+    private void showFilterPopup(View v, final int position) {
         PopupMenu popup = new PopupMenu(this, v);
         // Inflate the menu from xml
         popup.getMenuInflater().inflate(R.menu.popupmenu, popup.getMenu());
@@ -138,11 +142,13 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.menu_keyword:
+                    case R.id.menu_follow:
                         Toast.makeText(UserListActivity.this, "share", Toast.LENGTH_SHORT).show();
                         return true;
-                    case R.id.menu_popularity:
-                        Toast.makeText(UserListActivity.this, "delete!", Toast.LENGTH_SHORT).show();
+                    case R.id.menu_profile:
+                        Intent intent=new Intent(UserListActivity.this,ViewFriendActivity.class);
+                        intent.putExtra("user",userArrayList.get(position));
+                        startActivity(intent);
                         return true;
                     default:
                         return false;
@@ -156,6 +162,6 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+        Toast.makeText(getApplicationContext(),"User "+ userArrayList.get(position).username +" selected",Toast.LENGTH_SHORT).show();
     }
 }

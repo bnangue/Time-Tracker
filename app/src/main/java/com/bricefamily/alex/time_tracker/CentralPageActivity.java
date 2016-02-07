@@ -350,6 +350,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
             case "About":
+                startActivity(new Intent(CentralPageActivity.this,GCMessagingActivity.class));
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;

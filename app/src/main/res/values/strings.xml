@@ -25,4 +25,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_user_list">UserListActivity</string>
+    <string name="title_activity_gcmessaging">GCMessagingActivity</string>
+    <string name="title_activity_gmc2">GMC2Activity</string>
+
+
 </resources>

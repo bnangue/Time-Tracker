@@ -7,7 +7,7 @@ import com.bricefamily.alex.time_tracker.Config;
 import com.bricefamily.alex.time_tracker.User;
 
 import org.codehaus.jackson.map.ObjectMapper;
-
+import com.bricefamily.alex.time_tracker.GetUserCallbacks;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -92,82 +92,8 @@ public class POST2GCM{
         return reponse;
     }
 
-    public static String postToreggister(String redId, String username , String email){
 
-        String reponse=null;
-        HttpURLConnection urlConnection;
-        try{
-
-            // 1. URL
-            URL url = new URL("http://time-tracker.comlu.com/reggister.php");
-
-            // 2. Open connection
-            urlConnection=(HttpURLConnection)url.openConnection();
-//                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
-//                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setDoOutput(true);
-            urlConnection.setDoInput(true);
-
-            OutputStream out=urlConnection.getOutputStream();
-            BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
-            String data = URLEncoder.encode("gcm_regid", "UTF-8")+"="+URLEncoder.encode(redId,"UTF-8")+"&"+
-                    URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(username,"UTF-8")+"&"+
-                    URLEncoder.encode("email","UTF-8")+"="+URLEncoder.encode(email,"UTF-8");
-            buff.write(data);
-            buff.flush();
-            buff.close();
-            out.close();
-
-            // 6. Get the response
-            int responseCode = urlConnection.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(urlConnection.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            reponse=response.toString();
-            in.close();
-
-            // 7. Print result
-            System.out.println(response.toString());
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return reponse;
-    }
-
-    public class Post2GCMinnBackground  extends AsyncTask<Object,Void,String>{
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-
-        }
-
-        @Override
-        protected String doInBackground(Object... params) {
-            //String apikey=(String)params[0];
-            // Content content=(Content)params[1];
-            //String s= post(apikey,content);
-            String redId=(String)params[0];
-            String username=(String)params[1];
-            String email=(String)params[2];
-
-            String s= postToreggister(redId, username,email);
-            return s;
-        }
-    }
-
-
+    //post to google cloud messaging
     public static class PostGCMBackgroundTasck  extends AsyncTask<Object,Void,String>{
         @Override
         protected void onPostExecute(String s) {
@@ -253,6 +179,8 @@ public class POST2GCM{
         }
         return reponse;
     }
+
+
 
 
 }

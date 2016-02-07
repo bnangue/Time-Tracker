@@ -2,11 +2,14 @@ package com.bricefamily.alex.time_tracker;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * Created by alex on 16.01.2016.
  */
 public class UserLocalStore {
+
+    private int appVersion;
 
     public static final String SP_NAME="userDetails";
     SharedPreferences userLocalDataBase;
@@ -37,6 +40,23 @@ public class UserLocalStore {
 
     }
 
+    public void setUserGCMregId(String regId,int appversion){
+        appVersion=appversion;
+        SharedPreferences.Editor editor=userLocalDataBase.edit();
+        editor.putString("registration_id", regId);
+        editor.putInt("appVersion", appVersion);
+        editor.apply();
+
+    }
+    public String getUserRegistrationId() {
+        String registrationId = userLocalDataBase.getString("registration_id", "");
+        if (registrationId.isEmpty()) {
+            return "";
+        }
+        //int registeredVersion = userLocalDataBase.getInt("appVersion", Integer.MIN_VALUE);
+
+        return registrationId;
+    }
     public void clearUserData(){
         SharedPreferences.Editor spEditor=userLocalDataBase.edit();
         spEditor.clear();

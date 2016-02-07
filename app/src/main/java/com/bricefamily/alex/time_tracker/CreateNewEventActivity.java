@@ -24,6 +24,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bricefamily.alex.time_tracker.com.bricefamily.alex.app.gcm.server.App;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,6 +38,7 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
     private String titelstr,detailsstr,notestr,creatornamestr,datestr,status,currenttimestr;
     EventObject eventObject;
     DateEventObject dateEventObject;
+    UserLocalStore userLocalStore;
 
 
     @Override
@@ -43,6 +46,8 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_event);
         prepareView();
+
+        userLocalStore=new UserLocalStore(this);
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("HH:mm");
@@ -140,6 +145,14 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
 
             @Override
             public void updated(String reponse) {
+
+                if(reponse.contains("Event added successfully")){
+                    User user=userLocalStore.getLoggedInUser();
+                    String registrationId=userLocalStore.getUserRegistrationId();
+
+                    String[] args={registrationId,user.username,user.email,"New Event","new Event added by "+user.username+" .Have a look!"};
+                    App.main(args);
+                }
 
             }
         });

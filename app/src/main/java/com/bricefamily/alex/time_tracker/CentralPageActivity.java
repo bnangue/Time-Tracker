@@ -341,6 +341,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         switch (titel){
             case "Home":
+                String regid=userLocalStore.getUserRegistrationId();
+                Toast.makeText(getApplicationContext(),regid,Toast.LENGTH_SHORT).show();
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;

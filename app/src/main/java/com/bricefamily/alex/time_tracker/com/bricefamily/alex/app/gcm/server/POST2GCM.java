@@ -23,7 +23,7 @@ import java.net.URLEncoder;
 /**
  * Created by bricenangue on 06/02/16.
  */
-public class POST2GCM extends AsyncTask<Object,Void,String>{
+public class POST2GCM{
 
 
 
@@ -44,7 +44,7 @@ public class POST2GCM extends AsyncTask<Object,Void,String>{
 
             // 4. Set the headers
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "key="+apiKey);
+            conn.setRequestProperty("Authorization", "key=" + apiKey);
 
             conn.setDoOutput(true);
 
@@ -145,27 +145,114 @@ public class POST2GCM extends AsyncTask<Object,Void,String>{
         }
         return reponse;
     }
-    @Override
-    protected void onPostExecute(String s) {
-        super.onPostExecute(s);
-        try {
-            System.out.println(s);
-        }catch (Exception e){
+
+    public class Post2GCMinnBackground  extends AsyncTask<Object,Void,String>{
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
 
         }
-        System.out.println(s);
+
+        @Override
+        protected String doInBackground(Object... params) {
+            //String apikey=(String)params[0];
+            // Content content=(Content)params[1];
+            //String s= post(apikey,content);
+            String redId=(String)params[0];
+            String username=(String)params[1];
+            String email=(String)params[2];
+
+            String s= postToreggister(redId, username,email);
+            return s;
+        }
     }
 
-    @Override
-    protected String doInBackground(Object... params) {
-        //String apikey=(String)params[0];
-      // Content content=(Content)params[1];
-       //String s= post(apikey,content);
-        String redId=(String)params[0];
-        String username=(String)params[1];
-        String email=(String)params[2];
 
-        String s= postToreggister(redId, username,email);
-        return s;
+    public static class PostGCMBackgroundTasck  extends AsyncTask<Object,Void,String>{
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+        }
+
+        @Override
+        protected String doInBackground(Object... params) {
+            String apiKey=(String)params[0];
+           Content content=(Content)params[1];
+            //String s= post(apikey,content);
+            //String redId=(String)params[0];
+            //String username=(String)params[1];
+           // String email=(String)params[2];
+
+            String s= postTask(apiKey, content);
+            return s;
+        }
     }
+    public static String postTask(String apiKey, Content content){
+
+        String reponse=null;
+        try{
+
+            // 1. URL
+            URL url = new URL("https://android.googleapis.com/gcm/send");
+
+            // 2. Open connection
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            // 3. Specify POST method
+            conn.setRequestMethod("POST");
+
+            // 4. Set the headers
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "key=" + apiKey);
+
+            conn.setDoOutput(true);
+            OutputStream out =conn.getOutputStream();
+
+            // 5. Add JSON data into POST request body
+
+            //`5.1 Use Jackson object mapper to convert Contnet object into JSON
+            ObjectMapper mapper = new ObjectMapper();
+
+            // 5.2 Get connection output stream
+            DataOutputStream wr = new DataOutputStream(out);
+
+
+            // 5.3 Copy Content "JSON" into
+            mapper.writeValue(wr, content);
+
+            // 5.4 Send the request
+            wr.flush();
+
+            // 5.5 close
+            wr.close();
+
+            // 6. Get the response
+            int responseCode = conn.getResponseCode();
+            System.out.println("\nSending 'POST' request to URL : " + url);
+            System.out.println("Response Code : " + responseCode);
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            reponse=response.toString();
+            in.close();
+
+            // 7. Print result
+            System.out.println(response.toString());
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return reponse;
+    }
+
+
 }

@@ -58,7 +58,7 @@ public class GCMessagingActivity extends ActionBarActivity implements View.OnCli
 
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-            regid = getRegistrationId(getApplicationContext());
+            regid = userLocalStore.getUserRegistrationId();
             if(!regid.isEmpty()){
                 fab.setEnabled(false);
             }else{
@@ -117,18 +117,16 @@ public class GCMessagingActivity extends ActionBarActivity implements View.OnCli
                     msg = "Device registered, registration ID=" + regid;
                     Log.i("GCM", msg);
 
-                    storeRegistrationId(getApplicationContext(),regid);
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
 
                 }
-                return msg;
+                return regid;
             }
 
             @Override
             protected void onPostExecute(String msg) {
-                String[] args={regid,user.username,user.email};
-                App.main(args);
+                userLocalStore.setUserGCMregId(regid,appVersion);
                 redId.setText(msg+user.username+user.email);
             }
         }.execute(null, null, null);
@@ -177,6 +175,8 @@ public class GCMessagingActivity extends ActionBarActivity implements View.OnCli
         }
         return registrationId;
     }
+
+
     private SharedPreferences getGCMPreferences(Context context) {
         // This sample app persists the registration ID in shared preferences, but
         // how you store the regID in your app is up to you.

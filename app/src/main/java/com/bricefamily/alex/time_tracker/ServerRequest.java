@@ -151,7 +151,7 @@ public class ServerRequest {
     }
 
 
-    public class StoreEventsAsynckTacks extends AsyncTask<Void,Void,Void>{
+    public class StoreEventsAsynckTacks extends AsyncTask<Void,Void,String>{
 
         EventObject eventObject;
         GetEventsCallbacks eventsCallbacks;
@@ -161,15 +161,16 @@ public class ServerRequest {
             this.eventObject=eventObject;
         }
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(String aVoid) {
             progressDialog.dismiss();
-            eventsCallbacks.done(null);
+            eventsCallbacks.updated(aVoid);
             super.onPostExecute(aVoid);
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
 
+            String reponse=null;
             ArrayList<Pair<String,String>> data=new ArrayList<>();
             data.add(new Pair<String, String>("eventTitel", eventObject.titel));
             data.add(new Pair<String, String>("eventDetails",eventObject.infotext));
@@ -196,18 +197,21 @@ public class ServerRequest {
                 urlConnection.setDoOutput(true);
                 urlConnection.getOutputStream().write(postData);
 
-                Reader reader= new BufferedReader(new InputStreamReader(urlConnection.getInputStream(),"UTF-8"));
-                StringBuilder bld =new StringBuilder();
-                String line=null;
-                for(int c=reader.read();c!=-1;c=reader.read()){
-                    bld.append(c);
-                }
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(urlConnection.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
 
-                line=bld.toString();
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                reponse=response.toString();
+
+                in.close();
             }catch (Exception e){
                 e.printStackTrace();
             }
-            return null;
+            return reponse;
         }
     }
 

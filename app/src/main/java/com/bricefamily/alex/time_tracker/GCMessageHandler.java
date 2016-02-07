@@ -24,12 +24,11 @@ public class GCMessageHandler extends IntentService {
      * @param name Used to name the worker thread, important only for debugging.
      */
 
-    Notification noti;
     NotificationManager nmgr;
     public static final int NOTIFICATION_ID = 0;
 
     NotificationCompat.Builder mBuilder;
-    String mes;
+    String mes,title;
     private Handler handler;
     public GCMessageHandler() {
         super("GcmMessageHandler");
@@ -44,7 +43,7 @@ public class GCMessageHandler extends IntentService {
         mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.colornfo)
-                        .setContentTitle(mes)
+                        .setContentTitle(title)
                         .setContentText(mes);
         Intent intent = new Intent(this,CentralPageActivity.class);
         // The stack builder object will contain an artificial back stack for the
@@ -74,8 +73,10 @@ public class GCMessageHandler extends IntentService {
         // in your BroadcastReceiver.
         String messageType = gcm.getMessageType(intent);
 
-        mes = extras.getString("title");
+        title = extras.getString("title");
+        mes=extras.getString("message");
         mBuilder.setContentText(mes);
+        mBuilder.setContentTitle(title);
         showToast();
         Log.i("GCM", "Received : (" + messageType + ")  " + extras.getString("title"));
 

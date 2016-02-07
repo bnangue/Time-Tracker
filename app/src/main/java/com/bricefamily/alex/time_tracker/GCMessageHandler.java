@@ -45,14 +45,16 @@ public class GCMessageHandler extends IntentService {
                         .setSmallIcon(R.drawable.colornfo)
                         .setContentTitle(title)
                         .setContentText(mes);
-        Intent intent = new Intent(this,CentralPageActivity.class);
+        mBuilder.setAutoCancel(true);
+
+        Intent intent = new Intent(this,LoginActivity.class);
         // The stack builder object will contain an artificial back stack for the
 // started Activity.
 // This ensures that navigating backward from the Activity leads out of
 // your application to the Home screen.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(CentralPageActivity.class);
+        stackBuilder.addParentStack(LoginActivity.class);
 // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(intent);
         PendingIntent resultPendingIntent =
@@ -87,7 +89,6 @@ public class GCMessageHandler extends IntentService {
     public void showToast(){
         handler.post(new Runnable() {
             public void run() {
-                Toast.makeText(getApplicationContext(), mes, Toast.LENGTH_LONG).show();
                 nmgr.notify(NOTIFICATION_ID, mBuilder.build());
 
             }

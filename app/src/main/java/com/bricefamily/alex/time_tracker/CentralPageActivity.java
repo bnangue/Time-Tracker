@@ -393,7 +393,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(getApplicationContext(),"item "+ listEvent.get(position).titel,Toast.LENGTH_SHORT).show();
+
         Intent intent=new Intent(CentralPageActivity.this,DetailsEventsActivity.class);
         intent.putExtra("titel", listEvent.get(position).titel);
         intent.putExtra("textinfo", listEvent.get(position).infotext);

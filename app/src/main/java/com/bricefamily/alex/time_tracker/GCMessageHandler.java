@@ -45,6 +45,7 @@ public class GCMessageHandler extends IntentService {
                         .setSmallIcon(R.drawable.colornfo)
                         .setContentTitle(title)
                         .setContentText(mes);
+        mBuilder.setDefaults(NotificationCompat.DEFAULT_ALL);
         mBuilder.setAutoCancel(true);
 
         Intent intent = new Intent(this,LoginActivity.class);

@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -38,7 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class CompleteProfileActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener {
+public class CompleteProfileActivity extends ActionBarActivity implements View.OnClickListener, TextView.OnEditorActionListener {
 
     private int PICK_IMAGE_REQUEST = 1;
 
@@ -56,8 +57,6 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_complete_profile);
         prepareView();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         setViews();
 
         Bundle bundle=getIntent().getExtras();
@@ -110,14 +109,14 @@ public class CompleteProfileActivity extends AppCompatActivity implements View.O
             ab.setDisplayShowTitleEnabled(false);
             ab.setCustomView(view, params);
             ab.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.cellSelected)));
-        } catch (NullPointerException e) {
-            Log.w("ActionBar Error", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         try {
             //ab Android 5.0
             ab.setElevation(0);
-        } catch (NullPointerException e) {
-            Log.w("ActionBar Error", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }

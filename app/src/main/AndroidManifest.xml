@@ -88,6 +88,21 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
 
 
+        <activity
+            android:name=".AboutApplicationActivity"
+            android:label="@string/title_activity_user_list" />
+
+        <activity
+            android:name=".LiveChatActivity"
+            android:label="@string/title_activity_user_list" />
+        <activity
+            android:name=".ViewFriendActivity"
+            android:label="@string/title_activity_user_list" />
+
+
+
+
+
 
 
     </application>

@@ -5,9 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.bricefamily.alex.time_tracker.ProfileOverviewActivity">
+    tools:context="com.bricefamily.alex.time_tracker.AboutApplicationActivity">
 
-    <include layout="@layout/content_profile_overview" />
+
+    <include layout="@layout/content_about_application" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -15,7 +16,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:onClick="buttonOpencompleteProfilePressed"
-        android:src="@android:drawable/ic_menu_edit" />
+        android:src="@android:drawable/ic_dialog_email" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -44,6 +44,9 @@ public class ServerRequestUser {
         progressDialog.setMessage("please wait.");
     }
 
+    public void fetchUserGcmRegid(User user, GetUserCallbacks callbacks){
+        new FetchUserGcmRegIdAsynckTacks(user, callbacks).execute();
+    }
     public  void updtaestatus(User user , GetUserCallbacks callbacks){
         progressDialog.setTitle("Logging...");
         progressDialog.show();
@@ -624,6 +627,86 @@ public class ServerRequestUser {
             }
             return line;
         }
+    }
+
+
+    public class FetchUserGcmRegIdAsynckTacks extends AsyncTask<Void,Void,User> {
+        User user;
+        GetUserCallbacks userCallbacks;
+
+        public FetchUserGcmRegIdAsynckTacks(User user, GetUserCallbacks callbacks) {
+            this.user = user;
+            this.userCallbacks = callbacks;
+        }
+
+        @Override
+        protected void onPostExecute(User returneduser) {
+            progressDialog.dismiss();
+            userCallbacks.done(returneduser);
+            super.onPostExecute(returneduser);
+        }
+
+        @Override
+        protected User doInBackground(Void... params) {
+
+            User returneduser=null;
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try {
+                url=new URL(SERVER_ADDRESS + "FetchUserRegID.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+//                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+//                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                String data =URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(user.username,"UTF-8")+"&"+
+                        URLEncoder.encode("email","UTF-8")+"="+URLEncoder.encode(user.email,"UTF-8");
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+                JSONObject jsonObject= new JSONObject(respons);
+                if(jsonObject.length()==0){
+                    returneduser=null;
+                }else {
+                    String username=null;
+                    if(jsonObject.has("username")){
+                        username=jsonObject.getString("username");
+                        String regid=jsonObject.getString("gcm_regid");
+                        returneduser=new User(regid,username,user.email,null);
+                    }
+
+                }
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+
+            return returneduser;
+        }
+
+
     }
 
     public String getStringImage(Bitmap bmp){

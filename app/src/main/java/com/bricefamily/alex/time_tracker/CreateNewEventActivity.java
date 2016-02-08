@@ -140,13 +140,14 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
         serverRequest.createEventinBackground(eve, new GetEventsCallbacks() {
             @Override
             public void done(ArrayList<EventObject> returnedeventobject) {
-                showdialg(creatornamestr);
+
             }
 
             @Override
             public void updated(String reponse) {
 
                 if(reponse.contains("Event added successfully")){
+                    showdialg(creatornamestr);
                     serverRequest.fetchallgcmregistrationIds(new GetUserCallbacks() {
                         @Override
                         public void done(User returneduser) {
@@ -168,7 +169,7 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
                                     builder.append(reponse.get(i).regId).append(" ");
                                 }
                                 String registrationIds=builder.toString();
-                                
+
                                 String[] args={registrationIds,user.username,user.email,"New Event","new Event added by "+user.username+" .Have a look!"};
                                 App.main(args);
                             }

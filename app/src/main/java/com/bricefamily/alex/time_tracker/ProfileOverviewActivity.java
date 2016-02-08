@@ -32,10 +32,6 @@ public class ProfileOverviewActivity extends AppCompatActivity {
         user=userLocalStore.getLoggedInUser();
 
         setContentView(R.layout.activity_profile_overview);
-        prepareView();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
     }

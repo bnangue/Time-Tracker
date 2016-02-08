@@ -18,7 +18,6 @@ public class App {
 
         String apiKey = "AIzaSyAuskTOPN5tUYP0Z5sWJj_mMsax3oplHrQ";
         Content content = createContent();
-
         new POST2GCM.PostGCMBackgroundTasck().execute(apiKey,content);
     }
 
@@ -26,7 +25,11 @@ public class App {
 
         Content c = new Content();
 
-        c.addRegId(registerId);
+        String[] ids=registerId.split(" ");
+        for (int i=0;i<ids.length;i++){
+            c.addRegId(ids[i]);
+        }
+
         c.createData(titel, message);
 
         return c;

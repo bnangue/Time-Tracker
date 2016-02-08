@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,7 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-public class DetailsEventsActivity extends AppCompatActivity {
+public class DetailsEventsActivity extends ActionBarActivity {
 
     String titel,infotext,time,creator,day,month,year,hash;
     TextView titeltv,infotexttv,timetv,creatortv;
@@ -94,14 +95,14 @@ public class DetailsEventsActivity extends AppCompatActivity {
             ab.setDisplayShowTitleEnabled(false);
             ab.setCustomView(view, params);
             ab.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.cellSelected)));
-        } catch (NullPointerException e) {
-            Log.w("ActionBar Error", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         try {
             //ab Android 5.0
             ab.setElevation(0);
-        } catch (NullPointerException e) {
-            Log.w("ActionBar Error", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }

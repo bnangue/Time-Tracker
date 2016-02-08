@@ -9,7 +9,7 @@ import android.os.Parcelable;
  */
 public class User implements Parcelable {
     String username,email,
-            password,firstname,lastname;
+            password,firstname,lastname,regId;
     Bitmap picture;
     int status;
 
@@ -29,6 +29,17 @@ public class User implements Parcelable {
         this.username=username;
         this.picture=picture;
         this.status=status;
+    }
+    public User(String regId,String username,Bitmap picture){
+        this.username=username;
+        this.picture=picture;
+        this.regId=regId;
+    }
+    public User(String regId,String username,String email,String password){
+        this.username=username;
+        this.regId=regId;
+        this.email=email;
+        this.password=password;
     }
     public User(String username, String email, String password, String firstname, String lastname,int status) {
         this.username=username;

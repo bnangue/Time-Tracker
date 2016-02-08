@@ -341,8 +341,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         switch (titel){
             case "Home":
-                String regid=userLocalStore.getUserRegistrationId();
-                Toast.makeText(getApplicationContext(),regid,Toast.LENGTH_SHORT).show();
+
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
@@ -352,7 +351,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
             case "About":
-                startActivity(new Intent(CentralPageActivity.this,GCMessagingActivity.class));
+                startActivity(new Intent(CentralPageActivity.this,AboutApplicationActivity.class));
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
@@ -669,10 +668,10 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.menu_keyword:
+                    case R.id.menu_follow:
                         Toast.makeText(CentralPageActivity.this, "share", Toast.LENGTH_SHORT).show();
                         return true;
-                    case R.id.menu_popularity:
+                    case R.id.menu_profile:
                         Toast.makeText(CentralPageActivity.this, "delete!", Toast.LENGTH_SHORT).show();
                         return true;
                     default:

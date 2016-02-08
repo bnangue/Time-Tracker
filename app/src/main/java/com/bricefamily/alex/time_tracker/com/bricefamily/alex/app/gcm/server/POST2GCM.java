@@ -105,10 +105,6 @@ public class POST2GCM{
         protected String doInBackground(Object... params) {
             String apiKey=(String)params[0];
            Content content=(Content)params[1];
-            //String s= post(apikey,content);
-            //String redId=(String)params[0];
-            //String username=(String)params[1];
-           // String email=(String)params[2];
 
             String s= postTask(apiKey, content);
             return s;

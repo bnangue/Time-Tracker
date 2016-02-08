@@ -136,7 +136,7 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
         }
     }
     private void createEvents(EventObject eve){
-        ServerRequest serverRequest=new ServerRequest(this);
+        final ServerRequest serverRequest=new ServerRequest(this);
         serverRequest.createEventinBackground(eve, new GetEventsCallbacks() {
             @Override
             public void done(ArrayList<EventObject> returnedeventobject) {
@@ -147,11 +147,34 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
             public void updated(String reponse) {
 
                 if(reponse.contains("Event added successfully")){
-                    User user=userLocalStore.getLoggedInUser();
-                    String registrationId=userLocalStore.getUserRegistrationId();
+                    serverRequest.fetchallgcmregistrationIds(new GetUserCallbacks() {
+                        @Override
+                        public void done(User returneduser) {
 
-                    String[] args={registrationId,user.username,user.email,"New Event","new Event added by "+user.username+" .Have a look!"};
-                    App.main(args);
+                        }
+
+                        @Override
+                        public void deleted(String reponse) {
+
+                        }
+
+                        @Override
+                        public void userlist(ArrayList<User> reponse) {
+
+                            if(reponse.size()!=0){
+                                StringBuilder builder=new StringBuilder();
+                                User user=userLocalStore.getLoggedInUser();
+                                for(int i=0;i<reponse.size();i++){
+                                    builder.append(reponse.get(i).regId).append(" ");
+                                }
+                                String registrationIds=builder.toString();
+                                
+                                String[] args={registrationIds,user.username,user.email,"New Event","new Event added by "+user.username+" .Have a look!"};
+                                App.main(args);
+                            }
+                        }
+                    });
+
                 }
 
             }

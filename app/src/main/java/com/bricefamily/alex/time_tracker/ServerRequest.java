@@ -39,9 +39,8 @@ public class ServerRequest {
         progressDialog.setMessage("please wait.");
     }
 
-    public void fetchcurrentevent(EventObject eventObject,GetEventsCallbacks callbacks){
-        progressDialog.show();
-        new FetchCurrentEventAsynckTacks(eventObject,callbacks);
+    public void fetchallgcmregistrationIds(GetUserCallbacks callbacks){
+        new FetchAllGCMIDSAsynckTacks(callbacks).execute();
 
     }
 
@@ -529,6 +528,96 @@ public class ServerRequest {
 
 
 
+    public class FetchAllGCMIDSAsynckTacks extends AsyncTask<Void,Void,ArrayList<User>> {
+
+        GetUserCallbacks userCallbacks;
+
+
+        public FetchAllGCMIDSAsynckTacks( GetUserCallbacks callbacks) {
+            this.userCallbacks = callbacks;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<User> returnedusres) {
+            progressDialog.dismiss();
+            userCallbacks.userlist(returnedusres);
+            super.onPostExecute(returnedusres);
+        }
+
+        @Override
+        protected ArrayList<User> doInBackground(Void... params) {
+
+            ArrayList<User> returnedusres=new ArrayList<>();
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try {
+                url=new URL(SERVER_ADDRESS + "FetchAllUserGCMIds.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+                JSONArray jsonArray= new JSONArray(respons);
+                returnedusres= getAllIds(jsonArray);
+
+
+                // fetch data to a jason object
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
+            }
+
+            return returnedusres;
+        }
+
+
+    }
+
+    public ArrayList<User> getAllIds(JSONArray jsonArray){
+        ArrayList<User> usersids=new ArrayList<>();
+
+        try {
+
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jo_inside = jsonArray.getJSONObject(i);
+
+                String regid = jo_inside.getString("gcm_regid");
+                String username = jo_inside.getString("username");
+                String email = jo_inside.getString("email");
+
+                User  object =new User(regid, username, email,null);
+
+                usersids.add(object);
+
+
+            }
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return usersids;
+
+    }
 
 
 

@@ -9,14 +9,15 @@ $con=mysqli_connect("mysql12.000webhost.com","a5659879_brice","fXu*br5q","a56598
     mysqli_stmt_execute($statement);
    
    mysqli_stmt_store_result($statement);
-   mysqli_stmt_bind_result($statement,$UserID,$username,$email,$password,$firstname,$lastname);
-   
+   mysqli_stmt_bind_result($statement,$UserID,$username,$email,$password,$firstname,$lastname,$onlineStatus);
+
    $user=array();
    while(mysqli_stmt_fetch($statement))
    {
    $user[username]=$username;
    $user[email]=$email;
    $user[password]=$password;
+   $user[onlineStatus]=$onlineStatus;
    }
    
    echo json_encode($user);

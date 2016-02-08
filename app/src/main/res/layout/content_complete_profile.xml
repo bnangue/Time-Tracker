@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.bricefamily.alex.time_tracker.CompleteProfileActivity"
+    tools:showIn="@layout/activity_complete_profile"
+   >
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save change"
+        android:id="@+id/buttonsaveCompleteprofile"
+        android:layout_marginRight="53dp"
+        android:layout_marginEnd="53dp"
+        style="@style/buttondelete"
+
+        android:onClick="buttonSaveCompleteprofile"
+        android:layout_marginBottom="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="cancel"
+        style="@style/buttondelete"
+        android:onClick="buttonCancelCompleteprofile"
+        android:id="@+id/buttoncancelCompleteprofile"
+        android:layout_alignBaseline="@+id/buttonsaveCompleteprofile"
+        android:layout_alignBottom="@+id/buttonsaveCompleteprofile"
+        android:layout_alignLeft="@+id/editTextphonenumbCompleteprofile"
+        android:layout_alignStart="@+id/editTextphonenumbCompleteprofile" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Please complete your profile information"
+        android:id="@+id/textView2"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPostalAddress"
+        android:ems="10"
+        android:id="@+id/editTextAddress"
+        android:layout_marginTop="10dp"
+        android:hint="address postal"
+        android:layout_below="@+id/editTextageCompleteprofile"
+         />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="first name"
+        android:ems="10"
+        android:id="@+id/editTextfirstnameCompletprofile"
+        android:layout_below="@+id/imageViewprofilepic"
+        android:layout_marginTop="20dp"
+        android:layout_alignLeft="@+id/editTextAddress"
+        android:layout_alignStart="@+id/editTextAddress"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="lastame"
+        android:ems="10"
+        android:layout_marginTop="10dp"
+        android:id="@+id/editTextlastnameCompleteprofile"
+        android:layout_below="@+id/editTextfirstnameCompletprofile"
+        android:layout_alignLeft="@+id/editTextfirstnameCompletprofile"
+        android:layout_alignStart="@+id/editTextfirstnameCompletprofile" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:layout_marginTop="10dp"
+        android:id="@+id/editTextageCompleteprofile"
+        android:layout_below="@+id/editTextlastnameCompleteprofile"
+        android:layout_alignLeft="@+id/editTextlastnameCompleteprofile"
+        android:layout_alignStart="@+id/editTextlastnameCompleteprofile"
+        android:hint="age" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:ems="10"
+        android:layout_marginTop="10dp"
+        android:id="@+id/editTextphonenumbCompleteprofile"
+        android:layout_below="@+id/editTextAddress"
+        android:layout_alignLeft="@+id/editTextAddress"
+        android:layout_alignStart="@+id/editTextAddress"
+        android:hint="phone number" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="about"
+        android:id="@+id/textViewaboutCompleteprofile"
+        android:layout_below="@+id/buttoncancelCompleteprofile"
+        android:layout_centerHorizontal="true" />
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        app:civ_border="true"
+        app:civ_border_width="4dp"
+        app:civ_border_color="#ffff"
+        android:id="@+id/imageViewprofilepic"
+        android:layout_marginTop="10dp"
+        android:src="@mipmap/ic_launcher"
+        android:layout_below="@+id/textView2"
+        android:layout_toLeftOf="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
+
+        />
+
+
+
+</RelativeLayout>

@@ -12,9 +12,9 @@
         android:hint="E-mail"
         android:ems="10"
         android:id="@+id/editTextemail"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/textViewtitelmain"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="179dp"
+        android:layout_marginTop="9dp"
         android:layout_marginRight="35dp"
         android:layout_marginLeft="35dp"/>
 
@@ -27,7 +27,7 @@
         android:id="@+id/editTextpassword"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/editTextemail"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginRight="35dp"
         android:layout_marginLeft="35dp"/>
 
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:text="Log in"
         android:id="@+id/buttonlogin"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="24dp"
         android:layout_below="@+id/editTextpassword"
         style="?android:attr/borderlessButtonStyle"
         android:layout_centerHorizontal="true"
@@ -50,16 +50,16 @@
         android:layout_below="@+id/buttonlogin"
         style="?android:attr/borderlessButtonStyle"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="24dp"
         android:onClick="buttonCreateUserPressed"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Titel Seite"
-        android:id="@+id/textView"
+        android:id="@+id/textViewtitelmain"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="46dp" />
+        android:layout_marginTop="6dp" />
 </RelativeLayout>

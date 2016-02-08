@@ -32,25 +32,28 @@
         android:layout_marginLeft="35dp"/>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Log in"
+        style="@style/buttondelete"
+        android:backgroundTint="@color/cellSelected"
         android:id="@+id/buttonlogin"
         android:layout_marginTop="54dp"
         android:layout_below="@+id/editTextpassword"
-        style="?android:attr/borderlessButtonStyle"
         android:layout_centerHorizontal="true"
         android:onClick="buttonLoginPressed"/>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Create User"
+        style="@style/buttondelete"
+        android:backgroundTint="@color/cellSelected"
+
         android:id="@+id/buttoncreateuser"
         android:layout_below="@+id/buttonlogin"
-        style="?android:attr/borderlessButtonStyle"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="34dp"
         android:onClick="buttonCreateUserPressed"/>
 
     <TextView

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/tablerow">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:id="@+id/re"
+        android:layout_height="96dp"
+        >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Einkaufen"
+        android:id="@+id/itemTitel"
+        android:textStyle="bold"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:layout_above="@+id/itmeinfotext"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This is a sample text. Wir müssren zu globus einkauf..."
+        android:singleLine="false"
+        android:textSize="15sp"
+        android:textColor="#b6000000"
+        android:id="@+id/itmeinfotext"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/itemtime"
+        android:text="08:15"
+        android:textSize="12sp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:textSize="12sp"
+        android:id="@+id/itemcreator"
+        android:text="Jacqueline Akech"
+        android:layout_alignBaseline="@+id/itemtime"
+        android:layout_alignBottom="@+id/itemtime"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkBoxcentralpage"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            />
+    </RelativeLayout>
+</TableRow>

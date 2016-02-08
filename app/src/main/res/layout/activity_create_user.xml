@@ -23,7 +23,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:hint="Enter Your Name"
+        android:hint="Enter Your Userame"
         android:ems="10"
         android:id="@+id/editTextcreatename"
         android:layout_centerVertical="true"
@@ -60,13 +60,15 @@
         android:layout_marginLeft="35dp"/>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Create New User"
+        android:textSize="18sp"
+        style="@style/buttondelete"
+        android:backgroundTint="@color/cellSelected"
         android:id="@+id/buttoncreatenewuser"
         android:layout_marginTop="50dp"
         android:layout_below="@+id/editTextrepeatpassword"
-        style="?android:attr/borderlessButtonStyle"
         android:layout_centerHorizontal="true"
         android:onClick="buttonCreateNewAccountPressed"/>
 

@@ -1,9 +1,11 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -209,9 +211,32 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        PackageManager pm = getPackageManager();
+        ComponentName compName =
+                new ComponentName(getApplicationContext(),
+                        GCMBroadcastReceiver.class);
+        pm.setComponentEnabledSetting(
+                compName,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
+    }
+
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(broadcastReceiver);
+        PackageManager pm = getPackageManager();
+        ComponentName compName =
+                new ComponentName(getApplicationContext(),
+                        GCMBroadcastReceiver.class);
+        pm.setComponentEnabledSetting(
+                compName,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP);
+
+
     }
 
 
@@ -238,4 +263,5 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
         }
         return false;
     }
+
 }

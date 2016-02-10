@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -26,6 +30,9 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
     private String emailstr, passwordstr,repeatpasswordstr,usernamestr;
 
     private PasswordChecker pwChecker;
+    private UserLocalStore userLocalStore;
+    GoogleCloudMessaging gcm;
+    String regid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +40,7 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
         setContentView(R.layout.activity_create_user);
 
         prepareView();
+        userLocalStore=new UserLocalStore(this);
         pwChecker=new PasswordChecker();
         emailed=(EditText)findViewById(R.id.editTextcreateemail);
         usernameed=(EditText)findViewById(R.id.editTextcreatename);
@@ -42,12 +50,36 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
 
     }
 
+    public void storeregIdsMysql(User user){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.storeUserGcmIds(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+                if (reponse.contains("Registration id successfully saved")) {
+                    startActivity(new Intent(CreateUserActivity.this, LoginActivity.class));
+                }
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_create_user, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -73,6 +105,7 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
         if(pwChecker.checkIfValid(passwordstr,repeatpasswordstr)){
 
             User registeredData=new User(usernamestr,emailstr,passwordstr);
+
             register(registeredData);
 
         }else{
@@ -86,8 +119,9 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
         serverRequest.storeUserDataInBackground(registeredData, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
+                getRegId(registeredData);
 
-                    startActivity(new Intent(CreateUserActivity.this, LoginActivity.class));
+
                 }
 
             @Override
@@ -156,5 +190,34 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
             }
         }
             return false;
+    }
+
+    public void getRegId(final User registeredData){
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                try {
+                    if (gcm == null) {
+                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+                    }
+                    regid = gcm.register(Config.GCM_SENDER_ID);
+                    msg = "Device registered, registration ID=" + regid;
+                    Log.i("GCM", msg);
+
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+
+                }
+                return regid;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+
+                User user=new User(msg,registeredData.username,registeredData.email,null);
+                storeregIdsMysql(user);
+            }
+        }.execute(null, null, null);
     }
 }

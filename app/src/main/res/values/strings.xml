@@ -27,6 +27,21 @@
     <string name="title_activity_user_list">UserListActivity</string>
     <string name="title_activity_gcmessaging">GCMessagingActivity</string>
     <string name="title_activity_gmc2">GMC2Activity</string>
+    <string name="server_unregistered">unregisterd</string>
+    <string name="server_unregister_error">unregistered error</string>
+    <string name="server_register_error">registration error</string>
+    <string name="server_registered">registerd</string>
+    <string name="server_registering">registring</string>
+    <string name="title_activity_chat_main">ChatMainActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_chat_main_main">ChatMainMainActivity</string>
+    <string name="title_activity_grid_view_example">GridViewExample</string>
+    <string name="title_activity_send_push_notification">SendPushNotification</string>
+    <string name="title_activity_show_message">ShowMessage</string>
+    <string name="gcm_recoverable_error">error recovering gcm</string>
+    <string name="gcm_error">gcm error</string>
+    <string name="gcm_deleted">gcm delted</string>
+    <string name="gcm_unregistered">gcm unregisterd</string>
 
 
 </resources>

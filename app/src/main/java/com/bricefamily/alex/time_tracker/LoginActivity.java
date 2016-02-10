@@ -43,8 +43,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
     private UserLocalStore userLocalStore;
     UserProfilePicture userProfilePicture;
-    GoogleCloudMessaging gcm;
-    String regid;
+
 
 
     @Override
@@ -99,7 +98,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     @Override
     protected void onStart() {
         super.onStart();
-        if (authenticate() == true) {
+        if (authenticate()) {
             displayUserdetails();
             Bitmap bitmap= getThumbnail("profile.png");
             if(bitmap==null){
@@ -131,11 +130,20 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         emailstr = emailed.getText().toString();
         passwordstr = passworded.getText().toString();
 
-        User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
-        if(userLocalStore.getUserRegistrationId().isEmpty()|| userLocalStore.getUserRegistrationId()==null){
-            getRegId();
+        if(userLocalStore.getLoggedInUser().username.isEmpty()){
+            User user = new User(null, emailstr, passwordstr,1);
+            updatestatus(user);
+        }else{
+            User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
+            Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
+            if(userLocalStore.getUserRegistrationId().isEmpty()|| userLocalStore.getUserRegistrationId()==null){
+
+            }else {
+
+            }
+            updatestatus(user);
         }
-        updatestatus(user);
+
 
     }
 
@@ -144,14 +152,23 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         //logUserIn(returneduser);
         ServerRequestUser serverRequestUser=new ServerRequestUser(this);
         String deme = user.username;
+        String em = user.email;
+        String pw = user.password;
+
         serverRequestUser.fetchUserGcmRegid(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
                 if(returneduser!=null){
+                    String r=returneduser.regId;
                     if(returneduser.regId.equals(userLocalStore.getUserRegistrationId())){
                         logUserIn(user);
+                    }else {
+                        userLocalStore.setUserGCMregId(returneduser.regId,0);
+                        logUserIn(user);
                     }
-                }else{showdialg2();
+                }else{
+
+                    showdialg2();
                 }
             }
 
@@ -168,7 +185,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     }
     private void authenticateuser(final User user) {
         ServerRequestUser serverRequest = new ServerRequestUser(this);
-        String deme=user.username;
+        String deme=user.email;
         serverRequest.fetchUserDataInBackground(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
@@ -206,6 +223,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             public void deleted(String reponse) {
 
                 if (reponse.contains("Status successfully updated")) {
+
                     authenticateuser(user);
 
                 }
@@ -226,33 +244,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
     }
 
-    public void getRegId(){
-        new AsyncTask<Void, Void, String>() {
-            User user=userLocalStore.getLoggedInUser();
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg = "";
-                try {
-                    if (gcm == null) {
-                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-                    }
-                    regid = gcm.register(Config.GCM_SENDER_ID);
-                    msg = "Device registered, registration ID=" + regid;
-                    Log.i("GCM", msg);
 
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-
-                }
-                return regid;
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                userLocalStore.setUserGCMregId(regid,0);
-            }
-        }.execute(null, null, null);
-    }
     private void showdialg() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setMessage("Incorrect user data");

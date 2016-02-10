@@ -44,6 +44,10 @@ public class ServerRequestUser {
         progressDialog.setMessage("please wait.");
     }
 
+    public void storeUserGcmIds(User user, GetUserCallbacks callbacks){
+
+        new StoreUserGCMIdsAsynckTacks(user,callbacks).execute();
+    }
     public void fetchUserGcmRegid(User user, GetUserCallbacks callbacks){
         new FetchUserGcmRegIdAsynckTacks(user, callbacks).execute();
     }
@@ -897,6 +901,80 @@ public class ServerRequestUser {
         }
         return events;
 
+    }
+
+
+    public class StoreUserGCMIdsAsynckTacks extends AsyncTask<Void,Void,String>{
+
+        User user;
+        GetUserCallbacks userCallbacks;
+
+        public StoreUserGCMIdsAsynckTacks(User user, GetUserCallbacks callbacks){
+            this.user=user;
+            this.userCallbacks=callbacks;
+        }
+        @Override
+        protected void onPostExecute(String aVoid) {
+            progressDialog.dismiss();
+            userCallbacks.deleted(aVoid);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            ArrayList<Pair<String,String>> data=new ArrayList<>();
+            data.add(new Pair<String, String>("gcm_regid", user.regId));
+            data.add(new Pair<String, String>("username", user.username));
+            data.add(new Pair<String, String>("email",user.email));
+
+            String repomse=null;
+            URL url;
+            HttpURLConnection urlConnection=null;
+            try {
+
+                byte[] postData= getDataIds(data).getBytes("UTF-8");
+                url=new URL(SERVER_ADDRESS + "reggister.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", String.valueOf(postData.length));
+                urlConnection.setDoOutput(true);
+                urlConnection.getOutputStream().write(postData);
+
+                InputStream in =urlConnection.getInputStream();
+                BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                StringBuilder bld =new StringBuilder();
+                String il;
+                while((il=reader.readLine())!=null){
+                    bld.append(il);
+                }
+                repomse=bld.toString();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                if(urlConnection!=null){
+                    urlConnection.disconnect();
+                }
+            }
+            return repomse;
+        }
+    }
+    private String getDataIds(ArrayList<Pair<String,String>> values) throws UnsupportedEncodingException{
+        StringBuilder result=new StringBuilder();
+        for(Pair<String,String> pair : values){
+
+            if(result.length()!=0)
+
+                result.append("&");
+            result.append(URLEncoder.encode(pair.first, "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(pair.second, "UTF-8"));
+
+        }
+        return result.toString();
     }
 
     private int getstatusInteger(boolean status){

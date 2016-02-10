@@ -118,7 +118,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     private void displayUserdetails() {
         User user = userLocalStore.getLoggedInUser();
         emailed.setText(user.email);
-        passworded.setText(user.password);
+       // passworded.setText(user.password);
         userProfilePicture = new UserProfilePicture(user.username, null);
     }
 
@@ -173,7 +173,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
                 }else{
                     //regid speichern
                     getRegId(user);
-                    showdialg2();
+                    //showdialg2();
                 }
             }
 
@@ -200,6 +200,8 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             public void deleted(String reponse) {
                 if (reponse.contains("Registration id successfully saved")) {
                     logUserIn(user);
+                }else{
+                    showdialg2();
                 }
 
             }

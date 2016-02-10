@@ -25,7 +25,7 @@ public class LiveChatBroadcastReceiver extends WakefulBroadcastReceiver {
         Intent i = new Intent("CHAT_MESSAGE_RECEIVED");
         i.putExtra("message", extras.getString("message"));
         i.putExtra("sender", extras.getString("sender"));
-        i.putExtra("registration_ids", extras.getString("registrationSenderIDs"));
+        i.putExtra("registrationSenderIDs", extras.getString("registrationSenderIDs"));
 
         context.sendBroadcast(i);
 

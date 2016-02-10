@@ -1,19 +1,14 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,11 +19,12 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class UserListActivity extends ActionBarActivity implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+    ArrayList<User> userArrayListforGcm;
     ArrayList<User> userArrayList;
     ProfileListAdapter profileListAdapter;
+    UserLocalStore userLocalStore;
 
     int[] status ;
     private ListView listView;
@@ -36,10 +32,17 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
+        userLocalStore=new UserLocalStore(this);
         prepareView();
        Bundle extras=getIntent().getExtras();
         if(extras!=null){
-            userArrayList=extras.getParcelableArrayList("userlist");
+            userArrayListforGcm =extras.getParcelableArrayList("userlistforgcm");
+            userArrayList =extras.getParcelableArrayList("userlist");
+        }
+        else{
+            User u=userLocalStore.getLoggedInUser();
+            fetchuserlist(u);
+
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -50,10 +53,32 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
             }
         });
 
-        status=setstatuslist(userArrayList);
+        status=setstatuslist(userArrayList,userArrayListforGcm);
 
-       prepareListview(userArrayList,status);
+       prepareListview(userArrayListforGcm,status);
 
+    }
+
+    private void fetchuserlist(User user){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+                if (reponse.size() != 0) {
+                    userArrayListforGcm = reponse;
+                }
+            }
+        });
     }
 
     public void prepareView() {
@@ -108,13 +133,19 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
         }
     }
 
-    private int[] setstatuslist(ArrayList<User> list){
-        int[] status=new int[list.size()];
-        for(int i=0;i <list.size();i++){
-            if(list.get(i).status==0){
-                status[i]=0;
-            }else {
-                status[i]=1;
+    private int[] setstatuslist(ArrayList<User> list,ArrayList<User> gcmlist){
+        int[] status=new int[gcmlist.size()];
+        for(int i=0;i <gcmlist.size();i++){
+            for (int j=0;j<list.size();j++)
+            {
+                if(list.get(j).username.equals(gcmlist.get(i).username)){
+                    if(list.get(j).status==0){
+                        status[i]=0;
+                    }else {
+                        status[i]=1;
+                    }
+
+                }
             }
         }
         return status;
@@ -147,7 +178,7 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
                         return true;
                     case R.id.menu_profile:
                         Intent intent=new Intent(UserListActivity.this,ViewFriendActivity.class);
-                        intent.putExtra("user",userArrayList.get(position));
+                        intent.putExtra("user", userArrayListforGcm.get(position));
                         startActivity(intent);
                         return true;
                     default:
@@ -162,6 +193,20 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(getApplicationContext(),"User "+ userArrayList.get(position).username +" selected",Toast.LENGTH_SHORT).show();
+
+        if(status[position]!=0){
+            User reciever= userArrayListforGcm.get(position);
+            String recievername=reciever.username;
+            String reciverregId=reciever.regId;
+            Intent intent =new Intent(UserListActivity.this,LiveChatActivity.class);
+            intent.putExtra("recieverName",recievername);
+            intent.putExtra("recieverregId",reciverregId);
+            startActivity(intent);
+
+        }else{
+            Toast.makeText(getApplicationContext(),"User "+ userArrayListforGcm.get(position).username
+                    +" currently offline",Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

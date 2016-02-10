@@ -44,6 +44,11 @@ public class ServerRequestUser {
         progressDialog.setMessage("please wait.");
     }
 
+    public void fetchallUserForGcm(User user, GetUserCallbacks callbacks){
+        progressDialog.setTitle("Loading your friend list...");
+        progressDialog.show();
+        new FetchAllUserForGcmAsynckTacks(user,callbacks).execute();
+    }
     public void storeUserGcmIds(User user, GetUserCallbacks callbacks){
 
         new StoreUserGCMIdsAsynckTacks(user,callbacks).execute();
@@ -934,7 +939,7 @@ public class ServerRequestUser {
             try {
 
                 byte[] postData= getDataIds(data).getBytes("UTF-8");
-                url=new URL(SERVER_ADDRESS + "reggister.php");
+                url=new URL(SERVER_ADDRESS + "RegisterUserForGCM.php");
                 urlConnection=(HttpURLConnection)url.openConnection();
                 urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
                 urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
@@ -976,6 +981,109 @@ public class ServerRequestUser {
         }
         return result.toString();
     }
+
+
+    public class FetchAllUserForGcmAsynckTacks extends AsyncTask<Void,Void,ArrayList<User>> {
+        User user;
+        GetUserCallbacks userCallbacks;
+
+
+        public FetchAllUserForGcmAsynckTacks(User user,GetUserCallbacks callbacks) {
+            this.userCallbacks = callbacks;
+            this.user=user;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<User> returnedusres) {
+            progressDialog.dismiss();
+            userCallbacks.userlist(returnedusres);
+            super.onPostExecute(returnedusres);
+        }
+
+        @Override
+        protected ArrayList<User> doInBackground(Void... params) {
+
+            ArrayList<User> returnedusres=new ArrayList<>();
+            URL url;
+            String username= user.username;
+            HttpURLConnection urlConnection=null;
+            try {
+                url=new URL(SERVER_ADDRESS + "SelectUserForGCM.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                String data =URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(username,"UTF-8");
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+                JSONArray jsonArray= new JSONArray(respons);
+                returnedusres= getAllIds(jsonArray);
+
+
+                // fetch data to a jason object
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
+            }
+
+            return returnedusres;
+        }
+
+
+    }
+
+    public ArrayList<User> getAllIds(JSONArray jsonArray){
+        ArrayList<User> usersids=new ArrayList<>();
+
+        try {
+
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jo_inside = jsonArray.getJSONObject(i);
+
+                String regid = jo_inside.getString("gcm_regid");
+                String username = jo_inside.getString("username");
+                String email = jo_inside.getString("email");
+
+                User  object =new User(regid, username, email,null);
+
+                usersids.add(object);
+
+
+            }
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return usersids;
+
+    }
+
+
 
     private int getstatusInteger(boolean status){
         if(status){

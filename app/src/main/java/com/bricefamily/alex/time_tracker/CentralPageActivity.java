@@ -1,6 +1,7 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.app.ActionBar;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -33,6 +34,7 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -143,6 +145,12 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         if(bitmap!=null){
 
             profilePicture.setImageBitmap(bitmap);
+        }else{
+            if(username!=null){
+                UserProfilePicture u=new UserProfilePicture(username,null);
+                getUserPicture(u);
+            }
+
         }
         DrawerListAdapter adapter = new DrawerListAdapter(this, mNavItems);
         mDrawerList.setAdapter(adapter);
@@ -222,6 +230,51 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             }
         });
     }
+
+    void getUserPicture(final UserProfilePicture u){
+        if(u.username!=null|| !u.username.isEmpty()){
+
+            ServerRequestUser serverRequest=new ServerRequestUser(this);
+            serverRequest.fetchUserPicture(u, new GetImageCallBacks() {
+                @Override
+                public void done(String reponse) {
+
+                }
+
+                @Override
+                public void image(UserProfilePicture reponse) {
+                    if (reponse != null) {
+                        Bitmap bitmap = reponse.uProfilePicture;
+                        profilePicture.setImageBitmap(bitmap);
+                        storeimageLocaly(reponse.uProfilePicture);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "No Picture save for this user", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
+        }
+
+    }
+
+    private boolean  storeimageLocaly(Bitmap picture) {
+
+
+        FileOutputStream fos=null;
+        try {
+            fos=openFileOutput("profile.png", Context.MODE_PRIVATE);
+            picture.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+            return true;
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
     protected boolean onLongListItemClick(View v, int pos, long id) {
 
         showFilterPopup(v);
@@ -357,7 +410,12 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
             case "Group":
-                fetchuserlist();
+                if(username!=null|| !username.isEmpty()){
+                    User u=new User(username,"","");
+                    fetchuserlist(u);
+
+                }
+
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
@@ -366,9 +424,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
 
-    private void fetchuserlist(){
-        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
-        serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+    private void fetchuserlist(User user){
+        final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 
@@ -382,9 +440,32 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             @Override
             public void userlist(ArrayList<User> reponse) {
                 if (reponse.size() != 0) {
-                    Intent intent = new Intent(CentralPageActivity.this, UserListActivity.class);
-                    intent.putExtra("userlist", reponse);
-                    startActivity(intent);
+                    ArrayList<User> users = new ArrayList<User>();
+                    users=reponse;
+                    final ArrayList<User> finalUsers = users;
+                    serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+                        @Override
+                        public void done(User returneduser) {
+
+                        }
+
+                        @Override
+                        public void deleted(String reponse) {
+
+                        }
+
+                        @Override
+                        public void userlist(ArrayList<User> reponse) {
+
+                            if (reponse.size() != 0) {
+                                Intent intent = new Intent(CentralPageActivity.this, UserListActivity.class);
+                                intent.putExtra("userlistforgcm", finalUsers);
+                                intent.putExtra("userlist", reponse);
+                                startActivity(intent);
+                            }
+                        }
+                    });
+
                 }
             }
         });
@@ -670,10 +751,10 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_follow:
-                        Toast.makeText(CentralPageActivity.this, "share", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CentralPageActivity.this, "follow user", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.menu_profile:
-                        Toast.makeText(CentralPageActivity.this, "delete!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CentralPageActivity.this, "open profile!", Toast.LENGTH_SHORT).show();
                         return true;
                     default:
                         return false;

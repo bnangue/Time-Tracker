@@ -60,6 +60,7 @@ public class User implements Parcelable {
         firstname=in.readString();
         lastname=in.readString();
         status=in.readInt();
+        regId=in.readString();
 
 
     }
@@ -78,6 +79,7 @@ public class User implements Parcelable {
         dest.writeString(firstname);
         dest.writeString(lastname);
         dest.writeInt(status);
+        dest.writeString(regId);
 
     }
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {

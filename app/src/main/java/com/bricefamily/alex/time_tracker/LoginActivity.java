@@ -43,6 +43,8 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
     private UserLocalStore userLocalStore;
     UserProfilePicture userProfilePicture;
+    GoogleCloudMessaging gcm;
+    String regid;
 
 
 
@@ -135,7 +137,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             updatestatus(user);
         }else{
             User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
-            Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
             if(userLocalStore.getUserRegistrationId().isEmpty()|| userLocalStore.getUserRegistrationId()==null){
 
             }else {
@@ -162,12 +164,15 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
                     String r=returneduser.regId;
                     if(returneduser.regId.equals(userLocalStore.getUserRegistrationId())){
                         logUserIn(user);
-                    }else {
-                        userLocalStore.setUserGCMregId(returneduser.regId,0);
-                        logUserIn(user);
+                    }
+                    else {
+                        getRegId(user);
+                    //    userLocalStore.setUserGCMregId(returneduser.regId,0);
+                  //      logUserIn(user);
                     }
                 }else{
-
+                    //regid speichern
+                    getRegId(user);
                     showdialg2();
                 }
             }
@@ -182,6 +187,61 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
             }
         });
+    }
+    public void storeregIdsMysql(final User user){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.storeUserGcmIds(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+                if (reponse.contains("Registration id successfully saved")) {
+                    logUserIn(user);
+                }
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
+    }
+    public void getRegId(final User registeredData){
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                try {
+                    if (gcm == null) {
+                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+                    }
+                    regid = gcm.register(Config.GCM_SENDER_ID);
+                    msg = "Device registered, registration ID=" + regid;
+                    Log.i("GCM", msg);
+
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+
+                }
+                return regid;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+
+                if(!msg.isEmpty()){
+
+                    User user=new User(msg,registeredData.username,registeredData.email,null);
+
+                    userLocalStore.setUserGCMregId(msg,0);
+                    storeregIdsMysql(user);
+                }
+            }
+        }.execute(null, null, null);
     }
     private void authenticateuser(final User user) {
         ServerRequestUser serverRequest = new ServerRequestUser(this);
@@ -294,8 +354,20 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             emailstr = emailed.getText().toString();
             passwordstr = passworded.getText().toString();
 
-            User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
-            updatestatus(user);
+
+            if(userLocalStore.getLoggedInUser().username.isEmpty()){
+                User user = new User(null, emailstr, passwordstr,1);
+                updatestatus(user);
+            }else{
+                User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
+                //Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
+                if(userLocalStore.getUserRegistrationId().isEmpty()|| userLocalStore.getUserRegistrationId()==null){
+
+                }else {
+
+                }
+                updatestatus(user);
+            }
         }
 
         return false;

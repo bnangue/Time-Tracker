@@ -104,9 +104,10 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
         //do Mysql saving
         if(pwChecker.checkIfValid(passwordstr,repeatpasswordstr)){
 
-            User registeredData=new User(usernamestr,emailstr,passwordstr);
+            int password=passwordstr.hashCode();
+            User userRegistered=new User(usernamestr,emailstr,String.valueOf(password));
 
-            register(registeredData);
+            register(userRegistered);
 
         }else{
             Toast.makeText(this, "Password doesn't match", Toast.LENGTH_SHORT).show();
@@ -214,9 +215,14 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
 
             @Override
             protected void onPostExecute(String msg) {
+                if(!msg.isEmpty()){
 
-                User user=new User(msg,registeredData.username,registeredData.email,null);
-                storeregIdsMysql(user);
+                    User user=new User(msg,registeredData.username,registeredData.email,null);
+
+                    userLocalStore.setUserGCMregId(msg,0);
+                    storeregIdsMysql(user);
+                }
+
             }
         }.execute(null, null, null);
     }

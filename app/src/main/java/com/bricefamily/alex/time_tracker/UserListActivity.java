@@ -201,6 +201,7 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
             Intent intent =new Intent(UserListActivity.this,LiveChatActivity.class);
             intent.putExtra("recieverName",recievername);
             intent.putExtra("recieverregId",reciverregId);
+            intent.putExtra("message","");
             startActivity(intent);
 
         }else{

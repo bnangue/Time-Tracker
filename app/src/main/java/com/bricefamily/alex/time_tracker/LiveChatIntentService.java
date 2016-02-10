@@ -1,11 +1,14 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
@@ -18,11 +21,27 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 public class LiveChatIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
-    NotificationCompat.Builder builder;
+    NotificationCompat.Builder mBuilder;
+    Notification notification;
     public static final String TAG = "GcmIntentService";
+    IBinder mBinder=new Binder() ;
 
     public LiveChatIntentService() {
         super("GcmIntentService");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+         mBuilder = new NotificationCompat.Builder(
+                this).setSmallIcon(R.drawable.colorhome)
+                .setContentTitle("New Message")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(""))
+                .setContentText("");
+        mBuilder.setDefaults(NotificationCompat.DEFAULT_ALL);
+        mBuilder.setAutoCancel(true);
+
     }
 
     @Override
@@ -87,7 +106,7 @@ public class LiveChatIntentService extends IntentService {
         //intent.putExtra("chattingFrom", chattingFrom);
         intent.putExtra("recieverName",chattingToName);
         intent.putExtra("recieverregId",chattingToDeviceID);
-        intent.putExtra("message",msg);
+        intent.putExtra("messagefromgcm",msg);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
@@ -103,15 +122,11 @@ public class LiveChatIntentService extends IntentService {
         //PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
         //		new Intent(this, ChatActivity.class), 0);
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-                this).setSmallIcon(R.drawable.colorhome)
-                .setContentTitle("New Message")
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+        mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setContentText(message);
-        mBuilder.setDefaults(NotificationCompat.DEFAULT_ALL);
-        mBuilder.setAutoCancel(true);
         mBuilder.setContentIntent(resultPendingIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        notification=mBuilder.build();
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
     private void sendNotification(String msg) {
 
@@ -121,13 +136,16 @@ public class LiveChatIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, LiveChatActivity.class), 0);
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+       mBuilder = new NotificationCompat.Builder(
                 this).setSmallIcon(R.drawable.colorhome)
                 .setContentTitle("GCM Notification")
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                 .setContentText(msg);
 
         mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        notification=mBuilder.build();
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
+
+
 }

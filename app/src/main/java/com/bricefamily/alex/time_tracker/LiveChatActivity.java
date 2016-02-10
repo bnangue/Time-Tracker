@@ -1,20 +1,30 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.app.ActionBar;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -33,16 +43,30 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-public class LiveChatActivity extends AppCompatActivity implements TextView.OnEditorActionListener {
+public class LiveChatActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
 
     private ChatArrayApadter chatArrayApadter;
     private ListView chatlist;
     private Button sendBtn;
     private EditText chaTtext;
     private boolean side =false;
-    String receiverName;
+    String receiverName,intentrecievemesg;
     String receiverregId;
     UserLocalStore userLocalStore;
+    ArrayList<ChatPeople> ChatPeoples;
+
+    DBOperation dbOperation;
+    protected ServiceConnection mServerConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
 
     @Override
@@ -50,7 +74,9 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_chat);
 
+
         userLocalStore=new UserLocalStore(this);
+        ChatPeoples = new ArrayList<ChatPeople>();
         sendBtn=(Button)findViewById(R.id.buttonchatsend);
         chaTtext=(EditText)findViewById(R.id.chatedittext);
 
@@ -60,13 +86,27 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
         if(extras!=null){
             receiverName=extras.getString("recieverName");
             receiverregId=extras.getString("recieverregId");
+            intentrecievemesg=extras.getString("messagefromgcm");
 
         }
+        prepareView();
         registerReceiver(broadcastReceiver, new IntentFilter(
                 "CHAT_MESSAGE_RECEIVED"));
 
-        chatArrayApadter=new ChatArrayApadter(getApplicationContext(),R.layout.chat);
+        dbOperation = new DBOperation(this);
+        dbOperation.createAndInitializeTables();
+       // adding to db
 
+        if(intentrecievemesg!=null){
+            ChatPeople curChatObj = addToChat(receiverName, intentrecievemesg,
+                    "1");
+            addToDB(curChatObj);
+            populateChatMessages();
+        }
+        populateChatMessages();
+
+        chatlist.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        chatlist.setStackFromBottom(true);
         chaTtext.setOnEditorActionListener(this);
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,30 +116,161 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
             }
         });
 
-        chatlist.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        chatArrayApadter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                chatlist.setSelection(chatArrayApadter.getCount()-1);
-            }
-        });
-        chatlist.setAdapter(chatArrayApadter);
+
     }
 
+    public void prepareView() {
+
+        getWindow().getDecorView().setBackgroundColor(Color.WHITE); //Hintergrund der View
+
+        android.support.v7.app.ActionBar ab = getSupportActionBar();
+
+        //Disablen des Zurück Pfeils
+        if (findViewById(android.R.id.home) != null) {
+            findViewById(android.R.id.home).setVisibility(View.GONE);
+        }
+
+        LayoutInflater inflator = (LayoutInflater) getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
+        View view = inflator.inflate(R.layout.actionbarbackground, null);
 
 
+        //center des ActionBar Titles
+        android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+
+        try {
+            ab.setDisplayShowCustomEnabled(true);
+            ab.setDisplayShowTitleEnabled(false);
+            ab.setCustomView(view, params);
+            ab.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.cellSelected)));
+            if(receiverName!=null){
+                ab.setTitle(receiverName);
+            }
+
+        } catch (NullPointerException e) {
+            Log.w("ActionBar Error", e.getMessage());
+        }
+        try {
+            //ab Android 5.0
+            ab.setElevation(0);
+        } catch (NullPointerException e) {
+            Log.w("ActionBar Error", e.getMessage());
+        }
+
+    }
+
+    private void populateChatMessages() {
+
+        getDataFromDB();
+        if (ChatPeoples.size() > 0) {
+            chatArrayApadter = new ChatArrayApadter(this, R.layout.chat,ChatPeoples);
+
+            chatArrayApadter.registerDataSetObserver(new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    super.onChanged();
+                    chatlist.setSelection(chatArrayApadter.getCount() - 1);
+                }
+            });
+            chatlist.setAdapter(chatArrayApadter);
+
+        }
+
+    }
+
+    void getDataFromDB() {
+
+        ChatPeoples.clear();
+
+        Cursor cursor = dbOperation.getDataFromTable(receiverregId);
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            do {
+                // Log.i(TAG,
+                // "Name = " + cursor.getString(0) + ", Message = "
+                // + cursor.getString(1) + " Device ID = "
+                // + cursor.getString(2));
+
+                ChatPeople people = addToChat(cursor.getString(0),
+                        cursor.getString(1), cursor.getString(3));
+                ChatPeoples.add(people);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+    }
+    ChatPeople addToChat(String personName, String chatMessage, String toOrFrom) {
+
+        ChatPeople curChatObj = new ChatPeople();
+        curChatObj.setPERSON_NAME(personName);
+        curChatObj.setPERSON_CHAT_MESSAGE(chatMessage);
+        curChatObj.setPERSON_CHAT_TO_FROM(toOrFrom);// 1 or 0 convert to boolean in adapter
+        curChatObj.setPERSON_DEVICE_ID(receiverregId);
+        curChatObj.setPERSON_EMAIL("demo@gmail.com");
+
+        return curChatObj;
+
+    }
+    void addToDB(ChatPeople curChatObj) {
+
+        ChatPeople people = new ChatPeople();
+        ContentValues values = new ContentValues();
+        values.put(people.getPERSON_NAME(), curChatObj.getPERSON_NAME());
+        values.put(people.getPERSON_CHAT_MESSAGE(),
+                curChatObj.getPERSON_CHAT_MESSAGE());
+        values.put(people.getPERSON_DEVICE_ID(),
+                curChatObj.getPERSON_DEVICE_ID());
+        values.put(people.getPERSON_CHAT_TO_FROM(),
+                curChatObj.getPERSON_CHAT_TO_FROM());
+        values.put(people.getPERSON_EMAIL(), "demo_email@email.com");
+        dbOperation.open();
+        long id = dbOperation.insertTableData(people.getTableName(), values);
+        dbOperation.close();
+        if (id != -1) {
+        }
+
+        populateChatMessages();
+    }
 
     private boolean sendChatmessage(){
         String messagetoSend=chaTtext.getText().toString();
         String sender=userLocalStore.getLoggedInUser().username;
-        ChatMessage chatMessage=new ChatMessage(side,messagetoSend,sender);
-        populateChatMessages(chatMessage);
+
+        ChatPeople curChatObj = addToChat(receiverName, messagetoSend, "0");
+        addToDB(curChatObj);
+        clearMessageTextBox();
        // sendMessagetoServer();
 
         return true;
     }
 
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        Bundle b = intent.getExtras();
+
+        String message = b.getString("message");
+
+        String sender=b.getString("sender");
+        String registration_ids=b.getString("registrationSenderIDs");
+        receiverregId=registration_ids;
+
+        receiverName=sender	;
+        ChatPeople curChatObj = addToChat(sender, message,
+                "1");
+        addToDB(curChatObj); // adding to db
+
+        populateChatMessages();
+
+        setIntent(intent);
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        getIntent();
+    }
 
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -114,25 +285,15 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
             receiverregId=registration_ids;
 
             receiverName=sender	;
+            ChatPeople curChatObj = addToChat(sender, message,
+                    "1");
+            addToDB(curChatObj); // adding to db
 
-            ChatMessage chatMessage=new ChatMessage(true,message,sender);
-
-            // this demo this is the same device
-            //ChatPeople curChatObj = addToChat(sender, message,
-             //       "Received");//replace recieve by boolean false
-            //addToDB(curChatObj); // adding to db
-
-            populateChatMessages(chatMessage);
+            populateChatMessages();
 
         }
     };
 
-
-    private void populateChatMessages(ChatMessage message) {
-        chatArrayApadter.add(message);
-        chatArrayApadter.notifyDataSetChanged();
-        clearMessageTextBox();
-    }
 
     private static String getData(ArrayList<Pair<String, String>> values) throws UnsupportedEncodingException {
         StringBuilder result=new StringBuilder();
@@ -211,9 +372,11 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
 
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
+
         PackageManager pm = getPackageManager();
         ComponentName compName =
                 new ComponentName(getApplicationContext(),
@@ -222,11 +385,21 @@ public class LiveChatActivity extends AppCompatActivity implements TextView.OnEd
                 compName,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
+
+
     }
 
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(broadcastReceiver);
+
+
+            try {
+                if (broadcastReceiver != null) {
+                    this.unregisterReceiver(broadcastReceiver);
+                }
+            } catch (IllegalArgumentException e) {
+                broadcastReceiver = null;
+            }
         PackageManager pm = getPackageManager();
         ComponentName compName =
                 new ComponentName(getApplicationContext(),

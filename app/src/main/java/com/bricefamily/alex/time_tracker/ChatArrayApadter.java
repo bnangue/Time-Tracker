@@ -18,16 +18,18 @@ import java.util.List;
 /**
  * Created by bricenangue on 08/02/16.
  */
-public class ChatArrayApadter extends ArrayAdapter<ChatMessage>{
+public class ChatArrayApadter extends ArrayAdapter<ChatPeople>{
     private TextView chattext;
-    private List<ChatMessage> messageList=new ArrayList<ChatMessage>();
+    private List<ChatPeople> messageList=new ArrayList<ChatPeople>();
+    boolean left=false;
 
-    public ChatArrayApadter(Context context,int textRessourceId){
-        super(context, textRessourceId);
+    public ChatArrayApadter(Context context,int textRessourceId,ArrayList<ChatPeople> list){
+        super(context, textRessourceId,list);
+        this.messageList=list;
 
     }
 
-    public void add(ChatMessage chatMessage){
+    public void add(ChatPeople chatMessage){
         messageList.add(chatMessage);
         super.add(chatMessage);
     }
@@ -36,7 +38,7 @@ public class ChatArrayApadter extends ArrayAdapter<ChatMessage>{
         return this.messageList.size();
     }
 
-    public ChatMessage getItem(int index){
+    public ChatPeople getItem(int index){
         return this.messageList.get(index);
     }
 
@@ -49,11 +51,16 @@ public class ChatArrayApadter extends ArrayAdapter<ChatMessage>{
 
         }
         LinearLayout layout=(LinearLayout)v.findViewById(R.id.message1);
-        ChatMessage obj=getItem(positon);
+        ChatPeople obj=getItem(positon);
+        if(obj.getPERSON_CHAT_TO_FROM().equals("1")){
+            left=true;
+        }else{
+            left=false;
+        }
         chattext=(TextView)v.findViewById(R.id.singlemessage);
-        chattext.setText(obj.message);
-        chattext.setBackgroundResource(obj.left ? R.drawable.out_message_bg : R.drawable.in_message_bg);
-        layout.setGravity(obj.left? Gravity.LEFT : Gravity.RIGHT);
+        chattext.setText(obj.getPERSON_CHAT_MESSAGE());
+        chattext.setBackgroundResource(left ? R.drawable.out_message_bg : R.drawable.in_message_bg);
+        layout.setGravity(left? Gravity.LEFT : Gravity.RIGHT);
 
         return v;
 

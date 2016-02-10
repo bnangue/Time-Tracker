@@ -342,6 +342,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         switch (titel){
             case "Home":
 
+                startActivity(new Intent(CentralPageActivity.this,LiveChatActivity.class));
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;

@@ -22,7 +22,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginLeft="10dp"
-        android:onClick="openProfileFriendClick"/>
+        android:clickable="false"/>
 
     <TextView
         android:layout_width="wrap_content"

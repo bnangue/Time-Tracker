@@ -44,6 +44,7 @@ public class LiveChatIntentService extends IntentService {
 
     }
 
+
     @Override
     protected void onHandleIntent(Intent intent) {
 
@@ -72,13 +73,27 @@ public class LiveChatIntentService extends IntentService {
                 String s=extras.toString();
 
 
-                sendnotification(intent);
+                Intent i = new Intent("com.bricefamily.alex.time_tracker.CHAT_MESSAGE_RECEIVED");
+                i.putExtra("message", extras.getString("message"));
+                i.putExtra("sender", extras.getString("sender"));
+                i.putExtra("registrationSenderIDs", extras.getString("registrationSenderIDs"));
+                if(extras.getString("message").contains("new Event added by")){
+
+                }else{
+                    sendOrderedBroadcast(i, null);
+
+                    if(LiveChatActivity.messageshowed){
+                        sendnotification(intent);
+                        LiveChatBroadcastReceiver.completeWakefulIntent(intent);
+
+                    }
+                }
+
 
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
-        LiveChatBroadcastReceiver.completeWakefulIntent(intent);
 
 
     }
@@ -100,13 +115,14 @@ public class LiveChatIntentService extends IntentService {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
         Intent intent = new Intent(this,LiveChatActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         //intent.putExtra("chattingFrom", chattingFrom);
         intent.putExtra("recieverName",chattingToName);
         intent.putExtra("recieverregId",chattingToDeviceID);
-        intent.putExtra("messagefromgcm",msg);
+        intent.putExtra("messagefromgcm", msg);
+
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
@@ -128,6 +144,9 @@ public class LiveChatIntentService extends IntentService {
         notification=mBuilder.build();
         mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
+
+
+
     private void sendNotification(String msg) {
 
         mNotificationManager = (NotificationManager) this

@@ -10,8 +10,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
-
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <permission
         android:name="com.bricefamily.alex.time_tracker.permission.C2D_MESSAGE"
@@ -20,7 +19,6 @@
     <uses-permission android:name="com.bricefamily.alex.time_tracker.permission.C2D_MESSAGE" />
 
     <application
-
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -82,8 +80,6 @@
         <activity
             android:name=".GCMessagingActivity"
             android:label="@string/title_activity_gcmessaging" />
-
-
         <activity
             android:name=".AboutApplicationActivity"
             android:label="@string/title_activity_user_list" />
@@ -93,9 +89,10 @@
         <activity
             android:name=".ViewFriendActivity"
             android:label="@string/title_activity_user_list" />
+
         <receiver
             android:name=".LiveChatBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
 
@@ -105,10 +102,16 @@
 
         <service android:name=".LiveChatIntentService" />
 
-
-
-
+        <activity
+            android:name=".HomeScreenActivity"
+            android:label="@string/title_activity_home_screen"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".UserListTabsActivity"
+            android:label="@string/title_activity_user_list_tabs"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".UserFriendListTabActivity" />
+        <activity android:name=".AllUsersListsTabActivity"></activity>
     </application>
-
 
 </manifest>

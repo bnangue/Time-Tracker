@@ -18,8 +18,20 @@ public class GCMBroadcastReceiver extends WakefulBroadcastReceiver {
         ComponentName comp = new ComponentName(context.getPackageName(),
                 GCMessageHandler.class.getName());
 
-        // Start the service, keeping the device awake while it is launching.
-        startWakefulService(context, (intent.setComponent(comp)));
-        setResultCode(Activity.RESULT_OK);
+        String action=intent.getAction();
+        if (action.equals("com.google.android.c2dm.intent.REGISTRATION"))
+        {
+
+
+        }
+
+        if(action.equals("com.google.android.c2dm.intent.RECEIVE")){
+            String message=intent.getStringExtra("title");
+            if(message!=null && message.contains("New Event")){
+                startWakefulService(context, (intent.setComponent(comp)));
+                setResultCode(Activity.RESULT_OK);
+            }
+        }
+
     }
 }

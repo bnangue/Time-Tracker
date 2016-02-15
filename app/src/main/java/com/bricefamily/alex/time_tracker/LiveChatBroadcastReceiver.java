@@ -14,20 +14,24 @@ public class LiveChatBroadcastReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        String action=intent.getAction();
+
         // Explicitly specify that GcmIntentService will handle the intent.
         ComponentName comp = new ComponentName(context.getPackageName(),
                 LiveChatIntentService.class.getName());
         // Start the service, keeping the device awake while it is launching.
-        startWakefulService(context, (intent.setComponent(comp)));
-        setResultCode(Activity.RESULT_OK);
+        if(action.equals("com.google.android.c2dm.intent.RECEIVE")){
+            String message=intent.getStringExtra("title");
+            if(message!=null && message.contains("New Event")){
 
-        Bundle extras = intent.getExtras();
-        Intent i = new Intent("CHAT_MESSAGE_RECEIVED");
-        i.putExtra("message", extras.getString("message"));
-        i.putExtra("sender", extras.getString("sender"));
-        i.putExtra("registrationSenderIDs", extras.getString("registrationSenderIDs"));
+            }else{
+                startWakefulService(context, (intent.setComponent(comp)));
+            }
+        }else {
 
-        context.sendBroadcast(i);
+        }
+
 
     }
+
 }

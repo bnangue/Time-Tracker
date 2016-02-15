@@ -78,12 +78,16 @@ public class GCMessageHandler extends IntentService {
 
         title = extras.getString("title");
         mes=extras.getString("message");
+
         mBuilder.setContentText(mes);
         mBuilder.setContentTitle(title);
-        showToast();
-        Log.i("GCM", "Received : (" + messageType + ")  " + extras.getString("title"));
+        if(mes.contains("new Event added by")){
+            showToast();
+            Log.i("GCM", "Received : (" + messageType + ")  " + extras.getString("title"));
 
-        GCMBroadcastReceiver.completeWakefulIntent(intent);
+            GCMBroadcastReceiver.completeWakefulIntent(intent);
+
+        }
 
     }
 

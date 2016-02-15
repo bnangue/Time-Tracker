@@ -302,7 +302,10 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         userLocalStore.storeUserData(returneduser);
         userLocalStore.setUserLoggedIn(true);
 
-        getEventsFromDatabase(returneduser);
+        Intent intent=new Intent(this,HomeScreenActivity.class);
+        intent.putExtra("loggedinUser",returneduser);
+        startActivity(intent);
+        //getEventsFromDatabase(returneduser);
 
     }
 
@@ -321,28 +324,6 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         alert.show();
     }
 
-    void getEventsFromDatabase(final User returneduser) {
-
-        ServerRequest serverRequest = new ServerRequest(this);
-        serverRequest.fetchAllevents(new GetEventsCallbacks() {
-            @Override
-            public void done(ArrayList<EventObject> returnedeventobject) {
-                if (returnedeventobject != null) {
-                    Intent intent = new Intent(LoginActivity.this, CentralPageActivity.class);
-                    intent.putExtra("username", returneduser.username);
-                    intent.putExtra("eventlist", returnedeventobject);
-                    startActivity(intent);
-                } else {
-                    showdialg2();
-                }
-            }
-
-            @Override
-            public void updated(String reponse) {
-
-            }
-        });
-    }
 
     public void buttonCreateUserPressed(View view) {
 

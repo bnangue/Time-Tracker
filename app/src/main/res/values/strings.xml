@@ -42,6 +42,8 @@
     <string name="gcm_error">gcm error</string>
     <string name="gcm_deleted">gcm delted</string>
     <string name="gcm_unregistered">gcm unregisterd</string>
+    <string name="title_activity_home_screen">HomeScreenActivity</string>
+    <string name="title_activity_user_list_tabs">UserListTabsActivity</string>
 
 
 </resources>

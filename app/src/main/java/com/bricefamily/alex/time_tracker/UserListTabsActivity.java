@@ -50,6 +50,10 @@ public class UserListTabsActivity extends TabActivity {
 
         TabHost tabHost = getTabHost();
 
+        if(savedInstanceState!=null){
+            userArrayList=savedInstanceState.getParcelableArrayList("list");
+            userArrayListforGcm=savedInstanceState.getParcelableArrayList("listforgcm");
+        }
         // Inbox Tab
         TabHost.TabSpec userlisttabSpec = tabHost.newTabSpec(INBOX_SPEC);
         // Tab Icon
@@ -77,4 +81,11 @@ public class UserListTabsActivity extends TabActivity {
         tabHost.addTab(userfriendlisttabSpec); // Adding Outbox tab
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        outState.putParcelableArrayList("listforgcm", userArrayListforGcm);
+        outState.putParcelableArrayList("list",userArrayList);
+        super.onSaveInstanceState(outState);
+    }
 }

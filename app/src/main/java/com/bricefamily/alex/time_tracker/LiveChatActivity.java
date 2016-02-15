@@ -30,6 +30,7 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -69,7 +70,7 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     Intent intentr;
     static boolean messageshowed=true;
 
-    DBOperation dbOperation;
+     DBOperation dbOperation;
     protected ServiceConnection mServerConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -111,17 +112,13 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
         IntentFilter mfilter =new IntentFilter("com.bricefamily.alex.time_tracker.CHAT_MESSAGE_RECEIVED");
         mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         registerReceiver(broadcastReceiver,mfilter);
-        prepareView();
+        prepareView(receiverName);
 
         dbOperation = new DBOperation(this);
         dbOperation.createAndInitializeTables();
        // adding to db
 
-        if(intentrecievemesg!=null && !messageshowed){
-            ChatPeople curChatObj = addToChat(receiverName, intentrecievemesg,
-                    "1");
-            addToDB(curChatObj);
-        }
+
 
 
         populateChatMessages();
@@ -139,7 +136,7 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
 
     }
 
-    public void prepareView() {
+    public void prepareView(String name) {
 
         getWindow().getDecorView().setBackgroundColor(Color.WHITE); //Hintergrund der View
 
@@ -152,28 +149,29 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
 
         LayoutInflater inflator = (LayoutInflater) getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
         View view = inflator.inflate(R.layout.actionbarbackground, null);
+        TextView titelname=(TextView)view.findViewById(R.id.recievername);
+        titelname.setText(name);
 
 
         //center des ActionBar Titles
-        android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+        android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.LEFT);
 
         try {
             ab.setDisplayShowCustomEnabled(true);
             ab.setDisplayShowTitleEnabled(false);
             ab.setCustomView(view, params);
             ab.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.cellSelected)));
-            if(receiverName!=null){
-                ab.setTitle(receiverName);
-            }
 
-        } catch (NullPointerException e) {
-            Log.w("ActionBar Error", e.getMessage());
+
+
+        } catch (Exception e) {
+           e.printStackTrace();
         }
         try {
             //ab Android 5.0
             ab.setElevation(0);
-        } catch (NullPointerException e) {
-            Log.w("ActionBar Error", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -235,7 +233,20 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
         return curChatObj;
 
     }
-    void addToDBOnly(ChatPeople curChatObj) {
+
+     ChatPeople addToChatOnly(String personName, String chatMessage, String toOrFrom,String receiverregId) {
+
+        ChatPeople curChatObj = new ChatPeople();
+        curChatObj.setPERSON_NAME(personName);
+        curChatObj.setPERSON_CHAT_MESSAGE(chatMessage);
+        curChatObj.setPERSON_CHAT_TO_FROM(toOrFrom);// 1 or 0 convert to boolean in adapter
+        curChatObj.setPERSON_DEVICE_ID(receiverregId);
+        curChatObj.setPERSON_EMAIL("demo@gmail.com");
+
+        return curChatObj;
+
+    }
+     void addToDBOnly(ChatPeople curChatObj) {
 
         ChatPeople people = new ChatPeople();
         ContentValues values = new ContentValues();
@@ -321,6 +332,16 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     };
 
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                User u=userLocalStore.getLoggedInUser();
+                fetchuserlist(u);
+                break;
+        }
+        return true;
+    }
     private String getData(ArrayList<Pair<String, String>> values) throws UnsupportedEncodingException {
         StringBuilder result=new StringBuilder();
         for(Pair<String,String> pair : values){
@@ -477,5 +498,60 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
         }
         return false;
     }
+
+    @Override
+    public void onBackPressed()
+    {
+        User u=userLocalStore.getLoggedInUser();
+        fetchuserlist(u);
+    }
+    private void fetchuserlist(User user){
+        final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+                if (reponse.size() != 0) {
+                    ArrayList<User> users = new ArrayList<User>();
+                    users = reponse;
+                    final ArrayList<User> finalUsers = users;
+                    serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+                        @Override
+                        public void done(User returneduser) {
+
+                        }
+
+                        @Override
+                        public void deleted(String reponse) {
+
+                        }
+
+                        @Override
+                        public void userlist(ArrayList<User> reponse) {
+
+                            if (reponse.size() != 0) {
+                                Intent intent = new Intent(LiveChatActivity.this, UserListTabsActivity.class);
+                                intent.putExtra("userlistforgcm", finalUsers);
+                                intent.putExtra("userlist", reponse);
+                                startActivity(intent);
+                            }
+                        }
+                    });
+
+                }
+            }
+        });
+    }
+
+
 
 }

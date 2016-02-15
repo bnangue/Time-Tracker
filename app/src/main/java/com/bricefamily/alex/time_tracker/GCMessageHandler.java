@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import java.util.Random;
+
 /**
  * Created by bricenangue on 06/02/16.
  */
@@ -25,8 +27,8 @@ public class GCMessageHandler extends IntentService {
      */
 
     NotificationManager nmgr;
-    public static final int NOTIFICATION_ID = 0;
-
+    Random random = new Random();
+    int m = random.nextInt(9999 - 1000) + 1000;
     NotificationCompat.Builder mBuilder;
     String mes,title;
     private Handler handler;
@@ -94,7 +96,7 @@ public class GCMessageHandler extends IntentService {
     public void showToast(){
         handler.post(new Runnable() {
             public void run() {
-                nmgr.notify(NOTIFICATION_ID, mBuilder.build());
+                nmgr.notify(m, mBuilder.build());
 
             }
         });

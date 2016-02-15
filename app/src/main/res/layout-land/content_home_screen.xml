@@ -47,8 +47,7 @@
             android:text="meetUp Destination"
             android:id="@+id/textViewhomescreenhomesubtitle"
             android:layout_alignBottom="@+id/imageView2"
-            android:layout_toRightOf="@+id/imageView2"
-            android:layout_toEndOf="@+id/imageView2" />
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
@@ -120,8 +119,6 @@
             android:text="Preferences"
             android:id="@+id/textViewhimescreenpref"
             android:layout_alignTop="@+id/imageViewpref"
-            android:layout_toRightOf="@+id/imageViewpref"
-            android:layout_toEndOf="@+id/imageViewpref"
             android:layout_centerHorizontal="true" />
 
         <TextView
@@ -130,12 +127,8 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="change your preferences"
             android:id="@+id/textViewhomescreenprefsubtitle"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
             android:layout_alignBottom="@+id/imageViewpref"
-            android:layout_alignLeft="@+id/textViewhimescreenpref"
-            android:layout_alignStart="@+id/textViewhimescreenpref"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 
 

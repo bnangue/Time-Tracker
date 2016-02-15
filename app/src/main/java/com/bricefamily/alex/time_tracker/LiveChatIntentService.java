@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -23,6 +24,8 @@ public class LiveChatIntentService extends IntentService {
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder mBuilder;
     Notification notification;
+    DBOperation dbOperation;
+
     public static final String TAG = "GcmIntentService";
     IBinder mBinder=new Binder() ;
 
@@ -34,8 +37,10 @@ public class LiveChatIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
 
+        dbOperation = new DBOperation(this);
+        dbOperation.createAndInitializeTables();
          mBuilder = new NotificationCompat.Builder(
-                this).setSmallIcon(R.drawable.colorhome)
+                this).setSmallIcon(R.drawable.chaticon)
                 .setContentTitle("New Message")
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(""))
                 .setContentText("");
@@ -110,7 +115,7 @@ public class LiveChatIntentService extends IntentService {
         String chattingToDeviceID = extras.getString("registrationSenderIDs");
         String msg = extras.getString("message");
 
-        String message="Received Message : " +msg;
+        String message=chattingToName+": " +msg;
         mNotificationManager = (NotificationManager) this
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -123,6 +128,8 @@ public class LiveChatIntentService extends IntentService {
         intent.putExtra("recieverregId",chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
 
+        ChatPeople cppl=addToChatOnly(chattingToName, msg, "1", chattingToDeviceID);
+       addToDBOnly(cppl);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
@@ -156,7 +163,7 @@ public class LiveChatIntentService extends IntentService {
                 new Intent(this, LiveChatActivity.class), 0);
 
        mBuilder = new NotificationCompat.Builder(
-                this).setSmallIcon(R.drawable.colorhome)
+                this).setSmallIcon(R.drawable.chaticon)
                 .setContentTitle("GCM Notification")
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                 .setContentText(msg);
@@ -164,6 +171,38 @@ public class LiveChatIntentService extends IntentService {
         mBuilder.setContentIntent(contentIntent);
         notification=mBuilder.build();
         mNotificationManager.notify(NOTIFICATION_ID, notification);
+    }
+    ChatPeople addToChatOnly(String personName, String chatMessage, String toOrFrom,String receiverregId) {
+
+        ChatPeople curChatObj = new ChatPeople();
+        curChatObj.setPERSON_NAME(personName);
+        curChatObj.setPERSON_CHAT_MESSAGE(chatMessage);
+        curChatObj.setPERSON_CHAT_TO_FROM(toOrFrom);// 1 or 0 convert to boolean in adapter
+        curChatObj.setPERSON_DEVICE_ID(receiverregId);
+        curChatObj.setPERSON_EMAIL("demo@gmail.com");
+
+        return curChatObj;
+
+    }
+    void addToDBOnly(ChatPeople curChatObj) {
+
+        ChatPeople people = new ChatPeople();
+        ContentValues values = new ContentValues();
+        values.put(people.getPERSON_NAME(), curChatObj.getPERSON_NAME());
+        values.put(people.getPERSON_CHAT_MESSAGE(),
+                curChatObj.getPERSON_CHAT_MESSAGE());
+        values.put(people.getPERSON_DEVICE_ID(),
+                curChatObj.getPERSON_DEVICE_ID());
+        values.put(people.getPERSON_CHAT_TO_FROM(),
+                curChatObj.getPERSON_CHAT_TO_FROM());
+        values.put(people.getPERSON_EMAIL(), "demo_email@email.com");
+        dbOperation.open();
+        long id = dbOperation.insertTableData(people.getTableName(), values);
+        dbOperation.close();
+        if (id != -1) {
+
+        }
+
     }
 
 

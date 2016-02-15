@@ -41,10 +41,10 @@ public class UserFriendListTabActivity extends ActionBarActivity implements Adap
             userArrayListforGcm =extras.getParcelableArrayList("userlistforgcm");
             userArrayList =extras.getParcelableArrayList("userlist");
         }
-        else{
-            User u=userLocalStore.getLoggedInUser();
-            fetchuserlist(u);
-
+        if(savedInstanceState!=null){
+            userArrayList=savedInstanceState.getParcelableArrayList("userlist");
+            userArrayListforGcm=savedInstanceState.getParcelableArrayList("userlistforgcm");
+            status=savedInstanceState.getIntArray("status");
         }
 
 
@@ -123,7 +123,7 @@ public class UserFriendListTabActivity extends ActionBarActivity implements Adap
         // countevent=countevent+1;
         // selected(countevent, selectionevents);
         // centralPageAdapter.notifyDataSetChanged();
-        showFilterPopup(v,pos);
+        showFilterPopup(v, pos);
         return true;
     }
     private void showFilterPopup(View v, final int position) {
@@ -170,5 +170,13 @@ public class UserFriendListTabActivity extends ActionBarActivity implements Adap
                     +" currently offline",Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("userlistforgcm", userArrayListforGcm);
+        outState.putParcelableArrayList("userlist",userArrayList);
+        outState.putIntArray("status",status);
     }
 }

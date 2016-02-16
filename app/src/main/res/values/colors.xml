@@ -15,6 +15,9 @@
     <color name="borderBackground">#dbdbdb</color>
     <color name="cellselect">#f7f3cb</color>
     <color name="useroffline">#109f984f</color>
+    <color name="ColorPrimary">#cf0c81f7</color>
+    <color name="ColorPrimaryDark">#cf55a0ec</color>
+    <color name="tabsScrollColor">#cff5f6f7</color>
 
 
 

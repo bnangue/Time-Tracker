@@ -90,10 +90,11 @@ public class UserListTabsActivity extends TabActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+
         Intent intent=new Intent(UserListTabsActivity.this,HomeScreenActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         startActivity(intent);
+
     }
 }

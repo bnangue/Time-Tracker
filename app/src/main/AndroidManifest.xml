@@ -86,7 +86,11 @@
         <activity
             android:name=".LiveChatActivity"
             android:label="@string/title_activity_user_list"
-            android:parentActivityName=".UserListTabsActivity"/>
+            android:parentActivityName=".UserListTabsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UserListTabsActivity" />
+        </activity>
         <activity
             android:name=".ViewFriendActivity"
             android:label="@string/title_activity_user_list" />
@@ -110,10 +114,20 @@
         <activity
             android:name=".UserListTabsActivity"
             android:label="@string/title_activity_user_list_tabs"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".UserFriendListTabActivity"
-            />
-        <activity android:name=".AllUsersListsTabActivity"></activity>
+            android:parentActivityName=".HomeScreenActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HomeScreenActivity" />
+        </activity>
+        <activity android:name=".UserFriendListTabActivity" />
+        <activity android:name=".AllUsersListsTabActivity" />
+        <activity
+            android:name=".NewUserTabsActivity"
+            android:label="@string/title_activity_new_user_tabs"
+            android:theme="@style/AppTheme">
+
+        </activity>
     </application>
 
 </manifest>

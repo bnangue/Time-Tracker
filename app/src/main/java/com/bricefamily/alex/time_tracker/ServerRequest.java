@@ -65,6 +65,9 @@ public class ServerRequest {
         progressDialog.show();
         new FetchAllEventsAsynckTacks(callbacks).execute();
     }
+    public void fetchAlleventscentralpage(GetEventsCallbacks callbacks){
+        new FetchAllEventsAsynckTacks(callbacks).execute();
+    }
     public void createEventinBackground(EventObject eventObject, GetEventsCallbacks callbacks){
         progressDialog.setTitle("Record in creation...");
 

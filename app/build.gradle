@@ -28,5 +28,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile files('libs/jackson-all-1.9.5.jar')
     compile files('libs/gcm.jar')
+    compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
 }
 apply plugin: 'com.google.gms.google-services'

@@ -27,7 +27,12 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
             user=extras.getParcelable("loggedinUser");
         }
 
-        username=user.username;
+
+        if(user!=null){
+            username=user.username;
+        }else {
+           username= userLocalStore.getLoggedInUser().username;
+        }
 
     }
     public void homehomePressed(View view){
@@ -111,7 +116,7 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
                         public void userlist(ArrayList<User> reponse) {
 
                             if (reponse.size() != 0) {
-                                Intent intent = new Intent(HomeScreenActivity.this, UserListTabsActivity.class);
+                                Intent intent = new Intent(HomeScreenActivity.this, NewUserTabsActivity.class);
                                 intent.putExtra("userlistforgcm", finalUsers);
                                 intent.putExtra("userlist", reponse);
                                 startActivity(intent);

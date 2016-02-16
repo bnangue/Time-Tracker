@@ -119,7 +119,7 @@ protected boolean onLongListItemClick(View v, int pos, long id) {
         // countevent=countevent+1;
         // selected(countevent, selectionevents);
         // centralPageAdapter.notifyDataSetChanged();
-        showFilterPopup(v,pos);
+        showFilterPopup(v, pos);
         return true;
         }
 private void showFilterPopup(View v, final int position) {
@@ -154,5 +154,6 @@ public void onItemClick(AdapterView<?> parent, View view, int position, long id)
         Toast.makeText(getApplicationContext(),"User currently offline",Toast.LENGTH_SHORT).show();
 
         }
+
 
 }

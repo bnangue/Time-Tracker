@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -40,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 
-public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  ActionMode.Callback,DialogLogoutFragment.YesNoListenerDeleteAccount {
+public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  ActionMode.Callback,DialogLogoutFragment.YesNoListenerDeleteAccount,SwipeRefreshLayout.OnRefreshListener {
 
     ListView mDrawerList;
     RelativeLayout mDrawerpane;
@@ -60,6 +61,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     boolean[] selectionevents;
     private ArrayList<EventObject> listEvent;
     FloatingActionButton fab;
+    SwipeRefreshLayout refreshLayout;
 
     int countevent = 0;
     private android.support.v7.view.ActionMode mactionMode;
@@ -72,6 +74,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         prepareView();
          fab = (FloatingActionButton) findViewById(R.id.fab);
+        refreshLayout=(SwipeRefreshLayout)findViewById(R.id.swiperefresh);
+        refreshLayout.setColorSchemeColors(Color.BLUE);
+        refreshLayout.setOnRefreshListener(this);
 
         userLocalStore = new UserLocalStore(this);
         mtitel=drawerTitle = title = getTitle();
@@ -333,6 +338,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                 break;
             case R.id.action_refresh:
+                refreshLayout.setRefreshing(true);
                 getEventsFromDatabase(username);
                 break;
         }
@@ -714,8 +720,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     void  getEventsFromDatabase(final String username){
 
-        ServerRequest serverRequest=new ServerRequest(this);
-        serverRequest.fetchAllevents(new GetEventsCallbacks() {
+        ServerRequest serverRequest = new ServerRequest(this);
+        serverRequest.fetchAlleventscentralpage(new GetEventsCallbacks() {
             @Override
             public void done(ArrayList<EventObject> returnedeventobject) {
                 if (returnedeventobject != null) {
@@ -724,6 +730,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                     intent.putExtra("username", username);
                     intent.putExtra("eventlist", returnedeventobject);
                     startActivity(intent);
+                    refreshLayout.setRefreshing(false);
+
                 } else {
 
                 }
@@ -774,5 +782,19 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     @Override
     public void onNo() {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(CentralPageActivity.this, HomeScreenActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onRefresh() {
+
+        getEventsFromDatabase(userLocalStore.getLoggedInUser().username);
     }
 }

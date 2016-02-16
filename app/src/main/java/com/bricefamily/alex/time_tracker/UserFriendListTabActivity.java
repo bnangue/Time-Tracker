@@ -180,4 +180,5 @@ public class UserFriendListTabActivity extends ActionBarActivity implements Adap
         outState.putParcelableArrayList("userlist",userArrayList);
         outState.putIntArray("status",status);
     }
+
 }

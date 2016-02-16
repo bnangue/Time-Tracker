@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -31,7 +30,6 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
     private ListView listView;
 
     @TargetApi(Build.VERSION_CODES.M)
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         userLocalStore=new UserLocalStore(getContext());

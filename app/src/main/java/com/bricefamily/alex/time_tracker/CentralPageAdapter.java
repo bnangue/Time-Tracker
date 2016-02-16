@@ -14,7 +14,11 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -89,10 +93,39 @@ public class CentralPageAdapter extends BaseAdapter{
         String titeeel=list.get(position).titel;
         String creato=list.get(position).creator;
         String dtimes=list.get(position).creationTime;
+        String[] ti=dtimes.split("-");
+        String tiday=ti[2];
+        Calendar c=new GregorianCalendar();
+        Date dat=c.getTime();
+        //String day= String.valueOf(dat.getDay());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+        String day = (String) android.text.format.DateFormat.format("dd", dat); //20
+
+         int t=Integer.parseInt(day);
+        int y=Integer.parseInt(tiday);
+        if(tiday.equals(day)){
+            holder.dtime.setText("today");
+        }else if(t-1==y){
+            holder.dtime.setText("yesterday");
+        }else if(t-2==y){
+            holder.dtime.setText("2 days ago");
+        }else if(t-3==y){
+            holder.dtime.setText("3 days ago");
+        }else if(t-4==y){
+            holder.dtime.setText("4 days ago");
+        }else if(t-5==y){
+            holder.dtime.setText("5 days ago");
+        }else if(t-6==y){
+            holder.dtime.setText("6 days ago");
+        }else if(t-7==y){
+            holder.dtime.setText("a week ago");
+        }else {
+            holder.dtime.setText(dtimes);
+        }
         holder.creator.setText(creato);
         holder.titel.setText(titeeel);
-        holder.dtime.setText(dtimes);
+       // holder.dtime.setText(dtimes);
         holder.checker.setChecked(false);
 
 

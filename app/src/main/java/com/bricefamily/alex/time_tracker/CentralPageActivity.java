@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 
-public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  ActionMode.Callback {
+public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  ActionMode.Callback,DialogLogoutFragment.YesNoListenerDeleteAccount {
 
     ListView mDrawerList;
     RelativeLayout mDrawerpane;
@@ -327,11 +327,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                 break;
             case R.id.action_logout:
-                User user=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0);
-
-                updatestatus(user);
-                userLocalStore.clearUserData();
-                userLocalStore.setUserLoggedIn(false);
+                DialogLogoutFragment alertDialogFragmentTwobtn=new DialogLogoutFragment();
+                alertDialogFragmentTwobtn.setCancelable(false);
+                alertDialogFragmentTwobtn.show(getSupportFragmentManager(), "tag");
 
                 break;
             case R.id.action_refresh:
@@ -410,11 +408,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
             case "Group":
-                if(username!=null|| !username.isEmpty()){
-                    User u=new User(username,"","");
-                    fetchuserlist(u);
-
-                }
+                User u=userLocalStore.getLoggedInUser();
+                fetchuserlist(u);
 
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
@@ -441,7 +436,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             public void userlist(ArrayList<User> reponse) {
                 if (reponse.size() != 0) {
                     ArrayList<User> users = new ArrayList<User>();
-                    users=reponse;
+                    users = reponse;
                     final ArrayList<User> finalUsers = users;
                     serverRequestUser.fetchallUsers(new GetUserCallbacks() {
                         @Override
@@ -458,7 +453,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                         public void userlist(ArrayList<User> reponse) {
 
                             if (reponse.size() != 0) {
-                                Intent intent = new Intent(CentralPageActivity.this, UserListActivity.class);
+                                Intent intent = new Intent(CentralPageActivity.this, UserListTabsActivity.class);
                                 intent.putExtra("userlistforgcm", finalUsers);
                                 intent.putExtra("userlist", reponse);
                                 startActivity(intent);
@@ -766,4 +761,18 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         popup.show();
     }
 
+    @Override
+    public void onYes() {
+        User us=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0);
+
+        updatestatus(us);
+        userLocalStore.clearUserData();
+        userLocalStore.setUserLoggedIn(false);
+
+    }
+
+    @Override
+    public void onNo() {
+
+    }
 }

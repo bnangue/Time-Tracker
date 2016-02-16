@@ -77,7 +77,6 @@ public class CentralPageAdapter extends BaseAdapter{
 
             holder.creator=(TextView)convertView.findViewById(R.id.itemcreator);
             holder.titel=(TextView)convertView.findViewById(R.id.itemTitel);
-            holder.infotext=(TextView)convertView.findViewById(R.id.itmeinfotext);
             holder.dtime=(TextView)convertView.findViewById(R.id.itemtime);
             holder.checker=(CheckBox)convertView.findViewById(R.id.checkBoxcentralpage);
 
@@ -88,13 +87,11 @@ public class CentralPageAdapter extends BaseAdapter{
         }
 
         String titeeel=list.get(position).titel;
-        String infoteext=list.get(position).infotext;
         String creato=list.get(position).creator;
         String dtimes=list.get(position).creationTime;
 
         holder.creator.setText(creato);
         holder.titel.setText(titeeel);
-        holder.infotext.setText(infoteext);
         holder.dtime.setText(dtimes);
         holder.checker.setChecked(false);
 
@@ -140,7 +137,6 @@ public class CentralPageAdapter extends BaseAdapter{
 
     static class Holder {
         public TextView titel;
-        public TextView infotext;
         public TextView creator;
         public TextView dtime;
         public CheckBox checker;

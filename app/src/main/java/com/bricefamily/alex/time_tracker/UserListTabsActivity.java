@@ -19,9 +19,8 @@ public class UserListTabsActivity extends TabActivity {
     ArrayList<User> userArrayListforGcm;
     ArrayList<User> userArrayList;
     UserLocalStore userLocalStore;
-    private static final String INBOX_SPEC = "Inbox";
-    private static final String OUTBOX_SPEC = "Outbox";
-    private static final String PROFILE_SPEC = "Profile";
+    private static final String INBOX_SPEC = "My Friends";
+    private static final String OUTBOX_SPEC = "All Users";
 
 
     private ViewPager mViewPager;
@@ -87,5 +86,14 @@ public class UserListTabsActivity extends TabActivity {
         outState.putParcelableArrayList("listforgcm", userArrayListforGcm);
         outState.putParcelableArrayList("list",userArrayList);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent=new Intent(UserListTabsActivity.this,HomeScreenActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(intent);
     }
 }

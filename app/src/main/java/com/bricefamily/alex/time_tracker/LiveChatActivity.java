@@ -30,6 +30,7 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -331,6 +332,12 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
         }
     };
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_live_chat, menu);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -338,6 +345,9 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
             case android.R.id.home:
                 User u=userLocalStore.getLoggedInUser();
                 fetchuserlist(u);
+                break;
+            case R.id.action_delete_chat:
+                dbOperation.deleteTableData(new ChatPeople().getTableName(),null);
                 break;
         }
         return true;
@@ -372,7 +382,7 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
                         String regid = userLocalStore.getUserRegistrationId();
                         ArrayList<Pair<String,String>> data=new ArrayList<>();
                         data.add(new Pair<String, String>("message", messageToSend));
-                        data.add(new Pair<String, String>("sender", receiverName));
+                        data.add(new Pair<String, String>("sender", userLocalStore.getLoggedInUser().username));
                         data.add(new Pair<String, String>("registrationReceiverIDs", receiverregId));
                         data.add(new Pair<String, String>("registrationSenderIDs", regid));
                         data.add(new Pair<String, String>("apiKey", Config.API_KEY));
@@ -542,7 +552,9 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
                                 Intent intent = new Intent(LiveChatActivity.this, UserListTabsActivity.class);
                                 intent.putExtra("userlistforgcm", finalUsers);
                                 intent.putExtra("userlist", reponse);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
+                                finish();
                             }
                         }
                     });

@@ -164,6 +164,7 @@ public class UserFriendListTabActivity extends ActionBarActivity implements Adap
             intent.putExtra("recieverregId",reciverregId);
             intent.putExtra("message","");
             startActivity(intent);
+           finish();
 
         }else{
             Toast.makeText(getApplicationContext(),"User "+ userArrayListforGcm.get(position).username

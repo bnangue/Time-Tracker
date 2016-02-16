@@ -133,7 +133,7 @@ public class LiveChatIntentService extends IntentService {
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(LiveChatActivity.class);
+        stackBuilder.addParentStack(HomeScreenActivity.class);
 // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(intent);
         PendingIntent resultPendingIntent =

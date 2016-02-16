@@ -237,10 +237,10 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
                 if(!msg.isEmpty()){
 
-                    User user=new User(msg,registeredData.username,registeredData.email,null);
+                    User us=new User(msg,registeredData.username,registeredData.email,registeredData.password);
 
                     userLocalStore.setUserGCMregId(msg,0);
-                    storeregIdsMysql(user);
+                    storeregIdsMysql(us);
                 }
             }
         }.execute(null, null, null);

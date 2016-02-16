@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -12,14 +13,15 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class HomeScreenActivity extends AppCompatActivity {
+public class HomeScreenActivity extends ActionBarActivity implements DialogLogoutFragment.YesNoListenerDeleteAccount{
     User user;
     String username;
-
+    UserLocalStore userLocalStore;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+        userLocalStore=new UserLocalStore(this);
         Bundle extras=getIntent().getExtras();
         if(extras!=null){
             user=extras.getParcelable("loggedinUser");
@@ -39,6 +41,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         if(username!=null|| !username.isEmpty()){
             User u=new User(username,"","");
             fetchuserlist(u);
+
 
         }else {
             Toast.makeText(getApplicationContext(),"no user currently logged in",Toast.LENGTH_SHORT).show();
@@ -61,6 +64,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                     intent.putExtra("username", returneduser.username);
                     intent.putExtra("eventlist", returnedeventobject);
                     startActivity(intent);
+                    finish();
                 } else {
                     showdialg2();
                 }
@@ -128,4 +132,54 @@ public class HomeScreenActivity extends AppCompatActivity {
         alert.show();
     }
 
+    @Override
+    public void onBackPressed() {
+
+
+        DialogLogoutFragment alertDialogFragmentTwobtn=new DialogLogoutFragment();
+        alertDialogFragmentTwobtn.setCancelable(false);
+        alertDialogFragmentTwobtn.show(getSupportFragmentManager(), "tag");
+
+    }
+    private void updatestatus(final User user){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(this);
+        serverRequestUser.updtaestatus(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+                if (reponse.contains("Status successfully updated")) {
+                    Intent intent = new Intent(HomeScreenActivity.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onYes() {
+        String n=userLocalStore.getLoggedInUser().username;
+        String e=userLocalStore.getLoggedInUser().email;
+        String p=userLocalStore.getLoggedInUser().password;
+        User us=new User(n,e,p,0);
+
+        updatestatus(us);
+        userLocalStore.clearUserData();
+        userLocalStore.setUserLoggedIn(false);
+    }
+
+    @Override
+    public void onNo() {
+
+    }
 }

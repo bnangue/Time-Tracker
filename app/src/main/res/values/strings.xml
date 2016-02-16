@@ -44,6 +44,7 @@
     <string name="gcm_unregistered">gcm unregisterd</string>
     <string name="title_activity_home_screen">HomeScreenActivity</string>
     <string name="title_activity_user_list_tabs">UserListTabsActivity</string>
+    <string name="action_deletechat">Delete coonversation</string>
 
 
 </resources>

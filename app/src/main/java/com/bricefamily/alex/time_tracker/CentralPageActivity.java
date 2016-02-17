@@ -779,7 +779,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     @Override
     public void onYes() {
-        User us=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0);
+        User us=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0,userLocalStore.getUserRegistrationId());
 
         updatestatus(us);
         userLocalStore.clearUserData();

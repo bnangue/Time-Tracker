@@ -133,10 +133,10 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         passwordstr = passworded.getText().toString();
 
         if(userLocalStore.getLoggedInUser().username.isEmpty()){
-            User user = new User(null, emailstr, passwordstr,1);
+            User user = new User(null, emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
             updatestatus(user);
         }else{
-            User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
+            User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
             //Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
             if(userLocalStore.getUserRegistrationId().isEmpty()|| userLocalStore.getUserRegistrationId()==null){
 
@@ -345,10 +345,10 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
 
             if(userLocalStore.getLoggedInUser().username.isEmpty()){
-                User user = new User(null, emailstr, passwordstr,1);
+                User user = new User(null, emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
                 updatestatus(user);
             }else{
-                User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1);
+                User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
                 //Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
                 if(userLocalStore.getUserRegistrationId().isEmpty()|| userLocalStore.getUserRegistrationId()==null){
 

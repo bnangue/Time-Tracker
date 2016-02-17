@@ -20,11 +20,12 @@ public class User implements Parcelable {
         this.email=email;
         this.password=password;
     }
-    public User(String username,String email,String password,int status){
+    public User(String username,String email,String password,int status,String regId){
         this.username=username;
         this.email=email;
         this.password=password;
         this.status=status;
+        this.regId=regId;
     }
 
     public User(String username,Bitmap picture,int status){
@@ -43,13 +44,14 @@ public class User implements Parcelable {
         this.email=email;
         this.password=password;
     }
-    public User(String username, String email, String password, String firstname, String lastname,int status) {
+    public User(String username, String email, String password, String firstname, String lastname,int status,String regId) {
         this.username=username;
         this.email=email;
         this.password=password;
         this.firstname=firstname;
         this.lastname=lastname;
         this.status=status;
+        this.regId=regId;
 
     }
     public User(String username,String email,String password,String friendlist,int status){

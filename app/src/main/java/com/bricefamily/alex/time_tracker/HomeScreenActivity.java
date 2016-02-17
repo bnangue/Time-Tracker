@@ -209,7 +209,8 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
         String n=userLocalStore.getLoggedInUser().username;
         String e=userLocalStore.getLoggedInUser().email;
         String p=userLocalStore.getLoggedInUser().password;
-        User us=new User(n,e,p,0);
+        String reid=userLocalStore.getUserRegistrationId();
+        User us=new User(n,e,p,0,reid);
 
         updatestatus(us);
         userLocalStore.clearUserData();

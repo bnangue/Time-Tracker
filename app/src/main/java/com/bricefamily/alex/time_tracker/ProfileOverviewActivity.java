@@ -97,7 +97,7 @@ public class ProfileOverviewActivity extends AppCompatActivity {
                 });
                 break;
             case R.id.action_logout:
-                User user=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0);
+                User user=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0,userLocalStore.getUserRegistrationId());
 
                 updatestatus(user);
                 userLocalStore.clearUserData();

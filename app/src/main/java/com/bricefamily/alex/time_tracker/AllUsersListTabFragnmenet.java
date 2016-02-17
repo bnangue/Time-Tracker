@@ -29,6 +29,7 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
     UserLocalStore userLocalStore;
 
     int[] status ;
+    boolean[]friendstatus;
     private ListView listView;
     SwipeRefreshLayout refreshLayout;
 
@@ -45,7 +46,10 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
         refreshLayout.setColorSchemeColors(Color.BLUE);
         refreshLayout.setOnRefreshListener(this);
 
+
+
         fetchuserlist();
+
         return rootview;
     }
 
@@ -69,6 +73,8 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
                     userArrayList = reponse;
                     status = setfriendstatuslist(reponse, userfriendsArrayList);
                     prepareListview(reponse, setfriendstatuslist(reponse, userfriendsArrayList));
+                    friendstatus=setFriendstatus(reponse,userfriendsArrayList);
+                    allUserTabAdapter.setfriendstatus(friendstatus);
                     refreshLayout.setRefreshing(false);
 
                 }
@@ -79,6 +85,18 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
 
 
 
+    boolean[] setFriendstatus(ArrayList<User> userArrayList,ArrayList<String> userfriendsArrayList){
+        boolean[]frieds=new boolean[userArrayList.size()];
+        for(int i=0; i<userArrayList.size();i++){
+            for(int j=0;j<userfriendsArrayList.size();j++){
+                if(userfriendsArrayList.get(j).equals(userArrayList.get(i).username)){
+                    frieds[i]=true;
+                }
+            }
+        }
+
+        return frieds;
+    }
     void prepareListview(ArrayList<User> list,int[] statsus){
 
         allUserTabAdapter=new AllUserTabAdapter(getContext(),list,this);
@@ -92,6 +110,9 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
 
         if(status==null){
             status=new int[list.size()];
+        }
+        if(friendstatus==null){
+            friendstatus=new boolean[list.size()];
         }
     }
 
@@ -194,7 +215,7 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
 
     }
 
-    private void removeuserinfriendlist(final int position) {
+    public void removeuserinfriendlist(final int position) {
 
         ServerRequestUser serverRequestUser=new ServerRequestUser(getActivity());
         String f=userLocalStore.getUserfriendliststring();
@@ -246,7 +267,7 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             }
         });
     }
-    private  void adduserinfriendList(final int position){
+    public   void adduserinfriendList(final int position){
         ServerRequestUser serverRequestUser=new ServerRequestUser(getActivity());
         String f=userLocalStore.getUserfriendliststring();
         StringBuilder fadd=null;
@@ -305,7 +326,15 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
 
     @Override
     public void onAdd(int position) {
-        adduserinfriendList(position);
+        if(userArrayList.get(position).regId==null){
+            Toast.makeText(getContext(),"This user has not registered",Toast.LENGTH_SHORT).show();
+        }else {
+            FriendRequest friendRequest=new FriendRequest(getContext(),userArrayList.get(position));
+            friendRequest.sendFriendresquest(true,null,null);
+            status[position]=1;
+            allUserTabAdapter.setRequeststatus(status);
+        }
+
     }
 
     @Override

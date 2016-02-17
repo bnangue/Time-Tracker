@@ -245,9 +245,10 @@ public class ServerRequestUser {
                 }else {
                     String username=null;
                     if(jsonObject.has("username")){
+                        String regId=jsonObject.getString("gcm_regid");
                         username=jsonObject.getString("username");
                         int stat=jsonObject.getInt("onlineStatus");
-                        returneduser=new User(username,user.email,user.password,stat);
+                        returneduser=new User(username,user.email,user.password,stat,regId);
                     }
 
                 }
@@ -959,10 +960,11 @@ public class ServerRequestUser {
                 String firstname = jo_inside.getString("firstname");
                 String lastname = jo_inside.getString("lastname");
                 int  status = jo_inside.getInt("onlineStatus");
+                String regId = jo_inside.getString("gcm_regid");
 
 
                 User  object =new User(username, email, password, firstname,
-                        lastname,status);
+                        lastname,status,regId);
 
                 events.add(object);
 

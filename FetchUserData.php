@@ -9,7 +9,7 @@ $con=mysqli_connect("mysql12.000webhost.com","a5659879_brice","fXu*br5q","a56598
     mysqli_stmt_execute($statement);
    
    mysqli_stmt_store_result($statement);
-   mysqli_stmt_bind_result($statement,$UserID,$username,$email,$password,$firstname,$lastname,$onlineStatus,$friendList);
+   mysqli_stmt_bind_result($statement,$UserID,$username,$email,$password,$firstname,$lastname,$onlineStatus,$friendList,$gcm_regid);
 
    $user=array();
    while(mysqli_stmt_fetch($statement))
@@ -19,6 +19,7 @@ $con=mysqli_connect("mysql12.000webhost.com","a5659879_brice","fXu*br5q","a56598
    $user[password]=$password;
    $user[onlineStatus]=$onlineStatus;
    $user[friendList]=$friendList;
+    $user[gcm_regid]=$gcm_regid;
    }
    
    echo json_encode($user);

@@ -42,11 +42,13 @@ public class AllUserTabAdapter extends BaseAdapter implements DialogRequestAddFr
     private ArrayList<User> userlist;
     private Context context;
     private int[] requeststatus;
+    private boolean [] friendstatus;
 
     public AllUserTabAdapter(Context context, ArrayList<User> userlist,Fragment fragment){
         this.context=context;
         this.userlist=userlist;
         requeststatus =new int[userlist.size()];
+        friendstatus=new boolean[userlist.size()];
         onbuttonAddFriendPressed=(OnbuttonAddFriendPressed)fragment;
 
     }
@@ -54,6 +56,11 @@ public class AllUserTabAdapter extends BaseAdapter implements DialogRequestAddFr
     public void setRequeststatus(int[] status){
 
         this.requeststatus =status;
+        notifyDataSetChanged();
+    }
+    public void setfriendstatus(boolean[] status){
+
+        this.friendstatus =status;
         notifyDataSetChanged();
     }
     @Override
@@ -111,9 +118,16 @@ public class AllUserTabAdapter extends BaseAdapter implements DialogRequestAddFr
 
             holder.addfriend.setText("REMOVE");
             convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
-            holder.friendindicator.setText("request sent");
+            if(friendstatus[position]){
+                holder.friendindicator.setText("friend");
+                holder.addfriend.setEnabled(false);
+            }else {
+                holder.friendindicator.setText("request sent");
+                holder.addfriend.setEnabled(true);
+            }
 
-        }else{
+
+        } else {
             convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
             holder.addfriend.setText("ADD FRIEND");
         }

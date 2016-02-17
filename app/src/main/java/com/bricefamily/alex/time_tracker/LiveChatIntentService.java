@@ -25,6 +25,7 @@ public class LiveChatIntentService extends IntentService {
     NotificationCompat.Builder mBuilder;
     Notification notification;
     DBOperation dbOperation;
+    FriendRequest friendRequest;
 
     public static final String TAG = "GcmIntentService";
     IBinder mBinder=new Binder() ;
@@ -38,6 +39,7 @@ public class LiveChatIntentService extends IntentService {
         super.onCreate();
 
         dbOperation = new DBOperation(this);
+        friendRequest=new FriendRequest(this,null);
         dbOperation.createAndInitializeTables();
          mBuilder = new NotificationCompat.Builder(
                 this).setSmallIcon(R.drawable.chaticon)
@@ -84,6 +86,12 @@ public class LiveChatIntentService extends IntentService {
                 i.putExtra("registrationSenderIDs", extras.getString("registrationSenderIDs"));
                 if(extras.getString("message").contains("new Event added by")){
 
+                }else if(extras.getString("message").contains("Do you want to be friend with ")){
+
+                    sendfriendrequestnotification(intent);
+                } else if(extras.getString("message").contains(" is now your friend")){
+
+                    sendnewfriendnotification(intent);
                 }else{
                     sendOrderedBroadcast(i, null);
 
@@ -149,6 +157,101 @@ public class LiveChatIntentService extends IntentService {
                 .setContentText(message);
         mBuilder.setContentIntent(resultPendingIntent);
         notification=mBuilder.build();
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    private void sendfriendrequestnotification(Intent bintent) {
+
+        Bundle extras=bintent.getExtras();
+
+        //String chattingFrom = extras.getString("chattingFrom");
+        String chattingToName = extras.getString("sender");// will be user as receiver name in current Device getting the notifiction
+        String chattingToDeviceID = extras.getString("registrationSenderIDs");
+        String msg = extras.getString("message");
+        String receiver = extras.getString("receiver");// will be user as sender name in current Device getting the notifiction
+
+        String message=chattingToName+": " +msg;
+
+        NotificationCompat.Builder Builder = new NotificationCompat.Builder(
+                this).setSmallIcon(R.drawable.addusercolor)
+                .setContentTitle("New Message")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(""))
+                .setContentText("");
+        Builder.setDefaults(NotificationCompat.DEFAULT_ALL);
+        Builder.setAutoCancel(true);
+        mNotificationManager = (NotificationManager) this
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this,LoginPanelActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        //intent.putExtra("chattingFrom", chattingFrom);
+        intent.putExtra("recieverName",chattingToName);
+        intent.putExtra("receiver", receiver);
+        intent.putExtra("recieverregId", chattingToDeviceID);
+        intent.putExtra("messagefromgcm", msg);
+        intent.putExtra("request", true);
+
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        Builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setContentText(message);
+        Builder.setContentIntent(resultPendingIntent);
+        notification=Builder.build();
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+
+    private void sendnewfriendnotification(Intent bintent) {
+
+        Bundle extras=bintent.getExtras();
+
+        //String chattingFrom = extras.getString("chattingFrom");
+        String chattingToName = extras.getString("sender");// will be user as receiver name in current Device getting the notifiction
+        String chattingToDeviceID = extras.getString("registrationSenderIDs");
+        String msg = extras.getString("message");
+        String receiver = extras.getString("receiver");// will be user as sender name in current Device getting the notifiction
+
+        String message=chattingToName+": " +msg;
+
+        NotificationCompat.Builder Builder = new NotificationCompat.Builder(
+                this).setSmallIcon(R.drawable.addeduserblue)
+                .setContentTitle("New Message")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(""))
+                .setContentText("");
+        Builder.setDefaults(NotificationCompat.DEFAULT_ALL);
+        Builder.setAutoCancel(true);
+        mNotificationManager = (NotificationManager) this
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this,LoginPanelActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        //intent.putExtra("chattingFrom", chattingFrom);
+        intent.putExtra("recieverName",chattingToName);
+        intent.putExtra("receiver", receiver);
+        intent.putExtra("recieverregId", chattingToDeviceID);
+        intent.putExtra("messagefromgcm", msg);
+        intent.putExtra("request", false);
+
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        Builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setContentText(message);
+        Builder.setContentIntent(resultPendingIntent);
+        notification=Builder.build();
         mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 

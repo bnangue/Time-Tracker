@@ -34,8 +34,7 @@
         </activity>
         <activity
             android:name=".CentralPageActivity"
-            android:label="@string/title_activity_central_page"
-            />
+            android:label="@string/title_activity_central_page" />
         <activity
             android:name=".CreateUserActivity"
             android:label="@string/title_activity_create_user" />
@@ -126,13 +125,18 @@
         <activity
             android:name=".NewUserTabsActivity"
             android:label="@string/title_activity_new_user_tabs"
-            android:theme="@style/AppTheme"
-            android:parentActivityName=".HomeScreenActivity">
-
+            android:parentActivityName=".HomeScreenActivity"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".HomeScreenActivity" />
         </activity>
+        <activity
+            android:name=".RequestHandlerActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""></activity>
+        <activity android:name=".LoginPanelActivity"></activity>
     </application>
 
 </manifest>

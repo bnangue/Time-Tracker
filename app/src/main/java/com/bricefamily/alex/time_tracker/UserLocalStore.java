@@ -35,11 +35,27 @@ public class UserLocalStore {
     //call with true if logged in
     public void setUserLoggedIn(boolean loggedIn){
         SharedPreferences.Editor spEditor=userLocalDataBase.edit();
-        spEditor.putBoolean("loggedIn",loggedIn);
+        spEditor.putBoolean("loggedIn", loggedIn);
         spEditor.apply();
 
     }
 
+    public void setUserUserfriendliststring(String friendsname){
+        SharedPreferences.Editor editor=userLocalDataBase.edit();
+        editor.putString("friendsname", friendsname);
+
+        editor.apply();
+
+    }
+    public String getUserfriendliststring() {
+        String friendsname = userLocalDataBase.getString("friendsname", "");
+        if (friendsname.isEmpty()) {
+            return "";
+        }
+        //int registeredVersion = userLocalDataBase.getInt("appVersion", Integer.MIN_VALUE);
+
+        return friendsname;
+    }
     public void setUserGCMregId(String regId,int appversion){
         appVersion=appversion;
         SharedPreferences.Editor editor=userLocalDataBase.edit();

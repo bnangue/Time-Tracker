@@ -86,10 +86,10 @@
         <activity
             android:name=".LiveChatActivity"
             android:label="@string/title_activity_user_list"
-            android:parentActivityName=".UserListTabsActivity">
+            android:parentActivityName=".NewUserTabsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UserListTabsActivity" />
+                android:value=".NewUserTabsActivity" />
         </activity>
         <activity
             android:name=".ViewFriendActivity"
@@ -125,8 +125,12 @@
         <activity
             android:name=".NewUserTabsActivity"
             android:label="@string/title_activity_new_user_tabs"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".HomeScreenActivity">
 
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HomeScreenActivity" />
         </activity>
     </application>
 

@@ -4,12 +4,14 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 /**
  * Created by alex on 16.01.2016.
  */
 public class User implements Parcelable {
     String username,email,
-            password,firstname,lastname,regId;
+            password,firstname,lastname,regId,friendlist;
     Bitmap picture;
     int status;
 
@@ -50,6 +52,31 @@ public class User implements Parcelable {
         this.status=status;
 
     }
+    public User(String username,String email,String password,String friendlist,int status){
+        this.username=username;
+        this.friendlist=friendlist;
+        this.email=email;
+        this.password=password;
+        this.status=status;
+    }
+
+    public User() {
+
+    }
+
+    public ArrayList<String> getuserfriendlist(String ufriendlist){
+        ArrayList<String> list =new ArrayList<>();
+        String[]friends = null;
+        if(ufriendlist!=null){
+          friends=ufriendlist.split(",");
+
+        }
+        assert friends != null;
+        for(int i=0;i<friends.length;i++){
+            list.add(friends[i]);
+        }
+        return list;
+    }
 
 
     private User(Parcel in){
@@ -61,6 +88,7 @@ public class User implements Parcelable {
         lastname=in.readString();
         status=in.readInt();
         regId=in.readString();
+        friendlist=in.readString();
 
 
     }
@@ -80,6 +108,7 @@ public class User implements Parcelable {
         dest.writeString(lastname);
         dest.writeInt(status);
         dest.writeString(regId);
+        dest.writeString(friendlist);
 
     }
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {

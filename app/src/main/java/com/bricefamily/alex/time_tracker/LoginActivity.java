@@ -302,6 +302,12 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         userLocalStore.storeUserData(returneduser);
         userLocalStore.setUserLoggedIn(true);
 
+        String friendlist=userLocalStore.getUserfriendliststring();
+        if(friendlist==null||friendlist.isEmpty()||friendlist.equals(",")){
+            userLocalStore.setUserUserfriendliststring("noFrineds");
+        }
+
+
         Intent intent=new Intent(this,HomeScreenActivity.class);
         intent.putExtra("loggedinUser",returneduser);
         startActivity(intent);

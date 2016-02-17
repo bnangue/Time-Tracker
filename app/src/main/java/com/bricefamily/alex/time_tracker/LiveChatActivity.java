@@ -549,7 +549,7 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
                         public void userlist(ArrayList<User> reponse) {
 
                             if (reponse.size() != 0) {
-                                Intent intent = new Intent(LiveChatActivity.this, UserListTabsActivity.class);
+                                Intent intent = new Intent(LiveChatActivity.this, NewUserTabsActivity.class);
                                 intent.putExtra("userlistforgcm", finalUsers);
                                 intent.putExtra("userlist", reponse);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

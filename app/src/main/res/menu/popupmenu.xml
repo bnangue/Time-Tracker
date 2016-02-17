@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/menu_follow"
-        android:title="Keyword" />
+        android:title="follow" />
     <item android:id="@+id/menu_profile"
-        android:title="Popularity" />
+        android:title="view profile" />
 </menu>

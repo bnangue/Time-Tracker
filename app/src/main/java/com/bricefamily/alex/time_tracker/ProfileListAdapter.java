@@ -53,12 +53,13 @@ public class ProfileListAdapter extends BaseAdapter
         final Holder holder;
         if(convertView==null){
             LayoutInflater inflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView=inflater.inflate(R.layout.user_list_item,null);
+            convertView=inflater.inflate(R.layout.new_my_friends_tab_item,null);
             holder=new Holder();
 
             holder.username=(TextView)convertView.findViewById(R.id.usernamefriend);
             holder.userPicture=(ImageView)convertView.findViewById(R.id.avatarfriend);
             holder.checker=(RadioButton)convertView.findViewById(R.id.radioButtonstatus);
+            holder.friendindicator=(TextView)convertView.findViewById(R.id.friendindicator);
 
 
             convertView.setTag(holder);
@@ -70,6 +71,7 @@ public class ProfileListAdapter extends BaseAdapter
         String usernam=userlist.get(position).username;
 
         holder.username.setText(usernam);
+        holder.friendindicator.setText("friend");
 
         holder.checker.setChecked(setstatus(userlist.get(position).status));
         holder.checker.setClickable(false);
@@ -95,6 +97,7 @@ public class ProfileListAdapter extends BaseAdapter
         }
     }
     static class Holder {
+        public TextView friendindicator;
         public TextView username;
         public ImageView userPicture;
         public RadioButton checker;

@@ -43,14 +43,9 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
         }
     }
     public void homegroupPressed(View view){
-        if(username!=null|| !username.isEmpty()){
-            User u=new User(username,"","");
-            fetchuserlist(u);
+        Intent intent = new Intent(HomeScreenActivity.this, NewUserTabsActivity.class);
 
-
-        }else {
-            Toast.makeText(getApplicationContext(),"no user currently logged in",Toast.LENGTH_SHORT).show();
-        }
+        startActivity(intent);
 
     }
     public void homepreferencePressed(View view){

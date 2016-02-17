@@ -18,6 +18,7 @@
     <color name="ColorPrimary">#cf0c81f7</color>
     <color name="ColorPrimaryDark">#cf55a0ec</color>
     <color name="tabsScrollColor">#cff5f6f7</color>
+    <color name="inboxunread">#cf83bcf5</color>
 
 
 

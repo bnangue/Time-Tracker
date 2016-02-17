@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="15dp"
+    android:background="#6dbef7"
+    android:descendantFocusability="blocksDescendants">
+
+    <ImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:id="@+id/avatarfriend"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:src="@mipmap/ic_calendar"
+        android:layout_toLeftOf="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:background="#fff"
+        android:clickable="false"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/inboxeventTitle"
+        android:gravity="center_vertical"
+        android:textSize="18sp"
+        android:textColor="#000"
+        android:text="Brice posted a new Event "
+        android:textStyle="bold"
+        android:layout_marginLeft="30dp"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/avatarfriend"
+        android:layout_toEndOf="@+id/avatarfriend"
+        android:layout_alignTop="@+id/avatarfriend"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/timeindicator"
+        android:gravity="center_vertical"
+        android:layout_below="@+id/inboxeventTitle"
+        android:textSize="12sp"
+        android:textColor="#000"
+        android:text="few day ago"
+        android:textStyle="bold"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="5dp"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/avatarfriend"
+        android:layout_toEndOf="@+id/avatarfriend" />
+
+
+
+
+
+</RelativeLayout>

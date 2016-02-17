@@ -44,6 +44,10 @@ public class ServerRequestUser {
         progressDialog.setMessage("please wait.");
     }
 
+
+    public void updateFriendList(User user, GetUserCallbacks callbacks){
+        new UpdateUserFriendListAsynckTacks(user,callbacks).execute();
+    }
     public void fetchallUserForGcm(User user, GetUserCallbacks callbacks){
         progressDialog.setTitle("Loading your friend list...");
         progressDialog.show();
@@ -639,6 +643,72 @@ public class ServerRequestUser {
     }
 
 
+    public class UpdateUserFriendListAsynckTacks extends AsyncTask<Void,Void,String>
+    {
+
+        User user;
+        GetUserCallbacks getUserCallbacks;
+
+        public UpdateUserFriendListAsynckTacks(User user, GetUserCallbacks callbacks){
+            this.getUserCallbacks=callbacks;
+            this.user=user;
+        }
+        @Override
+        protected void onPostExecute(String reponse) {
+            progressDialog.dismiss();
+            getUserCallbacks.deleted(reponse);
+            super.onPostExecute(reponse);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            String line="";
+            URL url;
+            HttpURLConnection urlConnection;
+            try {
+                url=new URL(SERVER_ADDRESS + "UpdateUserFriendsList.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                String data =URLEncoder.encode("email","UTF-8")+"="+URLEncoder.encode(user.email,"UTF-8")+"&"+
+                        URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(String.valueOf(user.password.hashCode()),"UTF-8")
+                        +"&"+
+                        URLEncoder.encode("friendList","UTF-8")+"="+URLEncoder.encode(user.friendlist,"UTF-8");
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+
+                int responsecode=urlConnection.getResponseCode();
+                if(responsecode==HttpURLConnection.HTTP_OK){
+                    InputStream in =urlConnection.getInputStream();
+
+                    BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                    StringBuilder bld =new StringBuilder();
+                    String il;
+                    while((il=reader.readLine())!=null){
+                        bld.append(il);
+                    }
+                    line=bld.toString();
+                }else{
+                    line="Error";
+                }
+
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return line;
+        }
+    }
     public class FetchUserGcmRegIdAsynckTacks extends AsyncTask<Void,Void,User> {
         User user;
         GetUserCallbacks userCallbacks;
@@ -1093,4 +1163,6 @@ public class ServerRequestUser {
             return 0;
         }
     }
+
+
 }

@@ -62,6 +62,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     private ArrayList<EventObject> listEvent;
     FloatingActionButton fab;
     SwipeRefreshLayout refreshLayout;
+    User loggedinUser;
 
     int countevent = 0;
     private android.support.v7.view.ActionMode mactionMode;
@@ -88,6 +89,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         if (getIntent().getExtras()!=null || extras != null) {
             username = extras.getString("username");
             listEvent=extras.getParcelableArrayList("eventlist");
+            loggedinUser=extras.getParcelable("loggedinUser");
+
         }
         UserProfilePicture u=new UserProfilePicture(username,null);
        // getUserPicture(u);
@@ -99,6 +102,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             selectionevents=savedInstanceState.getBooleanArray("selectedevents");
             listEvent=savedInstanceState.getParcelableArrayList("eventsArray");
             countevent = savedInstanceState.getInt("numberOfSelectedevents");
+            loggedinUser=savedInstanceState.getParcelable("loggedinUser");
 
             prepareOrientationchange();
 
@@ -135,6 +139,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     public void openProfileOverviewClick(View view){
         Intent intent= new Intent(CentralPageActivity.this,ProfileOverviewActivity.class);
+        intent.putExtra("loggedinUser",loggedinUser);
         startActivity(intent);
     }
     void prepareDrawerViews(){
@@ -390,6 +395,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     public void buttonCreateNewEventPressed(View view){
         Intent intent= new Intent(CentralPageActivity.this, CreateNewEventActivity.class);
         intent.putExtra("username", username);
+        intent.putExtra("loggedinUser",loggedinUser);
         startActivity(intent);
 
     }
@@ -414,8 +420,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
             case "Group":
-                User u=userLocalStore.getLoggedInUser();
-                fetchuserlist(u);
+                Intent intent = new Intent(CentralPageActivity.this, NewUserTabsActivity.class);
+
+                startActivity(intent);
 
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
@@ -502,6 +509,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             state.putParcelableArrayList("eventsArray", listEvent);
             state.putString("user", username);
         state.putBoolean("hideOptions", hideOptions);
+        state.putParcelable("loggedinUser",loggedinUser);
 
 
     }
@@ -788,6 +796,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     public void onBackPressed() {
         super.onBackPressed();
         Intent intent = new Intent(CentralPageActivity.this, HomeScreenActivity.class);
+        intent.putExtra("loggedinUser",loggedinUser);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

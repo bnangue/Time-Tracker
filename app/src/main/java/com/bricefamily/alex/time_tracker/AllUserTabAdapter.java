@@ -114,7 +114,7 @@ public class AllUserTabAdapter extends BaseAdapter implements DialogRequestAddFr
             holder.friendindicator.setText("request sent");
 
         }else{
-            convertView.setBackgroundColor(context.getResources().getColor(R.color.cellselect));
+            convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
             holder.addfriend.setText("ADD FRIEND");
         }
 

@@ -3,13 +3,18 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
-        <item name="colorPrimary">@color/ColorPrimary</item>
-        <item name="colorPrimaryDark">@color/ColorPrimaryDark</item>
+
         <!-- Customize your theme here. -->
     </style>
 
     ...
 
+    <style name="custom" parent="Theme.AppCompat.Light">
+
+        <item name="colorPrimaryDark">#cf0c81f7</item>
+
+        <!-- Customize your theme here. -->
+    </style>
     <style name="MyCustomTheme" parent="Theme.AppCompat.Light">
         <item name="android:windowBackground">@color/BackgroundPhone</item>
         <item name="android:colorBackgroundCacheHint">@color/BackgroundPhone</item>

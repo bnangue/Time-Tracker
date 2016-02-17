@@ -3,6 +3,7 @@ package com.bricefamily.alex.time_tracker;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBarActivity;
@@ -17,6 +18,7 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
     User user;
     String username;
     UserLocalStore userLocalStore;
+    boolean save=true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +29,9 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
             user=extras.getParcelable("loggedinUser");
         }
 
+        if(savedInstanceState!=null){
+            user=savedInstanceState.getParcelable("user");
+        }
 
         if(user!=null){
             username=user.username;
@@ -38,8 +43,7 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
     public void homehomePressed(View view){
         if(user!=null){
             getEventsFromDatabase(user);
-        }else {
-            showdialg2();
+        }else {getAllEventsFromDatabase(userLocalStore.getLoggedInUser().username);
         }
     }
     public void homegroupPressed(View view){
@@ -63,8 +67,9 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
                     Intent intent = new Intent(HomeScreenActivity.this, CentralPageActivity.class);
                     intent.putExtra("username", returneduser.username);
                     intent.putExtra("eventlist", returnedeventobject);
+                    intent.putExtra("loggedinUser", user);
                     startActivity(intent);
-                    finish();
+
                 } else {
                     showdialg2();
                 }
@@ -77,6 +82,30 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
         });
     }
 
+    void getAllEventsFromDatabase(final String username) {
+
+        ServerRequest serverRequest = new ServerRequest(this);
+        serverRequest.fetchAllevents(new GetEventsCallbacks() {
+            @Override
+            public void done(ArrayList<EventObject> returnedeventobject) {
+                if (returnedeventobject != null) {
+                    Intent intent = new Intent(HomeScreenActivity.this, CentralPageActivity.class);
+                    intent.putExtra("username", username);
+                    intent.putExtra("eventlist", returnedeventobject);
+                    intent.putExtra("loggedinUser",user);
+                    startActivity(intent);
+
+                } else {
+                    showdialg2();
+                }
+            }
+
+            @Override
+            public void updated(String reponse) {
+
+            }
+        });
+    }
     private void fetchuserlist(User user){
         final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
         serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
@@ -164,6 +193,15 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
 
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(save){
+            super.onSaveInstanceState(outState);
+            outState.putParcelable("user",user);
+        }
+
     }
 
     @Override

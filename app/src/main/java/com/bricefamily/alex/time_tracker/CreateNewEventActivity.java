@@ -39,6 +39,7 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
     EventObject eventObject;
     DateEventObject dateEventObject;
     UserLocalStore userLocalStore;
+    User user;
 
 
     @Override
@@ -57,6 +58,7 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
 
         if (extras != null) {
             creatornamestr = extras.getString("username");
+            user=extras.getParcelable("loggedinUser");
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -216,8 +218,9 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
                 if (returnedeventobject != null) {
                     Intent intent = new Intent(CreateNewEventActivity.this, CentralPageActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.putExtra("username",username);
+                    intent.putExtra("username", username);
                     intent.putExtra("eventlist", returnedeventobject);
+                    intent.putExtra("loggedinUser",user);
                     startActivity(intent);
                 } else {
 

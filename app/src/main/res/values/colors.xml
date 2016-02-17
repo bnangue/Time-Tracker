@@ -19,6 +19,8 @@
     <color name="ColorPrimaryDark">#cf55a0ec</color>
     <color name="tabsScrollColor">#cff5f6f7</color>
     <color name="inboxunread">#cf83bcf5</color>
+    <color name="colorPrimaryDark">#FF9800</color>
+    <color name="actionbar_color">#607D8B</color>
 
 
 

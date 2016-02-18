@@ -1,6 +1,7 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +70,11 @@ public class ProfileListAdapter extends BaseAdapter
         }
 
         String usernam=userlist.get(position).username;
+        Bitmap picture=userlist.get(position).picture;
+
+        if(picture!=null){
+            holder.userPicture.setImageBitmap(picture);
+        }
 
         holder.username.setText(usernam);
         holder.friendindicator.setText("friend");

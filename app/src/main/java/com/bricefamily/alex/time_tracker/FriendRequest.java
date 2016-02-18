@@ -25,6 +25,7 @@ public class FriendRequest {
      String sendertname;
      String requestquestion="Do you want to be friend with ";
     String requestanswer=" is now your friend";
+    String removeinfo=" removed you as friend";
     private ArrayList<User> userArrayList;
     private int[] status;
     AllUserTabAdapter allUserTabAdapter;
@@ -226,5 +227,97 @@ public class FriendRequest {
 
             }
         });
+    }
+
+
+    public void uddateuserinfriendList(final User us){
+        ServerRequestUser serverRequestUser=new ServerRequestUser(context);
+
+
+        serverRequestUser.updateFriendList(us, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+                if (reponse.contains("Friendlist successfully updated")) {
+
+                }
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
+    }
+
+
+    public  void sendFriendremove() {
+
+        if (!user.regId.isEmpty()) {
+
+
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    HttpURLConnection conn=null;
+                    try {
+
+                        String regid = userLocalStore.getUserRegistrationId();
+                        sendertname=userLocalStore.getLoggedInUser().username;
+                        ArrayList<Pair<String,String>> data=new ArrayList<>();
+
+                            data.add(new Pair<String, String>("message", sendertname+removeinfo ));
+                            data.add(new Pair<String, String>("registrationReceiverIDs", user.regId));
+                            data.add(new Pair<String, String>("receiver", user.username));
+                            data.add(new Pair<String, String>("sender", sendertname));
+
+                        data.add(new Pair<String, String>("registrationSenderIDs", regid));
+                        data.add(new Pair<String, String>("apiKey", Config.API_KEY));
+
+                        byte[] bytes = getData(data).getBytes("UTF-8");
+
+
+                        URL url=new URL(Config.YOUR_SERVER_URL+ "ConnectionGCMServer.php");
+                        conn=(HttpURLConnection)url.openConnection();
+                        conn.setDoOutput(true);
+                        conn.setUseCaches(false);
+                        conn.setFixedLengthStreamingMode(bytes.length);
+                        conn.setRequestMethod("POST");
+                        conn.setRequestProperty("Content-Type",
+                                "application/x-www-form-urlencoded;charset=UTF-8");
+                        // post the request
+                        OutputStream out = conn.getOutputStream();
+                        out.write(bytes);
+                        out.close();
+
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(conn.getInputStream()));
+                        String inputLine;
+                        StringBuffer reponse = new StringBuffer();
+
+                        while ((inputLine = in.readLine()) != null) {
+                            reponse.append(inputLine);
+                        }
+                        final String response =reponse.toString();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }finally {
+                        if(conn!=null){
+                            conn.disconnect();
+                        }
+                    }
+                }
+            };
+
+            thread.start();
+
+        }
+
     }
 }

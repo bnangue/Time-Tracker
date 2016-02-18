@@ -135,8 +135,9 @@
             android:name=".RequestHandlerActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
-            android:taskAffinity=""></activity>
-        <activity android:name=".LoginPanelActivity"></activity>
+            android:taskAffinity="" />
+        <activity android:name=".LoginPanelActivity" />
+        <activity android:name=".RemovedAsFriendActivity"></activity>
     </application>
 
 </manifest>

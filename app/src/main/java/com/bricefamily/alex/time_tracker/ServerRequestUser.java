@@ -45,6 +45,11 @@ public class ServerRequestUser {
     }
 
 
+    public void updatefriendFriendList(User user, GetUserCallbacks callbacks){
+        progressDialog.setTitle("removing "+user.username+" your friend list...");
+        progressDialog.show();
+        new UpdatefriendFriendListAsynckTacks(user,callbacks).execute();
+    }
     public void updateFriendList(User user, GetUserCallbacks callbacks){
         new UpdateUserFriendListAsynckTacks(user,callbacks).execute();
     }
@@ -65,10 +70,10 @@ public class ServerRequestUser {
         progressDialog.show();
         new UpdateUserStatusAsynckTacks(user ,callbacks).execute();
     }
-    public void fetchallUsers(GetUserCallbacks callbacks){
+    public void fetchallUsers(User user,GetUserCallbacks callbacks){
         progressDialog.setTitle("Loading...");
         progressDialog.show();
-        new FetchAllUsersAsynckTacks(callbacks).execute();
+        new FetchAllUsersAsynckTacks(user,callbacks).execute();
     }
     public void deleteAlleventfromUser(User user , GetEventsCallbacks callbacks){
         progressDialog.setTitle("Deleting all your records...");
@@ -210,7 +215,7 @@ public class ServerRequestUser {
             URL url;
             HttpURLConnection urlConnection=null;
             try {
-                url=new URL(SERVER_ADDRESS + "FetchUserData.php");
+                url=new URL(SERVER_ADDRESS + "LoggingUserIn.php");
                 urlConnection=(HttpURLConnection)url.openConnection();
 //                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
 //                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
@@ -221,7 +226,9 @@ public class ServerRequestUser {
                 OutputStream out=urlConnection.getOutputStream();
                 BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
                 String data =URLEncoder.encode("email","UTF-8")+"="+URLEncoder.encode(user.email,"UTF-8")+"&"+
-                        URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(String.valueOf(user.password.hashCode()),"UTF-8");
+                        URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(String.valueOf(user.password.hashCode()),"UTF-8")
+                        +"&"+
+                        URLEncoder.encode("onlineStatus","UTF-8")+"="+URLEncoder.encode(String.valueOf(user.status),"UTF-8");
                 buff.write(data);
                 buff.flush();
                 buff.close();
@@ -239,7 +246,9 @@ public class ServerRequestUser {
                 in.close();
 
                 respons =bi.toString();
-                JSONObject jsonObject= new JSONObject(respons);
+                JSONArray jsonArray= new JSONArray(respons);
+
+                JSONObject jsonObject= jsonArray.getJSONObject(0);
                 if(jsonObject.length()==0){
                     returneduser=null;
                 }else {
@@ -247,8 +256,9 @@ public class ServerRequestUser {
                     if(jsonObject.has("username")){
                         String regId=jsonObject.getString("gcm_regid");
                         username=jsonObject.getString("username");
+                       String friendlist=jsonObject.getString("friendList");
                         int stat=jsonObject.getInt("onlineStatus");
-                        returneduser=new User(username,user.email,user.password,stat,regId);
+                        returneduser=new User(username,user.email,user.password,null,null,stat,regId,null,friendlist);
                     }
 
                 }
@@ -402,15 +412,16 @@ public class ServerRequestUser {
                 in.close();
 
                 respons =bi.toString();
-                JSONObject jsonObject= new JSONObject(respons);
+                JSONArray jsonArray=new JSONArray(respons);
+                JSONObject jsonObject= jsonArray.getJSONObject(0);
 
                 if(jsonObject.length()==0){
                     returned=null;
                 }else {
                     String username=null;
                     Bitmap bitmap=null;
-                    if(jsonObject.has("image")){
-                        String imgString=jsonObject.getString("image");
+                    if(jsonObject.has("Image")){
+                        String imgString=jsonObject.getString("Image");
                         bitmap=decodeBase64(imgString);
                     }
 
@@ -886,10 +897,12 @@ public class ServerRequestUser {
     public class FetchAllUsersAsynckTacks extends AsyncTask<Void,Void,ArrayList<User>> {
 
         GetUserCallbacks userCallbacks;
+        User user;
 
 
-        public FetchAllUsersAsynckTacks(GetUserCallbacks callbacks) {
+        public FetchAllUsersAsynckTacks(User user,GetUserCallbacks callbacks) {
             this.userCallbacks = callbacks;
+            this.user=user;
         }
 
         @Override
@@ -961,10 +974,13 @@ public class ServerRequestUser {
                 String lastname = jo_inside.getString("lastname");
                 int  status = jo_inside.getInt("onlineStatus");
                 String regId = jo_inside.getString("gcm_regid");
+                String imgString=jo_inside.getString("Image");
+                Bitmap bitmap=decodeBase64(imgString);
+                String friendlist=jo_inside.getString("friendList");
 
 
                 User  object =new User(username, email, password, firstname,
-                        lastname,status,regId);
+                        lastname,status,regId,bitmap,friendlist);
 
                 events.add(object);
 
@@ -980,7 +996,9 @@ public class ServerRequestUser {
 
     }
 
-
+    public Bitmap decodeToBitmap(byte[] decodeByte){
+        return BitmapFactory.decodeByteArray(decodeByte, 0, decodeByte.length);
+    }
     public class StoreUserGCMIdsAsynckTacks extends AsyncTask<Void,Void,String>{
 
         User user;
@@ -1157,12 +1175,70 @@ public class ServerRequestUser {
 
 
 
-    private int getstatusInteger(boolean status){
-        if(status){
-            return 1;
+    public class UpdatefriendFriendListAsynckTacks extends AsyncTask<Void,Void,String>
+    {
 
-        }else {
-            return 0;
+        User user;
+        GetUserCallbacks getUserCallbacks;
+
+        public UpdatefriendFriendListAsynckTacks(User user, GetUserCallbacks callbacks){
+            this.getUserCallbacks=callbacks;
+            this.user=user;
+        }
+        @Override
+        protected void onPostExecute(String reponse) {
+            progressDialog.dismiss();
+            getUserCallbacks.deleted(reponse);
+            super.onPostExecute(reponse);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            String line="";
+            URL url;
+            HttpURLConnection urlConnection;
+            try {
+                url=new URL(SERVER_ADDRESS + "UpdateUserFriendsList.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                String data =URLEncoder.encode("email","UTF-8")+"="+URLEncoder.encode(user.email,"UTF-8")+"&"+
+                        URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(user.password,"UTF-8")
+                        +"&"+
+                        URLEncoder.encode("friendList","UTF-8")+"="+URLEncoder.encode(user.friendlist,"UTF-8");
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+
+                int responsecode=urlConnection.getResponseCode();
+                if(responsecode==HttpURLConnection.HTTP_OK){
+                    InputStream in =urlConnection.getInputStream();
+
+                    BufferedReader reader= new BufferedReader(new InputStreamReader(in));
+                    StringBuilder bld =new StringBuilder();
+                    String il;
+                    while((il=reader.readLine())!=null){
+                        bld.append(il);
+                    }
+                    line=bld.toString();
+                }else{
+                    line="Error";
+                }
+
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return line;
         }
     }
 

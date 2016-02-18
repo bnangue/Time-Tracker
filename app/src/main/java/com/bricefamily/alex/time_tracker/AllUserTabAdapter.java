@@ -3,6 +3,7 @@ package com.bricefamily.alex.time_tracker;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,6 +101,10 @@ public class AllUserTabAdapter extends BaseAdapter implements DialogRequestAddFr
         }
 
         String usernam=userlist.get(position).username;
+        Bitmap picture=userlist.get(position).picture;
+        if(picture!=null){
+            holder.userPicture.setImageBitmap(picture);
+        }
         holder.friendindicator.setText(" ");
         holder.username.setText(usernam);
         holder.addfriend.setOnClickListener(new View.OnClickListener() {
@@ -120,7 +125,8 @@ public class AllUserTabAdapter extends BaseAdapter implements DialogRequestAddFr
             convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
             if(friendstatus[position]){
                 holder.friendindicator.setText("friend");
-                holder.addfriend.setEnabled(false);
+                holder.addfriend.setEnabled(true);
+
             }else {
                 holder.friendindicator.setText("request sent");
                 holder.addfriend.setEnabled(true);

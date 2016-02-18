@@ -92,6 +92,9 @@ public class LiveChatIntentService extends IntentService {
                 } else if(extras.getString("message").contains(" is now your friend")){
 
                     sendnewfriendnotification(intent);
+                }else if(extras.getString("message").contains(" removed you as friend")){
+
+                    sendremovedfriendnotification(intent);
                 }else{
                     sendOrderedBroadcast(i, null);
 
@@ -170,7 +173,7 @@ public class LiveChatIntentService extends IntentService {
         String msg = extras.getString("message");
         String receiver = extras.getString("receiver");// will be user as sender name in current Device getting the notifiction
 
-        String message=chattingToName+": " +msg;
+        String message=msg;
 
         NotificationCompat.Builder Builder = new NotificationCompat.Builder(
                 this).setSmallIcon(R.drawable.addusercolor)
@@ -187,7 +190,7 @@ public class LiveChatIntentService extends IntentService {
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         //intent.putExtra("chattingFrom", chattingFrom);
-        intent.putExtra("recieverName",chattingToName);
+        intent.putExtra("recieverName", chattingToName);
         intent.putExtra("receiver", receiver);
         intent.putExtra("recieverregId", chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
@@ -218,7 +221,7 @@ public class LiveChatIntentService extends IntentService {
         String msg = extras.getString("message");
         String receiver = extras.getString("receiver");// will be user as sender name in current Device getting the notifiction
 
-        String message=chattingToName+": " +msg;
+        String message=msg;
 
         NotificationCompat.Builder Builder = new NotificationCompat.Builder(
                 this).setSmallIcon(R.drawable.addeduserblue)
@@ -240,6 +243,52 @@ public class LiveChatIntentService extends IntentService {
         intent.putExtra("recieverregId", chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
         intent.putExtra("request", false);
+
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        Builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setContentText(message);
+        Builder.setContentIntent(resultPendingIntent);
+        notification=Builder.build();
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    private void sendremovedfriendnotification(Intent bintent) {
+
+        Bundle extras=bintent.getExtras();
+
+        //String chattingFrom = extras.getString("chattingFrom");
+        String chattingToName = extras.getString("sender");// will be user as receiver name in current Device getting the notifiction
+        String chattingToDeviceID = extras.getString("registrationSenderIDs");
+        String msg = extras.getString("message");
+        String receiver = extras.getString("receiver");// will be user as sender name in current Device getting the notifiction
+
+        String message=msg;
+
+        NotificationCompat.Builder Builder = new NotificationCompat.Builder(
+                this).setSmallIcon(R.drawable.userremovedloli)
+                .setContentTitle("New Message")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(""))
+                .setContentText("");
+        Builder.setDefaults(NotificationCompat.DEFAULT_ALL);
+        Builder.setAutoCancel(true);
+        mNotificationManager = (NotificationManager) this
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this,RemovedAsFriendActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        //intent.putExtra("chattingFrom", chattingFrom);
+        intent.putExtra("recieverName",chattingToName);
+        intent.putExtra("receiver", receiver);
+        intent.putExtra("recieverregId", chattingToDeviceID);
+        intent.putExtra("messagefromgcm", msg);
 
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(

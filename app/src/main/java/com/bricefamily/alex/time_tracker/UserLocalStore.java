@@ -73,6 +73,24 @@ public class UserLocalStore {
 
         return registrationId;
     }
+
+
+    public void setUserPicturePath(String path){
+
+        SharedPreferences.Editor editor=userLocalDataBase.edit();
+        editor.putString("picturePath", path);
+        editor.apply();
+
+    }
+    public String getUserPicturePath() {
+        String picturePath = userLocalDataBase.getString("picturePath", "");
+        if (picturePath.isEmpty()) {
+            return "";
+        }
+        return picturePath;
+    }
+
+
     public void clearUserData(){
         SharedPreferences.Editor spEditor=userLocalDataBase.edit();
         spEditor.clear();

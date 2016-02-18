@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -102,15 +104,26 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         super.onStart();
         if (authenticate()) {
             displayUserdetails();
-            Bitmap bitmap= getThumbnail("profile.png");
-            if(bitmap==null){
+            String path=userLocalStore.getUserPicturePath();
+            String uName=userLocalStore.getLoggedInUser().username;
+            if(path!=null||  !path.isEmpty()|| !uName.isEmpty()|| uName!=null){
+                Bitmap bitmap= loadImageFromStorage(path,uName);
+                if(bitmap==null){
+                    if(userProfilePicture!=null){
+                        getUserPicture(userProfilePicture);
+                    }else {
+                        Toast.makeText(getApplicationContext(),"Error loading picture",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            }else {
                 if(userProfilePicture!=null){
                     getUserPicture(userProfilePicture);
                 }else {
                     Toast.makeText(getApplicationContext(),"Error loading picture",Toast.LENGTH_SHORT).show();
                 }
-
             }
+
         }
 
     }
@@ -128,13 +141,14 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     }
 
 
+    // first check if internet connection
     public void buttonLoginPressed(View view) {
         emailstr = emailed.getText().toString();
         passwordstr = passworded.getText().toString();
 
         if(userLocalStore.getLoggedInUser().username.isEmpty()){
             User user = new User(null, emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
-            updatestatus(user);
+            logthisUserin(user);
         }else{
             User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
             //Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
@@ -143,12 +157,46 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             }else {
 
             }
-            updatestatus(user);
+            logthisUserin(user);
         }
 
 
     }
 
+    void logthisUserin(final User user){
+        ServerRequestUser serverRequest = new ServerRequestUser(this);
+        String deme=user.email;
+        serverRequest.fetchUserDataInBackground(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+                if (returneduser == null) {
+                    showdialg();
+                } else {
+
+                    String u=returneduser.username;
+                    if(returneduser.regId.equals(userLocalStore.getUserRegistrationId())){
+                        userLocalStore.setUserUserfriendliststring(returneduser.friendlist);
+                        logUserIn(returneduser);
+                    }
+                    else {
+                        getRegId(returneduser);
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void deleted(String reponse) {
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
+    }
 
     void checkGCMRegistrationIds(final User user){
         //logUserIn(returneduser);
@@ -160,17 +208,16 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         serverRequestUser.fetchUserGcmRegid(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
-                if(returneduser!=null){
-                    String r=returneduser.regId;
-                    if(returneduser.regId.equals(userLocalStore.getUserRegistrationId())){
+                if (returneduser != null) {
+                    String r = returneduser.regId;
+                    if (returneduser.regId.equals(userLocalStore.getUserRegistrationId())) {
                         logUserIn(user);
-                    }
-                    else {
+                    } else {
                         getRegId(user);
-                    //    userLocalStore.setUserGCMregId(returneduser.regId,0);
-                  //      logUserIn(user);
+                        //    userLocalStore.setUserGCMregId(returneduser.regId,0);
+                        //      logUserIn(user);
                     }
-                }else{
+                } else {
                     //regid speichern
                     getRegId(user);
                     //showdialg2();
@@ -188,6 +235,8 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             }
         });
     }
+
+
     public void storeregIdsMysql(final User user){
         ServerRequestUser serverRequestUser=new ServerRequestUser(this);
         serverRequestUser.storeUserGcmIds(user, new GetUserCallbacks() {
@@ -200,8 +249,8 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             public void deleted(String reponse) {
                 if (reponse.contains("Registration id successfully saved")) {
                     logUserIn(user);
-                }else{
-                    showdialg2();
+                } else {
+                    dialg("could not save registration id");
                 }
 
             }
@@ -297,6 +346,9 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             }
         });
     }
+
+
+
     private void logUserIn(User returneduser) {
 
         userLocalStore.storeUserData(returneduser);
@@ -330,6 +382,12 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         alert.show();
     }
 
+    private void dialg(String message) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setMessage(message);
+        alert.setPositiveButton("OK", null);
+        alert.show();
+    }
 
     public void buttonCreateUserPressed(View view) {
 
@@ -346,7 +404,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
             if(userLocalStore.getLoggedInUser().username.isEmpty()){
                 User user = new User(null, emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
-                updatestatus(user);
+                logthisUserin(user);
             }else{
                 User user = new User(userLocalStore.getLoggedInUser().username,emailstr, passwordstr,1,userLocalStore.getUserRegistrationId());
                 //Toast.makeText(getApplicationContext(),userLocalStore.getUserRegistrationId(),Toast.LENGTH_SHORT).show();
@@ -355,7 +413,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
                 }else {
 
                 }
-                updatestatus(user);
+               logthisUserin(user);
             }
         }
 
@@ -403,8 +461,10 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
                 public void image(UserProfilePicture reponse) {
                     if (reponse != null) {
                         Bitmap bitmap = reponse.uProfilePicture;
-                        //profilePicture.setImageBitmap(bitmap);
-                         storeimageLocaly(reponse.uProfilePicture);
+                        String  userName = reponse.username;
+                      String picturePath=  saveToInternalStorage(bitmap,userName);
+                        userLocalStore.setUserPicturePath(picturePath);
+                         //storeimageLocaly(reponse.uProfilePicture);
                     } else {
                         Toast.makeText(getApplicationContext(), "No Picture save for this user", Toast.LENGTH_SHORT).show();
                     }
@@ -413,6 +473,50 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
             });
         }
 
+    }
+
+    private String saveToInternalStorage(Bitmap bitmapImage,String username){
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("userProfilePicture", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath=new File(directory,username+".jpg");
+
+        if(mypath.exists()){
+            mypath.delete();
+            mypath=new File(directory,username+".jpg");
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath();
+    }
+
+
+    private Bitmap loadImageFromStorage(String path,String username)
+    {
+        Bitmap bitmap=null;
+        try {
+            File f=new File(path, username+".jpg");
+            bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        return bitmap;
     }
 
     private boolean  storeimageLocaly(Bitmap picture) {

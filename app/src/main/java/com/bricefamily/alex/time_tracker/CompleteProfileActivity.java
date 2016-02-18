@@ -51,11 +51,13 @@ public class CompleteProfileActivity extends ActionBarActivity implements View.O
     private UserProfilePicture userPicture;
     private Bitmap bitmap;
     private Uri filePath;
+    private UserLocalStore userLocalStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_complete_profile);
+        userLocalStore=new UserLocalStore(this);
         prepareView();
         setViews();
 
@@ -121,16 +123,111 @@ public class CompleteProfileActivity extends ActionBarActivity implements View.O
 
     }
 
+    private String saveToInternalStorage(Bitmap bitmapImage,String username){
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("userProfilePicture", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath=new File(directory,username+".jpg");
+
+        if(mypath.exists()){
+            mypath.delete();
+            mypath=new File(directory,username+".jpg");
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath();
+    }
+
+
+    private Bitmap loadImageFromStorage(String path,String username)
+    {
+        Bitmap bitmap=null;
+        try {
+            File f=new File(path, username+".jpg");
+            bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+
+
     public  void buttonSaveCompleteprofile(View view){
-        Bitmap bitmap=getThumbnail("profile.png");
-        if(bitmap==null){
+
+        String path=userLocalStore.getUserPicturePath();
+        String uName=userLocalStore.getLoggedInUser().username;
+
+        if(path!=null||!path.isEmpty()){
+            Bitmap bitmap = loadImageFromStorage(path, uName);
+            if(bitmap!=null){
+                if(userPicture!=null){
+                    ServerRequestUser serverRequest=new ServerRequestUser(this);
+                    serverRequest.updateUserPicture(userPicture, new GetImageCallBacks() {
+                        @Override
+                        public void done(String reponse) {
+                            if (reponse.contains("Profile picture successfully updated")) {
+                                userLocalStore.setUserPicturePath(saveToInternalStorage(userPicture.uProfilePicture,username));
+                                    Toast.makeText(getApplicationContext(), "Profile picture successfully updated", Toast.LENGTH_SHORT).show();
+
+                            }
+
+                        }
+
+                        @Override
+                        public void image(UserProfilePicture reponse) {
+
+                        }
+                    });
+
+                }
+
+            }else {
+                if(userPicture!=null){
+                    ServerRequestUser serverRequest=new ServerRequestUser(this);
+                    serverRequest.saveprofilepicture(userPicture, new GetImageCallBacks() {
+                        @Override
+                        public void done(String reponse) {
+                            if(reponse.contains("Image upload successfully")){
+                                userLocalStore.setUserPicturePath(saveToInternalStorage(userPicture.uProfilePicture, username));
+                                Toast.makeText(getApplicationContext(),"Profile picture successfully added",Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+
+                        @Override
+                        public void image(UserProfilePicture reponse) {
+
+                        }
+                    });
+
+                }
+
+
+            }
+        }else {
             if(userPicture!=null){
                 ServerRequestUser serverRequest=new ServerRequestUser(this);
                 serverRequest.saveprofilepicture(userPicture, new GetImageCallBacks() {
                     @Override
                     public void done(String reponse) {
                         if(reponse.contains("Image upload successfully")){
-                            if(storeimageLocaly(userPicture.uProfilePicture))
+                            userLocalStore.setUserPicturePath(saveToInternalStorage(userPicture.uProfilePicture,username));
                                 Toast.makeText(getApplicationContext(),"Profile picture successfully added",Toast.LENGTH_SHORT).show();
                         }
 
@@ -144,32 +241,13 @@ public class CompleteProfileActivity extends ActionBarActivity implements View.O
 
             }
 
-        }else {
-            if(userPicture!=null){
-                ServerRequestUser serverRequest=new ServerRequestUser(this);
-                serverRequest.updateUserPicture(userPicture, new GetImageCallBacks() {
-                    @Override
-                    public void done(String reponse) {
-                        if (reponse.contains("Profile picture successfully updated")) {
-                            if(storeimageLocaly(userPicture.uProfilePicture))
-                                Toast.makeText(getApplicationContext(),"Profile picture successfully updated",Toast.LENGTH_SHORT).show();
-
-                        }
-
-                    }
-
-                    @Override
-                    public void image(UserProfilePicture reponse) {
-
-                    }
-                });
-
-            }
 
         }
 
 
     }
+
+
     public Bitmap getThumbnail(String filename) {
 
         //String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD + APP_THUMBNAIL_PATH_SD_CARD;

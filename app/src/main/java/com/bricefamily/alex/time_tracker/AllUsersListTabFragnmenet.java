@@ -27,16 +27,19 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
     ArrayList<String> userfriendsArrayList;
     AllUserTabAdapter allUserTabAdapter;
     UserLocalStore userLocalStore;
+    Fragment fragment;
 
     int[] status ;
     boolean[]friendstatus;
     private ListView listView;
     SwipeRefreshLayout refreshLayout;
+    User u;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         userLocalStore=new UserLocalStore(getContext());
+        fragment=this;
         User user=new User();
         userfriendsArrayList=user.getuserfriendlist(userLocalStore.getUserfriendliststring());
 
@@ -46,17 +49,16 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
         refreshLayout.setColorSchemeColors(Color.BLUE);
         refreshLayout.setOnRefreshListener(this);
 
-
-
-        fetchuserlist();
+         u=userLocalStore.getLoggedInUser();
+        fetchuserlist(u);
 
         return rootview;
     }
 
-    private ArrayList<User> fetchuserlist(){
+    private ArrayList<User> fetchuserlist(User user){
         final ArrayList<User> staus = null;
         ServerRequestUser serverRequestUser=new ServerRequestUser(getContext());
-        serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+        serverRequestUser.fetchallUsers(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 
@@ -70,10 +72,20 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             @Override
             public void userlist(ArrayList<User> reponse) {
                 if (reponse.size() != 0) {
-                    userArrayList = reponse;
-                    status = setfriendstatuslist(reponse, userfriendsArrayList);
-                    prepareListview(reponse, setfriendstatuslist(reponse, userfriendsArrayList));
-                    friendstatus=setFriendstatus(reponse,userfriendsArrayList);
+                    ArrayList<User> list = new ArrayList<User>();
+                    for(int i=0;i<reponse.size();i++){
+                        if(userLocalStore.getLoggedInUser().username.equals(reponse.get(i).username)){
+                            userLocalStore.setUserUserfriendliststring(reponse.get(i).friendlist);
+                        }else{
+                            list.add(reponse.get(i));
+                        }
+                    }
+                    userArrayList = list;
+                    status = setfriendstatuslist(list, userfriendsArrayList);
+
+                    prepareListview(list, setfriendstatuslist(list, userfriendsArrayList));
+
+                    friendstatus=setFriendstatus(list,userfriendsArrayList);
                     allUserTabAdapter.setfriendstatus(friendstatus);
                     refreshLayout.setRefreshing(false);
 
@@ -153,45 +165,17 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_follow:
-                        ServerRequestUser serverRequestUser=new ServerRequestUser(getActivity());
-                        String f=userLocalStore.getUserfriendliststring();
-                        StringBuilder fadd=null;
-                        String finalfriendlist=null;
-                        if(f.equals("noFrineds")){
-                            userLocalStore.setUserUserfriendliststring(userArrayList.get(position).username);
-                            finalfriendlist=userArrayList.get(position).username;
+                        if(status[position]==1){
+                            DialogFragment alertDialogFragment = DialogRequestAddFriendFragment.newInstance(position,true);
+                            alertDialogFragment.setTargetFragment(fragment,getTargetRequestCode());
+                            alertDialogFragment.setCancelable(false);
+                            alertDialogFragment.show(getFragmentManager(), "fragmentalluser");
                         }else{
-                             fadd=new StringBuilder(f).append(",").append(userArrayList.get(position).username);
-                            userLocalStore.setUserUserfriendliststring(fadd.toString());
-                            finalfriendlist=fadd.toString();
+                            DialogFragment alertDialogFragment = DialogRequestAddFriendFragment.newInstance(position,false);
+                            alertDialogFragment.setTargetFragment(fragment, getTargetRequestCode());
+                            alertDialogFragment.setCancelable(false);
+                            alertDialogFragment.show(getFragmentManager(), "fragmentalluser");
                         }
-
-
-                        String password=userLocalStore.getLoggedInUser().password;
-                        String email=userLocalStore.getLoggedInUser().email;
-                        String uname=userLocalStore.getLoggedInUser().username;
-                        User user=new User(uname,email,password,finalfriendlist,1);
-                        serverRequestUser.updateFriendList(user, new GetUserCallbacks() {
-                            @Override
-                            public void done(User returneduser) {
-
-                            }
-
-                            @Override
-                            public void deleted(String reponse) {
-                                if(reponse.contains("Friendlist successfully updated")){
-                                    Toast.makeText(getContext(),userArrayList.get(position).username+" added to your friend list", Toast.LENGTH_SHORT).show();
-                                    status[position]=1;
-                                    allUserTabAdapter.setRequeststatus(status);
-                                }
-
-                            }
-
-                            @Override
-                            public void userlist(ArrayList<User> reponse) {
-
-                            }
-                        });
                         return true;
                     case R.id.menu_profile:
                         Intent intent=new Intent(getActivity(),ViewFriendActivity.class);
@@ -211,41 +195,78 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        Toast.makeText(getActivity(),"User currently offline",Toast.LENGTH_SHORT).show();
+        Intent intent=new Intent(getActivity(),ViewFriendActivity.class);
+        intent.putExtra("user", userArrayList.get(position));
+        startActivity(intent);
 
     }
 
     public void removeuserinfriendlist(final int position) {
 
+        User currentUser=userLocalStore.getLoggedInUser();
         ServerRequestUser serverRequestUser=new ServerRequestUser(getActivity());
-        String f=userLocalStore.getUserfriendliststring();
+
+        String f=userArrayList.get(position).friendlist;
+
         StringBuilder fadd=new StringBuilder();
+        StringBuilder fre=new StringBuilder();
+
         String finalfriendlist=null;
-        if(f.equals("noFrineds")){
-            Toast.makeText(getContext(),"You currently have no friends",Toast.LENGTH_SHORT).show();
+        String finalhisfriendlist=null;
+
+        User cuser=null;
+
+        if(f.equals("noFrineds")|| f.isEmpty()||f==null){
+            Toast.makeText(getContext(),userArrayList.get(position).username+" is not in friend list",Toast.LENGTH_SHORT).show();
         }else{
-            String[] fls=f.split(",");
-            for (int i =0;i<fls.length;i++){
-                if(!userArrayList.get(position).username.equals(fls[i])){
-                    if(i==fls.length-1){
-                        fadd.append(fls[i]);
+            String fcurrentuser=userLocalStore.getUserfriendliststring();
+
+
+
+            String[] fl=fcurrentuser.split(",");
+
+            for (int i =0;i<fl.length;i++){
+                if(!userArrayList.get(position).username.equals(fl[i])){
+                    if(i==fl.length-1){
+                        fre.append(fl[i]);
                     }else {
-                        fadd.append(fls[i]).append(",");
+                        fre.append(fl[i]).append(",");
                     }
 
                 }
             }
 
-            userLocalStore.setUserUserfriendliststring(fadd.toString());
-            finalfriendlist=fadd.toString();
+            finalfriendlist=fre.toString();
+            userLocalStore.setUserUserfriendliststring(finalfriendlist);
+             cuser=new User(currentUser.username,currentUser.email,currentUser.password,finalfriendlist,1);
+
+            String[] fls=f.split(",");
+            String cu=currentUser.username;
+                for (int i =0;i<fls.length;i++){
+                    if(!cu.equals(fls[i])){
+                        if(i==fls.length-1){
+                            fadd.append(fls[i]);
+                        }else {
+                            fadd.append(fls[i]).append(",");
+                        }
+
+                    }
+                }
+
+                finalhisfriendlist=fadd.toString();
+
+
         }
 
 
-        String password=userLocalStore.getLoggedInUser().password;
-        String email=userLocalStore.getLoggedInUser().email;
-        String uname=userLocalStore.getLoggedInUser().username;
-        User user=new User(uname,email,password,finalfriendlist,1);
-        serverRequestUser.updateFriendList(user, new GetUserCallbacks() {
+        String password=userArrayList.get(position).password;
+        String email=userArrayList.get(position).email;
+        String uname=userArrayList.get(position).username;
+        User user=new User(uname,email,password,finalhisfriendlist,1);
+
+        new FriendRequest(getContext(),cuser).uddateuserinfriendList(cuser);
+
+        serverRequestUser.updatefriendFriendList(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 
@@ -255,8 +276,12 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             public void deleted(String reponse) {
                 if (reponse.contains("Friendlist successfully updated")) {
                     Toast.makeText(getContext(), userArrayList.get(position).username + " removed from your friend list", Toast.LENGTH_SHORT).show();
-                    status[position]=0;
+                    FriendRequest friendRequest=new FriendRequest(getContext(),userArrayList.get(position));
+                    friendRequest.sendFriendremove();
+                    status[position] = 0;
+                    friendstatus[position] = false;
                     allUserTabAdapter.setRequeststatus(status);
+                    allUserTabAdapter.setfriendstatus(friendstatus);
                 }
 
             }
@@ -346,6 +371,6 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
 
     @Override
     public void onRefresh() {
-        fetchuserlist();
+        fetchuserlist(u);
     }
 }

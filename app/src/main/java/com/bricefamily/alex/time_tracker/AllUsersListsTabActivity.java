@@ -41,17 +41,17 @@ protected void onCreate(Bundle savedInstanceState) {
         }
         else{
         User u=userLocalStore.getLoggedInUser();
-        fetchuserlist();
+        fetchuserlist(u);
 
         }
 
 
         }
 
-private int[] fetchuserlist(){
+private int[] fetchuserlist(User user){
         final int[][] status = new int[1][1];
         ServerRequestUser serverRequestUser=new ServerRequestUser(this);
-        serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+        serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 

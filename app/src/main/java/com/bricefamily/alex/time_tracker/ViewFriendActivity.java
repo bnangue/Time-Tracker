@@ -1,6 +1,7 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.app.ActionBar;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ViewFriendActivity extends ActionBarActivity {
@@ -22,6 +24,11 @@ public class ViewFriendActivity extends ActionBarActivity {
         User u=getIntent().getExtras().getParcelable("user");
 
         TextView username=(TextView)findViewById(R.id.usernameviewfragment);
+        ImageView picture=(ImageView)findViewById(R.id.imageViewfriendPicture);
+        Bitmap bitmap=u.picture;
+        if(bitmap!=null){
+            picture.setImageBitmap(bitmap);
+        }
         username.setText(u.username);
         prepareView();
     }

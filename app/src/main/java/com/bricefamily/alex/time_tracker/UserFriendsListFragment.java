@@ -50,8 +50,8 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
 
     @TargetApi(Build.VERSION_CODES.M)
     private void fetchuserlist(User user){
-        final ServerRequestUser serverRequestUser=new ServerRequestUser(getContext());
-        serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
+        ServerRequestUser serverRequestUser=new ServerRequestUser(getContext());
+        serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 
@@ -64,48 +64,37 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
 
             @Override
             public void userlist(ArrayList<User> reponse) {
+
                 if (reponse.size() != 0) {
-                    ArrayList<User> users = new ArrayList<User>();
-                    users = reponse;
-                    final ArrayList<User> finalUsers = users;
-                    serverRequestUser.fetchallUsers(new GetUserCallbacks() {
-                        @Override
-                        public void done(User returneduser) {
-
+                    User user = new User();
+                    ArrayList<User> listw = new ArrayList<User>();
+                    for(int i=0;i<reponse.size();i++){
+                        String u=userLocalStore.getLoggedInUser().username;
+                        if(u.equals(reponse.get(i).username)){
+                            userLocalStore.setUserUserfriendliststring(reponse.get(i).friendlist);
+                        }else{
+                            listw.add(reponse.get(i));
                         }
-
-                        @Override
-                        public void deleted(String reponse) {
-
-                        }
-
-                        @Override
-                        public void userlist(ArrayList<User> reponse) {
-
-                            if (reponse.size() != 0) {
-                                User user=new User();
-                                ArrayList<String> flist=user.getuserfriendlist(userLocalStore.getUserfriendliststring());
-                                ArrayList<User> list=new ArrayList<User>();
-                                for(int i=0; i<finalUsers.size();i++){
-                                    for(int j=0;j<flist.size();j++){
-                                        if(flist.get(j).equals(finalUsers.get(i).username)){
-                                            list.add(finalUsers.get(i));
-                                        }
-                                    }
-                                }
-                                userArrayListforGcm=list;
-                                status=setstatuslist(reponse,list);
-
-                                prepareListview(list, status);
-                                refreshLayout.setRefreshing(false);
-
+                    }
+                    ArrayList<String> flist = user.getuserfriendlist(userLocalStore.getUserfriendliststring());
+                    ArrayList<User> list = new ArrayList<User>();
+                    for (int i = 0; i < listw.size(); i++) {
+                        for (int j = 0; j < flist.size(); j++) {
+                            if (flist.get(j).equals(listw.get(i).username)) {
+                                list.add(listw.get(i));
                             }
                         }
-                    });
+                    }
+                    userArrayListforGcm=list;
+                    status = setstatuslist(list);
+
+                    prepareListview(list, status);
+                    refreshLayout.setRefreshing(false);
 
                 }
             }
         });
+
     }
 
 
@@ -125,6 +114,22 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
         }
     }
 
+    private int[] setstatuslist(ArrayList<User> list){
+
+        int[] status=new int[list.size()];
+        for(int i=0;i <list.size();i++) {
+            if (list.get(i).status == 0) {
+                status[i] = 0;
+            } else {
+                status[i] = 1;
+            }
+
+
+
+        }
+
+        return status;
+    }
     private int[] setstatuslist(ArrayList<User> list,ArrayList<User> gcmlist){
         int[] status=new int[gcmlist.size()];
 

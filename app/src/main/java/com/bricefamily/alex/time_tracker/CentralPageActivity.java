@@ -35,6 +35,7 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -145,23 +146,23 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     void prepareDrawerViews(){
         fillList();
 
-        Bitmap bitmap=getThumbnail("profile.png");
+        String path=userLocalStore.getUserPicturePath();
+        String uName=userLocalStore.getLoggedInUser().username;
+
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
         mDrawerpane = (RelativeLayout) findViewById(R.id.drawerpane);
         mDrawerList = (ListView) findViewById(R.id.navlist);
         userName = (TextView) findViewById(R.id.username);
         profilePicture = (CircularImageView) findViewById(R.id.avatarfriend);
-        if(bitmap!=null){
+        if(path!=null){
+            Bitmap bitmap=loadImageFromStorage(path,uName);
+            if(bitmap!=null){
 
-            profilePicture.setImageBitmap(bitmap);
-        }else{
-            if(username!=null){
-                UserProfilePicture u=new UserProfilePicture(username,null);
-                getUserPicture(u);
+                profilePicture.setImageBitmap(bitmap);
             }
-
         }
+
         DrawerListAdapter adapter = new DrawerListAdapter(this, mNavItems);
         mDrawerList.setAdapter(adapter);
 
@@ -432,7 +433,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
 
-    private void fetchuserlist(User user){
+    private void fetchuserlist(final User user){
         final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
         serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
             @Override
@@ -451,7 +452,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                     ArrayList<User> users = new ArrayList<User>();
                     users = reponse;
                     final ArrayList<User> finalUsers = users;
-                    serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+                    serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
                         @Override
                         public void done(User returneduser) {
 
@@ -509,7 +510,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             state.putParcelableArrayList("eventsArray", listEvent);
             state.putString("user", username);
         state.putBoolean("hideOptions", hideOptions);
-        state.putParcelable("loggedinUser",loggedinUser);
+        state.putParcelable("loggedinUser", loggedinUser);
 
 
     }
@@ -792,6 +793,19 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
 
+    private Bitmap loadImageFromStorage(String path,String username)
+    {
+        Bitmap bitmap=null;
+        try {
+            File f=new File(path, username+".jpg");
+            bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
     @Override
     public void onBackPressed() {
         super.onBackPressed();

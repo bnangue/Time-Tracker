@@ -44,7 +44,7 @@ public class User implements Parcelable {
         this.email=email;
         this.password=password;
     }
-    public User(String username, String email, String password, String firstname, String lastname,int status,String regId) {
+    public User(String username, String email, String password, String firstname, String lastname,int status,String regId,Bitmap picture,String friendlist) {
         this.username=username;
         this.email=email;
         this.password=password;
@@ -52,6 +52,8 @@ public class User implements Parcelable {
         this.lastname=lastname;
         this.status=status;
         this.regId=regId;
+        this.picture=picture;
+        this.friendlist=friendlist;
 
     }
     public User(String username,String email,String password,String friendlist,int status){
@@ -91,6 +93,7 @@ public class User implements Parcelable {
         status=in.readInt();
         regId=in.readString();
         friendlist=in.readString();
+        picture=in.readParcelable(getClass().getClassLoader());
 
 
     }
@@ -111,6 +114,7 @@ public class User implements Parcelable {
         dest.writeInt(status);
         dest.writeString(regId);
         dest.writeString(friendlist);
+        dest.writeParcelable(picture,flags);
 
     }
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {

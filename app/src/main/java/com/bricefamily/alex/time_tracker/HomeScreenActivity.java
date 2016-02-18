@@ -106,7 +106,7 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
             }
         });
     }
-    private void fetchuserlist(User user){
+    private void fetchuserlist(final User user){
         final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
         serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
             @Override
@@ -125,7 +125,7 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
                     ArrayList<User> users = new ArrayList<User>();
                     users = reponse;
                     final ArrayList<User> finalUsers = users;
-                    serverRequestUser.fetchallUsers(new GetUserCallbacks() {
+                    serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
                         @Override
                         public void done(User returneduser) {
 

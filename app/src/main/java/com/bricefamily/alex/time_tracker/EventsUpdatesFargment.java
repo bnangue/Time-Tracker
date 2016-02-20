@@ -117,25 +117,34 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         toupdate(position);
         int type=incominglist.get(position).type;
+        int status=incominglist.get(position).readStatus;
         String jsodata=incominglist.get(position).body;
 
         switch (type){
             case 1:
-                try {
-                    JSONObject jsonObject=new JSONObject(jsodata);
-                    Intent intent = new Intent(getActivity(),RequestHandlerActivity.class);
+                if(status==0){
+                    try {
+                        IncomingNotification incomingNotification=new IncomingNotification(incominglist.get(position).type,1 ,incominglist.get(position).body,incominglist.get(position).creationDate);
+                        incomingNotification.id=incominglist.get(position).id;
+                        JSONObject jsonObject=new JSONObject(jsodata);
+                        Intent intent = new Intent(getActivity(),RequestHandlerActivity.class);
 
-                    intent.putExtra("recieverName", jsonObject.getString("sender"));
-                    intent.putExtra("receiver", jsonObject.getString("receiver"));
-                    intent.putExtra("recieverregId", jsonObject.getString("recieverregId"));
-                    intent.putExtra("messagefromgcm", jsonObject.getString("message"));
-                    intent.putExtra("request", true);
-                    intent.putExtra("myemail", jsonObject.getString("myemail"));
-                    intent.putExtra("mypassword", jsonObject.getString("mypassword"));
-                    startActivity(intent);
+                        intent.putExtra("recieverName", jsonObject.getString("sender"));
+                        intent.putExtra("receiver", jsonObject.getString("receiver"));
+                        intent.putExtra("recieverregId", jsonObject.getString("recieverregId"));
+                        intent.putExtra("messagefromgcm", jsonObject.getString("message"));
+                        intent.putExtra("request", true);
+                        intent.putExtra("myemail", jsonObject.getString("myemail"));
+                        intent.putExtra("mypassword", jsonObject.getString("mypassword"));
+                        intent.putExtra("notification", incomingNotification);
+                        startActivity(intent);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }else {
+                    Toast.makeText(getContext(),"You already reply this message",Toast.LENGTH_SHORT).show();
                 }
 
                 break;
@@ -159,36 +168,53 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
 
                 break;
             case 4:
-                try {
-                    JSONObject jsonObject=new JSONObject(jsodata);
-                    Intent intent = new Intent(getActivity(),RemovedAsFriendActivity.class);
+                if(status==0){
+                    try {
+                        IncomingNotification incomingNotification=new IncomingNotification(incominglist.get(position).type,1 ,incominglist.get(position).body,incominglist.get(position).creationDate);
+                        incomingNotification.id=incominglist.get(position).id;
+                        JSONObject jsonObject=new JSONObject(jsodata);
+                        Intent intent = new Intent(getActivity(),RemovedAsFriendActivity.class);
 
-                    intent.putExtra("recieverName", jsonObject.getString("sender"));
-                    intent.putExtra("receiver", jsonObject.getString("receiver"));
-                    intent.putExtra("recieverregId", jsonObject.getString("recieverregId"));
-                    intent.putExtra("messagefromgcm", jsonObject.getString("message"));
+                        intent.putExtra("recieverName", jsonObject.getString("sender"));
+                        intent.putExtra("receiver", jsonObject.getString("receiver"));
+                        intent.putExtra("recieverregId", jsonObject.getString("recieverregId"));
+                        intent.putExtra("messagefromgcm", jsonObject.getString("message"));
+                        intent.putExtra("notification", incomingNotification);
 
-                    startActivity(intent);
+                        startActivity(intent);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Toast.makeText(getContext(),"You already reply this message",Toast.LENGTH_SHORT).show();
                 }
+
                 break;
             case 5:
-                try {
-                    JSONObject jsonObject=new JSONObject(jsodata);
-                    Intent intent = new Intent(getActivity(),RemovedAsFriendActivity.class);
+                if(status==0){
+                    try {
+                        IncomingNotification incomingNotification=new IncomingNotification(incominglist.get(position).type,1 ,incominglist.get(position).body,incominglist.get(position).creationDate);
+                        incomingNotification.id=incominglist.get(position).id;
+                        JSONObject jsonObject=new JSONObject(jsodata);
+                        Intent intent = new Intent(getActivity(),RemovedAsFriendActivity.class);
 
-                    intent.putExtra("recieverName", jsonObject.getString("sender"));
-                    intent.putExtra("receiver", jsonObject.getString("receiver"));
-                    intent.putExtra("recieverregId", jsonObject.getString("recieverregId"));
-                    intent.putExtra("messagefromgcm", jsonObject.getString("message"));
+                        intent.putExtra("recieverName", jsonObject.getString("sender"));
+                        intent.putExtra("receiver", jsonObject.getString("receiver"));
+                        intent.putExtra("recieverregId", jsonObject.getString("recieverregId"));
+                        intent.putExtra("messagefromgcm", jsonObject.getString("message"));
+                        intent.putExtra("notification", incomingNotification);
 
-                    startActivity(intent);
+                        startActivity(intent);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }else {
+                    Toast.makeText(getContext(),"You already reply this message",Toast.LENGTH_SHORT).show();
                 }
+
                 break;
         }
     }

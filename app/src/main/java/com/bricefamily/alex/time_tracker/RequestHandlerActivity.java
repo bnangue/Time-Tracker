@@ -17,12 +17,16 @@ public class RequestHandlerActivity extends ActionBarActivity implements View.On
     Button btnCancleRequest, btnAcceptRequest;
     TextView tvMessage;
     UserLocalStore userLocalStore;
+    private MySQLiteHelper mySQLiteHelper;
+    private IncomingNotification incomingNotification;
     User user;
     private boolean request;
+    private  int id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_handler);
+        mySQLiteHelper=new MySQLiteHelper(this);
         userLocalStore=new UserLocalStore(this);
         Bundle extras=getIntent().getExtras();
         btnAcceptRequest =(Button)findViewById(R.id.btnacceptRequest);
@@ -41,6 +45,18 @@ public class RequestHandlerActivity extends ActionBarActivity implements View.On
             myemail=extras.getString("myemail");
             mypassword=extras.getString("mypassword");
             request = extras.getBoolean("request");
+            incomingNotification=extras.getParcelable("notification");
+            id=extras.getInt("notificationId");
+        }
+
+        if(incomingNotification!=null){
+            incomingNotification.id=id;
+
+            if(incomingNotification.readStatus==0){
+                incomingNotification.readStatus=1;
+                mySQLiteHelper.updateIncomingNotification(incomingNotification);
+            }
+            mySQLiteHelper.updateIncomingNotification(incomingNotification);
         }
         user=new User(sendername,myemail,mypassword,1,senderRegId);
         if(message!=null){
@@ -56,7 +72,7 @@ public class RequestHandlerActivity extends ActionBarActivity implements View.On
             case R.id.btnacceptRequest:
                 FriendRequest friendRequest=new FriendRequest(getApplicationContext(),user);
                 friendRequest.sendFriendresquest(false, senderRegId,sendername);
-                friendRequest.adduserinfriendList(receiverername, user.email, user.password,sendername);
+                friendRequest.adduserinfriendList(receiverername, user.email, user.password, sendername);
 
                 finish();
                 break;

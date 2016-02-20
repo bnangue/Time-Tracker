@@ -16,7 +16,6 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,7 +34,9 @@ public class LiveChatIntentService extends IntentService {
     Notification notification;
     DBOperation dbOperation;
     FriendRequest friendRequest;
+    private IncomingNotification incomingNotification;
     private MySQLiteHelper mySQLiteHelper;
+    private int incomingNotifiId;
 
     public static final String TAG = "GcmIntentService";
     IBinder mBinder=new Binder() ;
@@ -214,7 +215,7 @@ public class LiveChatIntentService extends IntentService {
 
         Intent intent = new Intent(this,RequestHandlerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         //intent.putExtra("chattingFrom", chattingFrom);
         intent.putExtra("recieverName", chattingToName);
@@ -241,11 +242,14 @@ public class LiveChatIntentService extends IntentService {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
-            IncomingNotification incomingNotification=new IncomingNotification(1,0,jsonObject.toString(),date);
-            mySQLiteHelper.addIncomingNotification(incomingNotification);
+             incomingNotification=new IncomingNotification(1,0,jsonObject.toString(),date);
+          incomingNotifiId =  mySQLiteHelper.addIncomingNotification(incomingNotification);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        intent.putExtra("notification",incomingNotification );
+        intent.putExtra("notificationId", incomingNotifiId);
 
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
@@ -286,7 +290,7 @@ public class LiveChatIntentService extends IntentService {
 
         Intent intent = new Intent(this,RemovedAsFriendActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                |Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         //intent.putExtra("chattingFrom", chattingFrom);
         intent.putExtra("recieverName",chattingToName);
@@ -307,12 +311,14 @@ public class LiveChatIntentService extends IntentService {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
-            IncomingNotification incomingNotification=new IncomingNotification(4,0,jsonObject.toString(),date);
-            mySQLiteHelper.addIncomingNotification(incomingNotification);
+           incomingNotification=new IncomingNotification(4,0,jsonObject.toString(),date);
+            incomingNotifiId=mySQLiteHelper.addIncomingNotification(incomingNotification);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
+        intent.putExtra("notification",incomingNotification );
+        intent.putExtra("notificationId", incomingNotifiId);
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
                         this,
@@ -351,7 +357,7 @@ public class LiveChatIntentService extends IntentService {
 
         Intent intent = new Intent(this,RemovedAsFriendActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         //intent.putExtra("chattingFrom", chattingFrom);
         intent.putExtra("recieverName",chattingToName);
@@ -372,12 +378,13 @@ public class LiveChatIntentService extends IntentService {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
-            IncomingNotification incomingNotification=new IncomingNotification(5,0,jsonObject.toString(),date);
-            mySQLiteHelper.addIncomingNotification(incomingNotification);
+            incomingNotification=new IncomingNotification(5,0,jsonObject.toString(),date);
+            incomingNotifiId=mySQLiteHelper.addIncomingNotification(incomingNotification);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        intent.putExtra("notification",incomingNotification );
+        intent.putExtra("notificationId", incomingNotifiId);
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
                         this,

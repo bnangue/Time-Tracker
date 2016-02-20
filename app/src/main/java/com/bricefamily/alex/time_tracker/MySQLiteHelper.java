@@ -62,7 +62,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String[] COLUMNS = {KEY_ID,KEY_TYPE, KEY_STATUS,  KEY_BODY, KEY_DATE};
 
 
-    public void addIncomingNotification(IncomingNotification notification){
+    public int addIncomingNotification(IncomingNotification notification){
         //for logging
         Log.d("addNotificationIncome", notification.toString());
 
@@ -77,12 +77,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         values.put(KEY_DATE, notification.creationDate); // get author
 
         // 3. insert
-        db.insert(TABLE_BOOKS, // table
+      int i= (int) db.insert(TABLE_BOOKS, // table
                 null, //nullColumnHack
                 values); // key/value -> keys = column names/ values = column values
 
         // 4. close
         db.close();
+        return i;
     }
 
     public ArrayList<IncomingNotification> getAllIncomingNotification() {

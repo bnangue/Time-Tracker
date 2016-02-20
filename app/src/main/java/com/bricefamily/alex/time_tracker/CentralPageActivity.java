@@ -64,6 +64,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     FloatingActionButton fab;
     SwipeRefreshLayout refreshLayout;
     User loggedinUser;
+   private MySQLiteHelper mySQLiteHelper;
 
     int countevent = 0;
     private android.support.v7.view.ActionMode mactionMode;
@@ -75,6 +76,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         setContentView(R.layout.activity_central_page);
 
         prepareView();
+        mySQLiteHelper=new MySQLiteHelper(this);
          fab = (FloatingActionButton) findViewById(R.id.fab);
         refreshLayout=(SwipeRefreshLayout)findViewById(R.id.swiperefresh);
         refreshLayout.setColorSchemeColors(Color.BLUE);
@@ -82,7 +84,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         userLocalStore = new UserLocalStore(this);
         mtitel=drawerTitle = title = getTitle();
-
+        mySQLiteHelper.updateIncomingMessage(1,2);
 
 
         listEvent = new ArrayList<EventObject>();

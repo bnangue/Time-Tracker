@@ -356,7 +356,7 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
         String friendlist=userLocalStore.getUserfriendliststring();
         if(friendlist==null||friendlist.isEmpty()||friendlist.equals(",")){
-            userLocalStore.setUserUserfriendliststring("noFrineds");
+            userLocalStore.setUserUserfriendliststring("");
         }
 
 

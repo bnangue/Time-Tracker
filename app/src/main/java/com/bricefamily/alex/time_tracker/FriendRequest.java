@@ -82,6 +82,8 @@ public class FriendRequest {
                             data.add(new Pair<String, String>("registrationReceiverIDs", user.regId));
                             data.add(new Pair<String, String>("receiver", user.username));
                             data.add(new Pair<String, String>("sender", sendertname));
+                            data.add(new Pair<String, String>("receiveremail", user.email));
+                            data.add(new Pair<String, String>("receiverhashpass", user.password));
                         }else{
                             data.add(new Pair<String, String>("message",sendername+ requestanswer));
                             data.add(new Pair<String, String>("registrationReceiverIDs", receiverregId));
@@ -95,7 +97,7 @@ public class FriendRequest {
                         byte[] bytes = getData(data).getBytes("UTF-8");
 
 
-                        URL url=new URL(Config.YOUR_SERVER_URL+ "ConnectionGCMServer.php");
+                        URL url=new URL(Config.YOUR_SERVER_URL+ "FriendRequestGCMconnection.php");
                         conn=(HttpURLConnection)url.openConnection();
                         conn.setDoOutput(true);
                         conn.setUseCaches(false);
@@ -188,8 +190,8 @@ public class FriendRequest {
     }
 
 
-     public void adduserinfriendList(final String username,final String email,final String password){
-        ServerRequestUser serverRequestUser=new ServerRequestUser(context);
+     public void adduserinfriendList(final String username,final String email,final String password,final String myusername){
+       final ServerRequestUser serverRequestUser=new ServerRequestUser(context);
         String f=userLocalStore.getUserfriendliststring();
         StringBuilder fadd=null;
         String finalfriendlist=null;
@@ -207,16 +209,36 @@ public class FriendRequest {
         String mail=email;
         String uname=username;
         User user=new User(uname,mail,pword,finalfriendlist,1);
-        serverRequestUser.updateFriendList(user, new GetUserCallbacks() {
+        serverRequestUser.fetchUsertoUpdateFriend(myusername,username, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 
+                if (returneduser != null) {
+                    serverRequestUser.fetchUsertoUpdateFriend(username, myusername, new GetUserCallbacks() {
+                        @Override
+                        public void done(User returneduser) {
+                            if (returneduser != null) {
+                                Toast.makeText(context, username + " added to your friend list", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void deleted(String reponse) {
+
+                        }
+
+                        @Override
+                        public void userlist(ArrayList<User> reponse) {
+
+                        }
+                    });
+                }
             }
 
             @Override
             public void deleted(String reponse) {
                 if (reponse.contains("Friendlist successfully updated")) {
-                    Toast.makeText(context,username + " added to your friend list", Toast.LENGTH_SHORT).show();
+
 
                 }
 

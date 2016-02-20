@@ -2,6 +2,7 @@ package com.bricefamily.alex.time_tracker;
 
 import android.annotation.TargetApi;
 import android.graphics.Color;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.os.Build;
@@ -21,10 +22,9 @@ import java.util.ArrayList;
 /**
  * Created by bricenangue on 15/02/16.
  */
-public class UserFriendsListFragment extends Fragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class UserFriendsListFragment extends Fragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener,DialogRequestAddFriendFragment.OnRequestconfirm {
 
     ArrayList<User> userArrayListforGcm;
-    ArrayList<User> userArrayList;
     ProfileListAdapter profileListAdapter;
     UserLocalStore userLocalStore;
 
@@ -51,7 +51,7 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
     @TargetApi(Build.VERSION_CODES.M)
     private void fetchuserlist(User user){
         ServerRequestUser serverRequestUser=new ServerRequestUser(getContext());
-        serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
+        serverRequestUser.fetchallUsers(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
 
@@ -68,11 +68,11 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
                 if (reponse.size() != 0) {
                     User user = new User();
                     ArrayList<User> listw = new ArrayList<User>();
-                    for(int i=0;i<reponse.size();i++){
-                        String u=userLocalStore.getLoggedInUser().username;
-                        if(u.equals(reponse.get(i).username)){
+                    for (int i = 0; i < reponse.size(); i++) {
+                        String u = userLocalStore.getLoggedInUser().username;
+                        if (u.equals(reponse.get(i).username)) {
                             userLocalStore.setUserUserfriendliststring(reponse.get(i).friendlist);
-                        }else{
+                        } else {
                             listw.add(reponse.get(i));
                         }
                     }
@@ -85,7 +85,7 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
                             }
                         }
                     }
-                    userArrayListforGcm=list;
+                    userArrayListforGcm = list;
                     status = setstatuslist(list);
 
                     prepareListview(list, status);
@@ -160,19 +160,20 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
         // countevent=countevent+1;
         // selected(countevent, selectionevents);
         // centralPageAdapter.notifyDataSetChanged();
-        showFilterPopup(v,pos);
+        showFilterPopup(v, pos);
         return true;
     }
     private void showFilterPopup(View v, final int position) {
         PopupMenu popup = new PopupMenu(getContext(), v);
         // Inflate the menu from xml
-        popup.getMenuInflater().inflate(R.menu.popupmenu, popup.getMenu());
+        popup.getMenuInflater().inflate(R.menu.friendpopup_menu, popup.getMenu());
         // Setup menu item selection
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_follow:
-                        Toast.makeText(getActivity(), "share", Toast.LENGTH_SHORT).show();
+                        unfollowFriend(position);
+                        Toast.makeText(getActivity(), "removed as friend", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.menu_profile:
                         Intent intent=new Intent(getActivity(),ViewFriendActivity.class);
@@ -188,7 +189,12 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
         // Show the menu
         popup.show();
     }
-
+    void unfollowFriend(int position){
+        DialogFragment alertDialogFragment = DialogRequestAddFriendFragment.newInstance(position,true);
+        alertDialogFragment.setTargetFragment(this, getTargetRequestCode());
+        alertDialogFragment.setCancelable(false);
+        alertDialogFragment.show(getFragmentManager(), "fragmentalluser");
+    }
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -199,6 +205,7 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
             Intent intent =new Intent(getActivity(),LiveChatActivity.class);
             intent.putExtra("recieverName",recievername);
             intent.putExtra("recieverregId",reciverregId);
+            intent.putExtra("friendPicture",reciever.picture);
             intent.putExtra("message","");
             startActivity(intent);
 
@@ -212,5 +219,106 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
     @Override
     public void onRefresh() {
         fetchuserlist(userLocalStore.getLoggedInUser());
+    }
+
+    @Override
+    public void onAdd(int position) {
+
+    }
+
+    @Override
+    public void onRemove(int position) {
+        removeuserinfriendlist(position);
+    }
+    public void removeuserinfriendlist(final int position) {
+
+        User currentUser=userLocalStore.getLoggedInUser();
+        ServerRequestUser serverRequestUser=new ServerRequestUser(getActivity());
+
+        String f=userArrayListforGcm.get(position).friendlist;
+
+        StringBuilder fadd=new StringBuilder();
+        StringBuilder fre=new StringBuilder();
+
+        String finalfriendlist=null;
+        String finalhisfriendlist=null;
+
+        User cuser=null;
+
+        if(f.equals("noFrineds")|| f.isEmpty()||f==null){
+            Toast.makeText(getContext(),userArrayListforGcm.get(position).username+" is not in friend list",Toast.LENGTH_SHORT).show();
+        }else{
+            String fcurrentuser=userLocalStore.getUserfriendliststring();
+
+
+
+            String[] fl=fcurrentuser.split(",");
+
+            for (int i =0;i<fl.length;i++){
+                if(!userArrayListforGcm.get(position).username.equals(fl[i])|| fl[i].isEmpty()){
+                    if(i==fl.length-1){
+                        fre.append(fl[i]);
+                    }else {
+                        fre.append(fl[i]).append(",");
+                    }
+
+                }
+            }
+
+            finalfriendlist=fre.toString();
+            userLocalStore.setUserUserfriendliststring(finalfriendlist);
+            cuser=new User(currentUser.username,currentUser.email,currentUser.password,finalfriendlist,1);
+
+            String[] fls=f.split(",");
+            String cu=currentUser.username;
+            for (int i =0;i<fls.length;i++){
+                if(!cu.equals(fls[i])|| fls[i].isEmpty()){
+                    if(i==fls.length-1){
+                        fadd.append(fls[i]);
+                    }else {
+                        fadd.append(fls[i]).append(",");
+                    }
+
+                }
+            }
+
+            finalhisfriendlist=fadd.toString();
+
+
+        }
+
+
+        String password=userArrayListforGcm.get(position).password;
+        String email=userArrayListforGcm.get(position).email;
+        String uname=userArrayListforGcm.get(position).username;
+        User user=new User(uname,email,password,finalhisfriendlist,1);
+
+        new FriendRequest(getContext(),cuser).uddateuserinfriendList(cuser);
+
+        serverRequestUser.updatefriendFriendList(user, new GetUserCallbacks() {
+            @Override
+            public void done(User returneduser) {
+
+            }
+
+            @Override
+            public void deleted(String reponse) {
+                if (reponse.contains("Friendlist successfully updated")) {
+                    Toast.makeText(getContext(), userArrayListforGcm.get(position).username + " removed from your friend list", Toast.LENGTH_SHORT).show();
+                    FriendRequest friendRequest=new FriendRequest(getContext(),userArrayListforGcm.get(position));
+                    friendRequest.sendFriendremove();
+                    status[position] = 0;
+                    userArrayListforGcm.remove(position);
+                    profileListAdapter.notifyDataSetChanged();
+
+                }
+
+            }
+
+            @Override
+            public void userlist(ArrayList<User> reponse) {
+
+            }
+        });
     }
 }

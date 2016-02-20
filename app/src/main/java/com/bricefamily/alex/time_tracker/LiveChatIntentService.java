@@ -16,6 +16,15 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 /**
  * Created by bricenangue on 10/02/16.
  */
@@ -26,6 +35,7 @@ public class LiveChatIntentService extends IntentService {
     Notification notification;
     DBOperation dbOperation;
     FriendRequest friendRequest;
+    private MySQLiteHelper mySQLiteHelper;
 
     public static final String TAG = "GcmIntentService";
     IBinder mBinder=new Binder() ;
@@ -37,7 +47,7 @@ public class LiveChatIntentService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        mySQLiteHelper=new MySQLiteHelper(this);
         dbOperation = new DBOperation(this);
         friendRequest=new FriendRequest(this,null);
         dbOperation.createAndInitializeTables();
@@ -138,6 +148,22 @@ public class LiveChatIntentService extends IntentService {
         intent.putExtra("recieverName",chattingToName);
         intent.putExtra("recieverregId",chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
+        try {
+            JSONObject jsonObject=new JSONObject();
+            jsonObject.put("sender",chattingToName);
+            jsonObject.put("message",msg);
+            jsonObject.put("recieverregId",chattingToDeviceID);
+            Calendar c=new GregorianCalendar();
+            Date dat=c.getTime();
+            //String day= String.valueOf(dat.getDay());
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
+            IncomingNotification incomingNotification=new IncomingNotification(3,0,jsonObject.toString(),date);
+            mySQLiteHelper.addIncomingNotification(incomingNotification);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         ChatPeople cppl=addToChatOnly(chattingToName, msg, "1", chattingToDeviceID);
        addToDBOnly(cppl);
@@ -172,7 +198,8 @@ public class LiveChatIntentService extends IntentService {
         String chattingToDeviceID = extras.getString("registrationSenderIDs");
         String msg = extras.getString("message");
         String receiver = extras.getString("receiver");// will be user as sender name in current Device getting the notifiction
-
+        String receiveremail = extras.getString("receiveremail");//to automaticly log in an dupdate friend list in mysql
+        String receiverhashpass = extras.getString("receiverhashpass");//to automaticly log in an dupdate friend list in mysql in device receiving notification
         String message=msg;
 
         NotificationCompat.Builder Builder = new NotificationCompat.Builder(
@@ -185,7 +212,7 @@ public class LiveChatIntentService extends IntentService {
         mNotificationManager = (NotificationManager) this
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Intent intent = new Intent(this,LoginPanelActivity.class);
+        Intent intent = new Intent(this,RequestHandlerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -195,6 +222,30 @@ public class LiveChatIntentService extends IntentService {
         intent.putExtra("recieverregId", chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
         intent.putExtra("request", true);
+        intent.putExtra("myemail", receiveremail);
+        intent.putExtra("mypassword", receiverhashpass);
+
+        try {
+            JSONObject jsonObject=new JSONObject();
+            jsonObject.put("title","New Friend request");
+            jsonObject.put("message",msg);
+            jsonObject.put("sender",chattingToName);
+            jsonObject.put("receiver",receiver);
+            jsonObject.put("recieverregId",chattingToDeviceID);
+            jsonObject.put("myemail",receiveremail);
+            jsonObject.put("mypassword",receiverhashpass);
+            jsonObject.put("request","true");
+            Calendar c=new GregorianCalendar();
+            Date dat=c.getTime();
+            //String day= String.valueOf(dat.getDay());
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
+            IncomingNotification incomingNotification=new IncomingNotification(1,0,jsonObject.toString(),date);
+            mySQLiteHelper.addIncomingNotification(incomingNotification);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
@@ -233,7 +284,7 @@ public class LiveChatIntentService extends IntentService {
         mNotificationManager = (NotificationManager) this
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Intent intent = new Intent(this,LoginPanelActivity.class);
+        Intent intent = new Intent(this,RemovedAsFriendActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -242,7 +293,25 @@ public class LiveChatIntentService extends IntentService {
         intent.putExtra("receiver", receiver);
         intent.putExtra("recieverregId", chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
-        intent.putExtra("request", false);
+
+        try {
+            JSONObject jsonObject=new JSONObject();
+            jsonObject.put("title","You have a new  Friend");
+            jsonObject.put("message",msg);
+            jsonObject.put("sender",chattingToName);
+            jsonObject.put("receiver",receiver);
+            jsonObject.put("recieverregId",chattingToDeviceID);
+            Calendar c=new GregorianCalendar();
+            Date dat=c.getTime();
+            //String day= String.valueOf(dat.getDay());
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
+            IncomingNotification incomingNotification=new IncomingNotification(4,0,jsonObject.toString(),date);
+            mySQLiteHelper.addIncomingNotification(incomingNotification);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
@@ -289,6 +358,25 @@ public class LiveChatIntentService extends IntentService {
         intent.putExtra("receiver", receiver);
         intent.putExtra("recieverregId", chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
+
+        try {
+            JSONObject jsonObject=new JSONObject();
+            jsonObject.put("title","Removed as Friend");
+            jsonObject.put("message",msg);
+            jsonObject.put("sender",chattingToName);
+            jsonObject.put("receiver",receiver);
+            jsonObject.put("recieverregId",chattingToDeviceID);
+            Calendar c=new GregorianCalendar();
+            Date dat=c.getTime();
+            //String day= String.valueOf(dat.getDay());
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
+            IncomingNotification incomingNotification=new IncomingNotification(5,0,jsonObject.toString(),date);
+            mySQLiteHelper.addIncomingNotification(incomingNotification);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(

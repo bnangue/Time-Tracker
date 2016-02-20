@@ -14,6 +14,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -38,10 +39,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -69,7 +73,10 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     Notification notification;
     public static final int NOTIFICATION_ID = 1;
     Intent intentr;
+    private MySQLiteHelper mySQLiteHelper;
     static boolean messageshowed=true;
+
+    Bitmap bitmap;
 
      DBOperation dbOperation;
     protected ServiceConnection mServerConn = new ServiceConnection() {
@@ -87,18 +94,19 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mySQLiteHelper=new MySQLiteHelper(this);
         Intent i  = getIntent();
         Bundle extras=i.getExtras();
         if(extras!=null){
             receiverName=extras.getString("recieverName");
             receiverregId=extras.getString("recieverregId");
             intentrecievemesg=extras.getString("messagefromgcm");
+            bitmap=(Bitmap)extras.getParcelable("friendPicture");
 
         }
 
         setContentView(R.layout.activity_live_chat);
-
-
+        mySQLiteHelper.updateIncomingMessage(1, 3);
 
         messageshowed=false;
 
@@ -149,8 +157,12 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
         }
 
         LayoutInflater inflator = (LayoutInflater) getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
-        View view = inflator.inflate(R.layout.actionbarbackground, null);
+        View view = inflator.inflate(R.layout.livechat_actionbar_background, null);
         TextView titelname=(TextView)view.findViewById(R.id.recievername);
+        ImageView img =(ImageView)view.findViewById(R.id.avatarfriend);
+        if(bitmap!=null){
+            img.setImageBitmap(bitmap);
+        }
         titelname.setText(name);
 
 

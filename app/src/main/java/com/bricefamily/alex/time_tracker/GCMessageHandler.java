@@ -14,6 +14,14 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Random;
 
 /**
@@ -32,6 +40,7 @@ public class GCMessageHandler extends IntentService {
     NotificationCompat.Builder mBuilder;
     String mes,title;
     private Handler handler;
+    private MySQLiteHelper mySQLiteHelper;
     public GCMessageHandler() {
         super("GcmMessageHandler");
     }
@@ -39,6 +48,7 @@ public class GCMessageHandler extends IntentService {
     public void onCreate() {
         // TODO Auto-generated method stub
         super.onCreate();
+        mySQLiteHelper=new MySQLiteHelper(this);
         handler = new Handler();
         nmgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
@@ -83,8 +93,26 @@ public class GCMessageHandler extends IntentService {
 
         mBuilder.setContentText(mes);
         mBuilder.setContentTitle(title);
+
         if(mes.contains("new Event added by")){
             showToast();
+            try {
+                JSONObject jsonObject=new JSONObject();
+                jsonObject.put("title",title);
+                jsonObject.put("message",mes);
+                Calendar c=new GregorianCalendar();
+                Date dat=c.getTime();
+                //String day= String.valueOf(dat.getDay());
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
+
+                IncomingNotification incomingNotification=new IncomingNotification(2,0,jsonObject.toString(),date);
+                mySQLiteHelper.addIncomingNotification(incomingNotification);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             Log.i("GCM", "Received : (" + messageType + ")  " + extras.getString("title"));
 
             GCMBroadcastReceiver.completeWakefulIntent(intent);

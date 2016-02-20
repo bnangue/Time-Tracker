@@ -41,16 +41,13 @@
         android:layout_height="wrap_content"
         android:id="@+id/timeindicator"
         android:gravity="center_vertical"
-        android:layout_below="@+id/inboxeventTitle"
         android:textSize="12sp"
         android:textColor="#000"
         android:text="few day ago"
         android:textStyle="bold"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="5dp"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/avatarfriend"
-        android:layout_toEndOf="@+id/avatarfriend" />
+        android:layout_alignBottom="@+id/avatarfriend"
+        android:layout_alignLeft="@+id/inboxeventTitle"
+        android:layout_alignStart="@+id/inboxeventTitle" />
 
 
 

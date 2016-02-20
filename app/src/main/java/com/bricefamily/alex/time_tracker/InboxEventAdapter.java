@@ -9,18 +9,22 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * Created by bricenangue on 16/02/16.
  */
 public class InboxEventAdapter extends BaseAdapter
 {
-    private ArrayList<User> incominglist;
+    private ArrayList<IncomingNotification> incominglist;
     private Context context;
     private int[] readstatus;
 
-    public InboxEventAdapter(Context context, ArrayList<User> incominglist){
+    public InboxEventAdapter(Context context, ArrayList<IncomingNotification> incominglist){
         this.context=context;
         this.incominglist=incominglist;
         readstatus =new int[incominglist.size()];
@@ -57,7 +61,7 @@ public class InboxEventAdapter extends BaseAdapter
 
             holder.inboxtitle=(TextView)convertView.findViewById(R.id.inboxeventTitle);
             holder.picture=(ImageView)convertView.findViewById(R.id.avatarfriend);
-            holder.datetime=(TextView)convertView.findViewById(R.id.timeindicator);
+            holder.dtime=(TextView)convertView.findViewById(R.id.timeindicator);
 
 
 
@@ -67,19 +71,76 @@ public class InboxEventAdapter extends BaseAdapter
             holder=(Holder)convertView.getTag();
         }
 
-        String usernam=incominglist.get(position).username;
-        holder.datetime.setText("");
-        holder.inboxtitle.setText(usernam);
 
+        String creationtime=incominglist.get(position).creationDate;
+        int readstatus=incominglist.get(position).readStatus;
+        int type=incominglist.get(position).type;
+       // holder.datetime.setText(creationtime);
 
-
-        if(readstatus[position]==1){
+        if(readstatus==1){
 
             convertView.setBackgroundColor(context.getResources().getColor(R.color.white));
 
-        }else{
+        }else if(readstatus==0){
             convertView.setBackgroundColor(context.getResources().getColor(R.color.inboxunread));
         }
+        switch (type){
+            case 1:
+                holder.inboxtitle.setText("New friend request");
+                holder.picture.setImageResource(R.drawable.useraddedblue);
+                break;
+            case 2:
+                holder.inboxtitle.setText("New event posted");
+                holder.picture.setImageResource(R.drawable.calendar);
+                break;
+            case 3:
+                holder.inboxtitle.setText("New message");
+                holder.picture.setImageResource(R.drawable.chaticon);
+                break;
+            case 4:
+                holder.inboxtitle.setText("You have one new friend");
+                holder.picture.setImageResource(R.drawable.addeduserblue);
+                break;
+            case 5:
+                holder.inboxtitle.setText("Your friend request has been rejected");
+                holder.picture.setImageResource(R.drawable.userremovedloli);
+                break;
+        }
+
+        String dtimes=incominglist.get(position).creationDate;
+        String[] ti=dtimes.split("-");
+        String tiday=ti[2];
+        Calendar c=new GregorianCalendar();
+        Date dat=c.getTime();
+        //String day= String.valueOf(dat.getDay());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        String day = (String) android.text.format.DateFormat.format("dd", dat); //20
+
+        int t=Integer.parseInt(day);
+        int y=Integer.parseInt(tiday);
+        if(tiday.equals(day)){
+            holder.dtime.setText("today");
+        }else if(t-1==y){
+            holder.dtime.setText("yesterday");
+        }else if(t-2==y){
+            holder.dtime.setText("2 days ago");
+        }else if(t-3==y){
+            holder.dtime.setText("3 days ago");
+        }else if(t-4==y){
+            holder.dtime.setText("4 days ago");
+        }else if(t-5==y){
+            holder.dtime.setText("5 days ago");
+        }else if(t-6==y){
+            holder.dtime.setText("6 days ago");
+        }else if(t-7==y){
+            holder.dtime.setText("a week ago");
+        }else {
+            holder.dtime.setText(dtimes);
+        }
+
+
+
         return convertView;
     }
 
@@ -87,7 +148,7 @@ public class InboxEventAdapter extends BaseAdapter
     static class Holder {
         public TextView inboxtitle;
         public ImageView picture;
-        public TextView datetime;
+        public TextView dtime;
 
     }
 }

@@ -40,8 +40,8 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         userLocalStore=new UserLocalStore(getContext());
         fragment=this;
-        User user=new User();
-        userfriendsArrayList=user.getuserfriendlist(userLocalStore.getUserfriendliststring());
+
+
 
         View rootview=inflater.inflate(R.layout.activity_all_users_lists_tab,container,false);
         listView=(ListView)rootview.findViewById(R.id.listalluser);
@@ -73,19 +73,20 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             public void userlist(ArrayList<User> reponse) {
                 if (reponse.size() != 0) {
                     ArrayList<User> list = new ArrayList<User>();
-                    for(int i=0;i<reponse.size();i++){
-                        if(userLocalStore.getLoggedInUser().username.equals(reponse.get(i).username)){
+                    for (int i = 0; i < reponse.size(); i++) {
+                        if (userLocalStore.getLoggedInUser().username.equals(reponse.get(i).username)) {
                             userLocalStore.setUserUserfriendliststring(reponse.get(i).friendlist);
-                        }else{
+                        } else {
                             list.add(reponse.get(i));
                         }
                     }
+                    userfriendsArrayList=u.getuserfriendlist(userLocalStore.getUserfriendliststring());
                     userArrayList = list;
                     status = setfriendstatuslist(list, userfriendsArrayList);
 
                     prepareListview(list, setfriendstatuslist(list, userfriendsArrayList));
 
-                    friendstatus=setFriendstatus(list,userfriendsArrayList);
+                    friendstatus = setFriendstatus(list, userfriendsArrayList);
                     allUserTabAdapter.setfriendstatus(friendstatus);
                     refreshLayout.setRefreshing(false);
 
@@ -226,7 +227,7 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             String[] fl=fcurrentuser.split(",");
 
             for (int i =0;i<fl.length;i++){
-                if(!userArrayList.get(position).username.equals(fl[i])){
+                if(!userArrayList.get(position).username.equals(fl[i])|| fl[i].isEmpty()){
                     if(i==fl.length-1){
                         fre.append(fl[i]);
                     }else {
@@ -243,7 +244,7 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             String[] fls=f.split(",");
             String cu=currentUser.username;
                 for (int i =0;i<fls.length;i++){
-                    if(!cu.equals(fls[i])){
+                    if(!cu.equals(fls[i])|| fls[i].isEmpty()){
                         if(i==fls.length-1){
                             fadd.append(fls[i]);
                         }else {

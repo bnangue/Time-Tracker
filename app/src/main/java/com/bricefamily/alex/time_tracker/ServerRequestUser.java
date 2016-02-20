@@ -148,6 +148,7 @@ public class ServerRequestUser {
             data.add(new Pair<String, String>("username", user.username));
             data.add(new Pair<String, String>("password",user.password));
 
+
             URL url;
             HttpURLConnection urlConnection=null;
             try {
@@ -173,6 +174,9 @@ public class ServerRequestUser {
                 line=bld.toString();
             }catch (Exception e){
                 e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
             }
             return null;
         }
@@ -311,7 +315,7 @@ public class ServerRequestUser {
             // String data = "{ image_data: \"" + uploadimage.toString() + "\", uploadedBy: \"1\" }";
             String line="";
             URL url;
-            HttpURLConnection urlConnection;
+            HttpURLConnection urlConnection = null;
             try {
 
                 //String dataPosted=getData(data);
@@ -351,6 +355,9 @@ public class ServerRequestUser {
 
             }catch (Exception e){
                 e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
             }
             return line;
         }
@@ -609,7 +616,7 @@ public class ServerRequestUser {
 
             String line="";
             URL url;
-            HttpURLConnection urlConnection;
+            HttpURLConnection urlConnection = null;
             try {
                 url=new URL(SERVER_ADDRESS + "UpdateOnlineStatus.php");
                 urlConnection=(HttpURLConnection)url.openConnection();
@@ -649,6 +656,9 @@ public class ServerRequestUser {
 
             }catch (Exception e){
                 e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
             }
             return line;
         }
@@ -677,7 +687,7 @@ public class ServerRequestUser {
 
             String line="";
             URL url;
-            HttpURLConnection urlConnection;
+            HttpURLConnection urlConnection = null;
             try {
                 url=new URL(SERVER_ADDRESS + "UpdateUserFriendsList.php");
                 urlConnection=(HttpURLConnection)url.openConnection();
@@ -717,6 +727,9 @@ public class ServerRequestUser {
 
             }catch (Exception e){
                 e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
             }
             return line;
         }
@@ -888,6 +901,9 @@ public class ServerRequestUser {
                 }
             }catch (Exception e){
                 e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
             }
             return line;
         }
@@ -1197,7 +1213,7 @@ public class ServerRequestUser {
 
             String line="";
             URL url;
-            HttpURLConnection urlConnection;
+            HttpURLConnection urlConnection = null;
             try {
                 url=new URL(SERVER_ADDRESS + "UpdateUserFriendsList.php");
                 urlConnection=(HttpURLConnection)url.openConnection();
@@ -1237,10 +1253,112 @@ public class ServerRequestUser {
 
             }catch (Exception e){
                 e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
             }
             return line;
         }
     }
 
+    public void fetchUsertoUpdateFriend(String friendusername,String myusername, GetUserCallbacks callbacks){
+        new FetchUsertoUpdateFriendListAsynckTacks(friendusername,myusername,callbacks).execute();
+    }
+    public class FetchUsertoUpdateFriendListAsynckTacks extends AsyncTask<Void,Void,User> {
+        String username;
+        String myusername;
+        GetUserCallbacks userCallbacks;
+
+
+        public FetchUsertoUpdateFriendListAsynckTacks(String friendusername,String myusername, GetUserCallbacks callbacks) {
+            this.userCallbacks = callbacks;
+            this.username=friendusername;
+            this.myusername=myusername;
+        }
+
+        @Override
+        protected void onPostExecute(User returnedusres) {
+            progressDialog.dismiss();
+            userCallbacks.done(returnedusres);
+            if(returnedusres.friendlist.isEmpty()||returnedusres.friendlist==null){
+                User user=new User(returnedusres.username,returnedusres.email,returnedusres.password,null,null,returnedusres.status,returnedusres.regId,returnedusres.picture,myusername);
+                new UpdatefriendFriendListAsynckTacks(user,userCallbacks).execute();
+            }else {
+                StringBuilder b= new StringBuilder(returnedusres.friendlist).append(",").append(myusername);
+                User user=new User(returnedusres.username,returnedusres.email,returnedusres.password,null,null,returnedusres.status,returnedusres.regId,returnedusres.picture,b.toString());
+                new UpdatefriendFriendListAsynckTacks(user,userCallbacks).execute();
+            }
+
+            super.onPostExecute(returnedusres);
+        }
+
+        @Override
+        protected User doInBackground(Void... params) {
+
+            User returnedusres=null;
+            URL url;
+
+            HttpURLConnection urlConnection=null;
+            try {
+                url=new URL(SERVER_ADDRESS + "FetchUserToUpdateFriendList.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
+                urlConnection.setReadTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                OutputStream out=urlConnection.getOutputStream();
+                BufferedWriter buff=new BufferedWriter(new OutputStreamWriter(out,"UTF-8"));
+                String data =URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(username,"UTF-8");
+                buff.write(data);
+                buff.flush();
+                buff.close();
+                out.close();
+
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line=reader.readLine())!=null){
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons =bi.toString();
+                JSONArray jsonArray= new JSONArray(respons);
+                JSONObject jsonObject=jsonArray.getJSONObject(0);
+                if(jsonObject.length()==0){
+                    returnedusres=null;
+                }else {
+                    String username=null;
+                    if(jsonObject.has("username")){
+                        String regId=jsonObject.getString("gcm_regid");
+                        username=jsonObject.getString("username");
+                        String friendlist=jsonObject.getString("friendList");
+                        String email=jsonObject.getString("email");
+                        String hashpassword=jsonObject.getString("password");
+                        int stat=jsonObject.getInt("onlineStatus");
+                        returnedusres=new User(username,email,hashpassword,null,null,stat,regId,null,friendlist);
+                    }
+
+                }
+
+
+                // fetch data to a jason object
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                assert urlConnection != null;
+                urlConnection.disconnect();
+            }
+
+            return returnedusres;
+        }
+
+
+    }
 
 }

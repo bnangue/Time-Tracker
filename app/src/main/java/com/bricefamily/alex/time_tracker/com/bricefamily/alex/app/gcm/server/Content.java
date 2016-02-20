@@ -26,6 +26,7 @@ public class Content implements Serializable {
 
         data.put("title", title);
         data.put("message", message);
+
     }
     public List<String> getRegistration_ids() {
         return registration_ids;

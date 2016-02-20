@@ -7,15 +7,18 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 /**
  * Created by bricenangue on 17/02/16.
  */
 public class RequestHandlerActivity extends ActionBarActivity implements View.OnClickListener {
-    private String senderRegId, receiverername,message,sendername;
+    private String senderRegId, receiverername,message,sendername,myemail,mypassword;
     Button btnCancleRequest, btnAcceptRequest;
     TextView tvMessage;
     UserLocalStore userLocalStore;
     User user;
+    private boolean request;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,8 +38,11 @@ public class RequestHandlerActivity extends ActionBarActivity implements View.On
             sendername =extras.getString("receiver");
             senderRegId=extras.getString("recieverregId");
             message=extras.getString("messagefromgcm");
-            user=extras.getParcelable("user");
+            myemail=extras.getString("myemail");
+            mypassword=extras.getString("mypassword");
+            request = extras.getBoolean("request");
         }
+        user=new User(sendername,myemail,mypassword,1,senderRegId);
         if(message!=null){
             tvMessage.setText(message);
         }
@@ -49,8 +55,9 @@ public class RequestHandlerActivity extends ActionBarActivity implements View.On
         switch (id){
             case R.id.btnacceptRequest:
                 FriendRequest friendRequest=new FriendRequest(getApplicationContext(),user);
-                friendRequest.sendFriendresquest(false,senderRegId,sendername);
-                friendRequest.adduserinfriendList(receiverername,user.email,user.password);
+                friendRequest.sendFriendresquest(false, senderRegId,sendername);
+                friendRequest.adduserinfriendList(receiverername, user.email, user.password,sendername);
+
                 finish();
                 break;
             case R.id.btncancleRequest:

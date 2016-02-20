@@ -50,7 +50,7 @@ public class LoginPanelActivity extends AppCompatActivity {
                     finish();
                 }else {
                     FriendRequest friendRequest=new FriendRequest(getApplicationContext(),user);
-                    friendRequest.adduserinfriendList(user.username,user.email,user.password);
+                    friendRequest.adduserinfriendList(user.username,user.email,user.password,user.username);
                     finish();
                 }
 

@@ -137,7 +137,8 @@
             android:launchMode="singleTask"
             android:taskAffinity="" />
         <activity android:name=".LoginPanelActivity" />
-        <activity android:name=".RemovedAsFriendActivity"></activity>
+        <activity android:name=".RemovedAsFriendActivity" />
+        <activity android:name=".MessageForShowActivity"></activity>
     </application>
 
 </manifest>

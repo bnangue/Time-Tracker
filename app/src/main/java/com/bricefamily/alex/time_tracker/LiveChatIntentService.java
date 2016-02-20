@@ -36,6 +36,7 @@ public class LiveChatIntentService extends IntentService {
     FriendRequest friendRequest;
     private IncomingNotification incomingNotification;
     private MySQLiteHelper mySQLiteHelper;
+    private SQLPictureHelper sqlPictureHelper;
     private int incomingNotifiId;
 
     public static final String TAG = "GcmIntentService";
@@ -49,6 +50,7 @@ public class LiveChatIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         mySQLiteHelper=new MySQLiteHelper(this);
+        sqlPictureHelper=new SQLPictureHelper(this);
         dbOperation = new DBOperation(this);
         friendRequest=new FriendRequest(this,null);
         dbOperation.createAndInitializeTables();
@@ -149,6 +151,7 @@ public class LiveChatIntentService extends IntentService {
         intent.putExtra("recieverName",chattingToName);
         intent.putExtra("recieverregId",chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
+        intent.putExtra("friendPicture",sqlPictureHelper.getfriendPicture(chattingToName));
         try {
             JSONObject jsonObject=new JSONObject();
             jsonObject.put("sender",chattingToName);

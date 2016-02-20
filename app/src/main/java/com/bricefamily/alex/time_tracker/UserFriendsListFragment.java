@@ -1,6 +1,7 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.annotation.TargetApi;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,7 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
     ArrayList<User> userArrayListforGcm;
     ProfileListAdapter profileListAdapter;
     UserLocalStore userLocalStore;
+    private SQLPictureHelper sqlPictureHelper;
 
     int[] status ;
     private ListView listView;
@@ -37,6 +39,7 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         userLocalStore=new UserLocalStore(getContext());
 
+        sqlPictureHelper=new SQLPictureHelper(getContext());
         View rootview =inflater.inflate(R.layout.activity_user_friend_list_tab, container, false);
         User u=userLocalStore.getLoggedInUser();
         listView=(ListView)rootview.findViewById(R.id.listfriend);
@@ -50,7 +53,7 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
 
     @TargetApi(Build.VERSION_CODES.M)
     private void fetchuserlist(User user){
-        ServerRequestUser serverRequestUser=new ServerRequestUser(getContext());
+        final ServerRequestUser serverRequestUser=new ServerRequestUser(getContext());
         serverRequestUser.fetchallUsers(user, new GetUserCallbacks() {
             @Override
             public void done(User returneduser) {
@@ -82,6 +85,18 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
                         for (int j = 0; j < flist.size(); j++) {
                             if (flist.get(j).equals(listw.get(i).username)) {
                                 list.add(listw.get(i));
+                                if(listw.get(i).picture!=null){
+                                    Bitmap b=sqlPictureHelper.getfriendPicture(listw.get(i).username);
+                                    if(b!=null){
+                                        sqlPictureHelper.updatefriendPicture(listw.get(i).username,listw.get(i).picture);
+                                    }else {
+                                        sqlPictureHelper.addfriendPicture(listw.get(i).username,listw.get(i).picture);
+                                    }
+
+                                }
+
+
+
                             }
                         }
                     }

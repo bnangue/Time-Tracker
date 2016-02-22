@@ -7,6 +7,8 @@ import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -37,7 +40,12 @@ public class LiveChatIntentService extends IntentService {
     private IncomingNotification incomingNotification;
     private MySQLiteHelper mySQLiteHelper;
     private SQLPictureHelper sqlPictureHelper;
+    private SQLITELastMessageReceive sqliteLastMessageReceive;
     private int incomingNotifiId;
+    private final static String GROUP_KEY_MESSAGES = "group_key_messages";
+    public static int notificationId=0;
+    public static ArrayList<String>  incomingmessages=new ArrayList<>();
+
 
     public static final String TAG = "GcmIntentService";
     IBinder mBinder=new Binder() ;
@@ -52,6 +60,7 @@ public class LiveChatIntentService extends IntentService {
         mySQLiteHelper=new MySQLiteHelper(this);
         sqlPictureHelper=new SQLPictureHelper(this);
         dbOperation = new DBOperation(this);
+        sqliteLastMessageReceive=new SQLITELastMessageReceive(this);
         friendRequest=new FriendRequest(this,null);
         dbOperation.createAndInitializeTables();
          mBuilder = new NotificationCompat.Builder(
@@ -109,13 +118,16 @@ public class LiveChatIntentService extends IntentService {
 
                     sendremovedfriendnotification(intent);
                 }else{
-                    sendOrderedBroadcast(i, null);
-
-                    if(LiveChatActivity.messageshowed){
+                    if(!LiveChatActivity.messageshowed && extras.getString("sender").equals(LiveChatActivity.receiverName)){
+                        sendOrderedBroadcast(i, null);
+                    }else if(LiveChatActivity.messageshowed){
                         sendnotification(intent);
                         LiveChatBroadcastReceiver.completeWakefulIntent(intent);
-
+                    }else if(!LiveChatActivity.messageshowed && !extras.getString("sender").equals(LiveChatActivity.receiverName)){
+                        sendnotification(intent);
+                        LiveChatBroadcastReceiver.completeWakefulIntent(intent);
                     }
+
                 }
 
 
@@ -132,6 +144,10 @@ public class LiveChatIntentService extends IntentService {
     // a GCM message.
     private void sendnotification(Intent bintent) {
 
+        notificationId++;
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.chaticon);
+
+
         Bundle extras=bintent.getExtras();
 
         //String chattingFrom = extras.getString("chattingFrom");
@@ -140,6 +156,7 @@ public class LiveChatIntentService extends IntentService {
         String msg = extras.getString("message");
 
         String message=chattingToName+": " +msg;
+
         mNotificationManager = (NotificationManager) this
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -149,6 +166,7 @@ public class LiveChatIntentService extends IntentService {
 
         //intent.putExtra("chattingFrom", chattingFrom);
         intent.putExtra("recieverName",chattingToName);
+        intent.putExtra("notifreceiver",extras.getString("receiver"));
         intent.putExtra("recieverregId",chattingToDeviceID);
         intent.putExtra("messagefromgcm", msg);
         intent.putExtra("friendPicture",sqlPictureHelper.getfriendPicture(chattingToName));
@@ -157,6 +175,7 @@ public class LiveChatIntentService extends IntentService {
             jsonObject.put("sender",chattingToName);
             jsonObject.put("message",msg);
             jsonObject.put("recieverregId",chattingToDeviceID);
+            jsonObject.put("notifreceiver",extras.getString("receiver"));
             Calendar c=new GregorianCalendar();
             Date dat=c.getTime();
             //String day= String.valueOf(dat.getDay());
@@ -171,6 +190,19 @@ public class LiveChatIntentService extends IntentService {
 
         ChatPeople cppl=addToChatOnly(chattingToName, msg, "1", chattingToDeviceID);
        addToDBOnly(cppl);
+        LastMessage lastMessage=sqliteLastMessageReceive.getfriendLastMessage(chattingToDeviceID);
+        if(lastMessage!=null){
+          int d=  sqliteLastMessageReceive.updatefriendLastMessage(chattingToDeviceID,chattingToName,msg,"0");
+            if(d>0){
+
+            }
+        }else {
+           int d= sqliteLastMessageReceive.addfriendLastMessage(chattingToName,msg,"0",chattingToDeviceID);
+            if(d>0){
+
+            }
+        }
+
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
@@ -186,11 +218,28 @@ public class LiveChatIntentService extends IntentService {
         //PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
         //		new Intent(this, ChatActivity.class), 0);
 
+        incomingmessages.add(message);
+        NotificationCompat.InboxStyle style=new NotificationCompat.InboxStyle();
         mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setContentText(message);
+        for(int i=0;i<incomingmessages.size();i++){
+            style.addLine(incomingmessages.get(i));
+            style.setBigContentTitle(notificationId + " new messages");
+            style.setSummaryText("messages");
+        }
+        if(notificationId>=2){
+            mBuilder.setContentIntent(resultPendingIntent)
+                    .setStyle(style)
+                    .setGroup(GROUP_KEY_MESSAGES)
+                    .setGroupSummary(true);
+        }
         mBuilder.setContentIntent(resultPendingIntent);
         notification=mBuilder.build();
-        mNotificationManager.notify(NOTIFICATION_ID, notification);
+        mNotificationManager.cancelAll();
+        mNotificationManager.notify(notificationId, notification);
+        if(!LiveChatActivity.messageshowed){
+            mNotificationManager.cancelAll();
+        }
     }
 
     private void sendfriendrequestnotification(Intent bintent) {
@@ -263,7 +312,9 @@ public class LiveChatIntentService extends IntentService {
                 );
         Builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setContentText(message);
-        Builder.setContentIntent(resultPendingIntent);
+        Builder.setContentIntent(resultPendingIntent)
+                .setGroup(GROUP_KEY_MESSAGES)
+                .setGroupSummary(true);
         notification=Builder.build();
         mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
@@ -283,7 +334,7 @@ public class LiveChatIntentService extends IntentService {
 
         NotificationCompat.Builder Builder = new NotificationCompat.Builder(
                 this).setSmallIcon(R.drawable.addeduserblue)
-                .setContentTitle("New Message")
+                .setContentTitle("New friend request")
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(""))
                 .setContentText("");
         Builder.setDefaults(NotificationCompat.DEFAULT_ALL);
@@ -456,4 +507,12 @@ public class LiveChatIntentService extends IntentService {
     }
 
 
+    public class Msg{
+        String msg;
+        String uname;
+        public Msg( String msg, String uname){
+            this.msg=msg;
+            this.uname=uname;
+        }
+    }
 }

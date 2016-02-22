@@ -3,6 +3,7 @@ package com.bricefamily.alex.time_tracker;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -68,6 +69,7 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
                         .setAction("Action", null).show();
             }
         });
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
 
 
         currenttime=(TextView)findViewById(R.id.textVieweventcurrenttime);

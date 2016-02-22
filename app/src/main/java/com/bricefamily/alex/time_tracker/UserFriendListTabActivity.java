@@ -80,7 +80,7 @@ public class UserFriendListTabActivity extends ActionBarActivity implements Adap
 
     void prepareListview(ArrayList<User> list,int[] statsus){
         listView=(ListView)findViewById(R.id.listfriend);
-        profileListAdapter=new ProfileListAdapter(this,list);
+        profileListAdapter=new ProfileListAdapter(this,list,"");
 
         listView.setAdapter(profileListAdapter);
         profileListAdapter.setUserStatus(statsus);

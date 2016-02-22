@@ -60,7 +60,7 @@ public class ChatArrayApadter extends ArrayAdapter<ChatPeople>{
         chattext=(TextView)v.findViewById(R.id.singlemessage);
         chattext.setText(obj.getPERSON_CHAT_MESSAGE());
         chattext.setBackgroundResource(left ? R.drawable.out_message_bg : R.drawable.in_message_bg);
-        layout.setGravity(left? Gravity.LEFT : Gravity.RIGHT);
+        layout.setGravity(left ? Gravity.LEFT : Gravity.RIGHT);
 
         return v;
 

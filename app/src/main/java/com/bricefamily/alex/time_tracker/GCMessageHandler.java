@@ -5,6 +5,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
@@ -38,7 +40,12 @@ public class GCMessageHandler extends IntentService {
     Random random = new Random();
     int m = random.nextInt(9999 - 1000) + 1000;
     NotificationCompat.Builder mBuilder;
+    Notification notificationSummary;
     String mes,title;
+    private final static String GROUP_KEY_MESSAGES = "group_key_messages";
+    public static int notificationId=0;
+
+
     private Handler handler;
     private MySQLiteHelper mySQLiteHelper;
     public GCMessageHandler() {
@@ -50,8 +57,18 @@ public class GCMessageHandler extends IntentService {
         super.onCreate();
         mySQLiteHelper=new MySQLiteHelper(this);
         handler = new Handler();
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.colorhome);
+
         nmgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
+        Notification notification=new NotificationCompat.Builder(this)
+                .setAutoCancel(true)
+                .setContentTitle("New Events")
+                .setContentText("You have "+notificationId+" new Event")
+                .setLargeIcon(icon)
+                .setGroup(GROUP_KEY_MESSAGES)
+                .setGroupSummary(true)
+                .build();
         mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.colornfo)

@@ -1,6 +1,7 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -52,6 +53,7 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
                         .setAction("Action", null).show();
             }
         });
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
 
         status=setstatuslist(userArrayList,userArrayListforGcm);
 
@@ -119,7 +121,7 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
 
     void prepareListview(ArrayList<User> list,int[] statsus){
         listView=(ListView)findViewById(R.id.userListview);
-        profileListAdapter=new ProfileListAdapter(this,list);
+        profileListAdapter=new ProfileListAdapter(this,list,"");
 
         listView.setAdapter(profileListAdapter);
         profileListAdapter.setUserStatus(statsus);

@@ -17,6 +17,9 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
@@ -57,24 +60,26 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.logging.Filter;
 
-public class LiveChatActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
+public class LiveChatActivity extends ActionBarActivity implements TextView.OnEditorActionListener, DialogDeleteChatVerlaufFragment.YesNoListenerDeleteChat {
 
     private ChatArrayApadter chatArrayApadter;
     private ListView chatlist;
     private Button sendBtn;
     private EditText chaTtext;
     private boolean side =false;
-    String receiverName,intentrecievemesg;
-    String receiverregId;
+    String intentrecievemesg;
+    String receiverregId,notifreceiver;
     UserLocalStore userLocalStore;
     ArrayList<ChatPeople> ChatPeoples;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder mBuilder;
     Notification notification;
     public static final int NOTIFICATION_ID = 1;
+    private SQLITELastMessageReceive sqliteLastMessageReceive;
     Intent intentr;
     private MySQLiteHelper mySQLiteHelper;
     static boolean messageshowed=true;
+    static String receiverName ;
 
     Bitmap bitmap;
 
@@ -95,18 +100,27 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mySQLiteHelper=new MySQLiteHelper(this);
+        sqliteLastMessageReceive=new SQLITELastMessageReceive(this);
         Intent i  = getIntent();
         Bundle extras=i.getExtras();
         if(extras!=null){
             receiverName=extras.getString("recieverName");
             receiverregId=extras.getString("recieverregId");
             intentrecievemesg=extras.getString("messagefromgcm");
+            notifreceiver=extras.getString("notifreceiver");
             bitmap=(Bitmap)extras.getParcelable("friendPicture");
 
         }
 
+        LiveChatIntentService.notificationId=0;
+        LiveChatIntentService.incomingmessages=new ArrayList<>();
         setContentView(R.layout.activity_live_chat);
         mySQLiteHelper.updateIncomingMessage(1, 3);
+        LastMessage messag=sqliteLastMessageReceive.getfriendLastMessage(receiverregId);
+        if(messag!=null){
+            sqliteLastMessageReceive.updatefriendLastMessage(receiverregId, messag.lusername,messag.lmessage,"1");
+        }
+
 
         messageshowed=false;
 
@@ -206,6 +220,12 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
             chatlist.setStackFromBottom(true);
             chatlist.setAdapter(chatArrayApadter);
 
+        }else {
+            chatArrayApadter = new ChatArrayApadter(this, R.layout.chat,ChatPeoples);
+
+            chatlist.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+            chatlist.setStackFromBottom(true);
+            chatlist.setAdapter(chatArrayApadter);
         }
 
     }
@@ -307,6 +327,10 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
         if(!messagetoSend.isEmpty()){
             ChatPeople curChatObj = addToChat(receiverName, messagetoSend, "0");
             addToDB(curChatObj);
+            LastMessage messag=sqliteLastMessageReceive.getfriendLastMessage(receiverregId);
+            if(messag!=null){
+                sqliteLastMessageReceive.updatefriendLastMessage(receiverregId, notifreceiver,messagetoSend,"1");
+            }
             populateChatMessages();
             clearMessageTextBox();
 
@@ -336,6 +360,17 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
                     "1");
             addToDB(curChatObj); // adding to db
 
+            try {
+                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                r.play();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            LastMessage messag=sqliteLastMessageReceive.getfriendLastMessage(receiverregId);
+            if(messag!=null){
+                sqliteLastMessageReceive.updatefriendLastMessage(receiverregId, receiverName,message,"1");
+            }
             populateChatMessages();
             messageshowed=false;
             abortBroadcast();
@@ -355,11 +390,15 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                User u=userLocalStore.getLoggedInUser();
-                fetchuserlist(u);
+                Intent intent = new Intent(LiveChatActivity.this, NewUserTabsActivity.class);
+                startActivity(intent);
+                finish();
                 break;
             case R.id.action_delete_chat:
-                dbOperation.deleteTableData(new ChatPeople().getTableName(),null);
+                DialogDeleteChatVerlaufFragment alertDialodDeleteVerlauf=new DialogDeleteChatVerlaufFragment();
+                alertDialodDeleteVerlauf.setCancelable(false);
+                alertDialodDeleteVerlauf.show(getSupportFragmentManager(), "tag");
+
                 break;
         }
         return true;
@@ -379,6 +418,12 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
         return result.toString();
     }
 
+    public void deletechatverlauf(){
+        dbOperation.open();
+        dbOperation.deleteChatData(new ChatPeople().getTableName(), receiverregId);
+        dbOperation.close();
+        populateChatMessages();
+    }
     public void sendMessagetoServer() {
 
         final String messageToSend = chaTtext.getText().toString().trim();
@@ -492,11 +537,9 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     }
 
     void clearMessageTextBox() {
-
-        chaTtext.clearFocus();
         chaTtext.setText("");
 
-        hideKeyBoard(chaTtext);
+
 
     }
 
@@ -507,6 +550,7 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     }
 
     private void hideKeyBoard(EditText edt) {
+        edt.clearFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(edt.getWindowToken(), 0);
     }
@@ -524,58 +568,19 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
     @Override
     public void onBackPressed()
     {
-        User u=userLocalStore.getLoggedInUser();
-        fetchuserlist(u);
-    }
-    private void fetchuserlist(final User user){
-        final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
-        serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
-            @Override
-            public void done(User returneduser) {
-
-            }
-
-            @Override
-            public void deleted(String reponse) {
-
-            }
-
-            @Override
-            public void userlist(ArrayList<User> reponse) {
-                if (reponse.size() != 0) {
-                    ArrayList<User> users = new ArrayList<User>();
-                    users = reponse;
-                    final ArrayList<User> finalUsers = users;
-                    serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
-                        @Override
-                        public void done(User returneduser) {
-
-                        }
-
-                        @Override
-                        public void deleted(String reponse) {
-
-                        }
-
-                        @Override
-                        public void userlist(ArrayList<User> reponse) {
-
-                            if (reponse.size() != 0) {
-                                Intent intent = new Intent(LiveChatActivity.this, NewUserTabsActivity.class);
-                                intent.putExtra("userlistforgcm", finalUsers);
-                                intent.putExtra("userlist", reponse);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                finish();
-                            }
-                        }
-                    });
-
-                }
-            }
-        });
+        Intent intent = new Intent(LiveChatActivity.this, NewUserTabsActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 
+    @Override
+    public void onYes() {
+        deletechatverlauf();
+    }
 
+    @Override
+    public void onNo() {
+
+    }
 }

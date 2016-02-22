@@ -1,5 +1,7 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -38,6 +40,7 @@ public class NewUserTabsActivity extends ActionBarActivity {
                         .setAction("Action", null).show();
             }
         });
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
 
         toolbar.setBackgroundColor(getResources().getColor(R.color.ColorPrimary));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){

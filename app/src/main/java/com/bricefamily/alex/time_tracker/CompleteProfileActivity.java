@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -73,6 +74,7 @@ public class CompleteProfileActivity extends ActionBarActivity implements View.O
                         .setAction("Action", null).show();
             }
         });
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
     }
 
     void setViews(){

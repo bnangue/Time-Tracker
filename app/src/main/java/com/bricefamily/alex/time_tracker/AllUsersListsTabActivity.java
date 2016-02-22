@@ -77,7 +77,7 @@ private int[] fetchuserlist(User user){
 
         void prepareListview(ArrayList<User> list,int[] statsus){
         listView=(ListView)findViewById(R.id.listalluser);
-        profileListAdapter=new ProfileListAdapter(this,list);
+        profileListAdapter=new ProfileListAdapter(this,list,"");
 
         listView.setAdapter(profileListAdapter);
         profileListAdapter.setUserStatus(statsus);

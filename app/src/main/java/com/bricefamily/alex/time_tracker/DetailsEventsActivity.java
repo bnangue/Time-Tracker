@@ -3,6 +3,7 @@ package com.bricefamily.alex.time_tracker;
 import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.app.Fragment;
@@ -36,6 +37,7 @@ public class DetailsEventsActivity extends ActionBarActivity {
         userLocalStore=new UserLocalStore(this);
          fab = (FloatingActionButton) findViewById(R.id.fab);
 
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
 
         Bundle bundle=getIntent().getExtras();
         if(bundle!=null){

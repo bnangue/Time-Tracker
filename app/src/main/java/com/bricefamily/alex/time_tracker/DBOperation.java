@@ -88,8 +88,19 @@ public class DBOperation {
         return db.delete(DB_TABLE, condition, null) > 0;
     }
 
-    public Cursor getAllTableData(String tablename, String[] fields)
+    public boolean deleteChatData(String tablename, String personDeviceID)
             throws SQLException {
+        ChatPeople peopleTable = new ChatPeople();
+        String condition = "";
+        if (personDeviceID != null) {
+            condition = peopleTable.getPERSON_DEVICE_ID() + " = '"
+                    + personDeviceID + "'";
+        }
+        DB_TABLE = tablename;
+        return db.delete(DB_TABLE, condition, null) > 0;
+    }
+    public Cursor getAllTableData(String tablename, String[] fields)
+            throws Exception {
         DB_TABLE = tablename;
         return db.query(DB_TABLE, fields, null, null, null, null, null);
     }
@@ -127,6 +138,21 @@ public class DBOperation {
         return retVar;
     }
 
+    public ChatPeople lastInsertedtext(String regid) {
+        ChatPeople peopleTable = new ChatPeople();
+        DB_TABLE=peopleTable.getTableName();
+        String query = "SELECT person_name, person_chat_message, status FROM " + DB_TABLE +" WHERE person_device_id = ? AND id = (SELECT MAX(id)  FROM TABLE)";
+
+        Cursor cursor =db.rawQuery(query, new String[]{regid});
+
+        if (cursor != null&&cursor.moveToFirst()){
+            peopleTable.setPERSON_NAME(cursor.getString(0));
+            peopleTable.setPERSON_CHAT_MESSAGE(cursor.getString(1));
+            peopleTable.setPERSON_CHAT_TO_FROM(cursor.getString(2));
+            cursor.close();
+        }
+        return peopleTable;
+    }
     public void createAndInitializeTables() {
         try {
             ChatPeople mytable = new ChatPeople();

@@ -2,6 +2,7 @@ package com.bricefamily.alex.time_tracker;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ public class ProfileOverviewActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_profile_overview);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
 
     }
 

@@ -115,7 +115,7 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
 
 
     void prepareListview(ArrayList<User> list,int[] statsus){
-        profileListAdapter=new ProfileListAdapter(getContext(),list);
+        profileListAdapter=new ProfileListAdapter(getContext(),list,userLocalStore.getLoggedInUser().username);
 
         listView.setAdapter(profileListAdapter);
         profileListAdapter.setUserStatus(statsus);
@@ -221,7 +221,8 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
             intent.putExtra("recieverName",recievername);
             intent.putExtra("recieverregId",reciverregId);
             intent.putExtra("friendPicture",reciever.picture);
-            intent.putExtra("message","");
+            intent.putExtra("notifreceiver",userLocalStore.getLoggedInUser().username);
+
             startActivity(intent);
 
         }else{

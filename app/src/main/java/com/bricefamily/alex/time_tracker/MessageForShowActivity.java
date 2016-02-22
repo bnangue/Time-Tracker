@@ -2,6 +2,7 @@ package com.bricefamily.alex.time_tracker;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +20,7 @@ public class MessageForShowActivity extends ActionBarActivity {
     private TextView tvtitel,tvmessage;
     private String sendername,message,senderRegid;
     Button chatto;
+    private Bitmap bitmap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +31,7 @@ public class MessageForShowActivity extends ActionBarActivity {
             sendername=extras.getString("recieverName");
             message=extras.getString("messagefromgcm");
             senderRegid=extras.getString("recieverregId");
+            bitmap=(Bitmap)extras.getParcelable("friendPicture");
         }
         chatto=(Button)findViewById(R.id.buttonTochat);
         tvmessage=(TextView)findViewById(R.id.textViewshowmsgMessage);
@@ -45,6 +48,7 @@ public class MessageForShowActivity extends ActionBarActivity {
         intent.putExtra("recieverName",sendername);
         intent.putExtra("recieverregId", senderRegid);
         intent.putExtra("messagefromgcm", message);
+        intent.putExtra("friendPicture",bitmap);
         startActivity(intent);
     }
 

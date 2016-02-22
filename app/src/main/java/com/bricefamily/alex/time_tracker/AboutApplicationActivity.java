@@ -1,5 +1,6 @@
 package com.bricefamily.alex.time_tracker;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,6 +24,7 @@ public class AboutApplicationActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
     }
 
 }

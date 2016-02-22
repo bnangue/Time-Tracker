@@ -3,6 +3,7 @@ package com.bricefamily.alex.time_tracker;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -82,6 +83,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         refreshLayout.setColorSchemeColors(Color.BLUE);
         refreshLayout.setOnRefreshListener(this);
 
+        fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
         userLocalStore = new UserLocalStore(this);
         mtitel=drawerTitle = title = getTitle();
         mySQLiteHelper.updateIncomingMessage(1,2);
@@ -156,6 +158,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         mDrawerpane = (RelativeLayout) findViewById(R.id.drawerpane);
         mDrawerList = (ListView) findViewById(R.id.navlist);
         userName = (TextView) findViewById(R.id.username);
+        TextView luserName = (TextView) findViewById(R.id.usernamemainpage);
+        luserName.setText(uName);
         profilePicture = (CircularImageView) findViewById(R.id.avatarfriend);
         if(path!=null){
             Bitmap bitmap=loadImageFromStorage(path,uName);

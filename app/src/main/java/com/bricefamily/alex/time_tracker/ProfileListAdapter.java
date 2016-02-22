@@ -1,7 +1,9 @@
 package com.bricefamily.alex.time_tracker;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +23,15 @@ public class ProfileListAdapter extends BaseAdapter
     private ArrayList<User> userlist;
     private Context context;
     private int[] onlinestatus;
+    private SQLITELastMessageReceive dbOperation;
+    String senderName,mesg,status,currentusername;
 
-    public ProfileListAdapter(Context context,ArrayList<User> userlist){
+    public ProfileListAdapter(Context context,ArrayList<User> userlist,String currentusername){
         this.context=context;
         this.userlist=userlist;
         onlinestatus=new int[userlist.size()];
+        dbOperation=new SQLITELastMessageReceive(context);
+        this.currentusername=currentusername;
 
     }
 
@@ -69,6 +75,35 @@ public class ProfileListAdapter extends BaseAdapter
             holder=(Holder)convertView.getTag();
         }
 
+        LastMessage cursor=dbOperation.getfriendLastMessage(userlist.get(position).regId);
+        if(cursor!=null){
+           senderName=cursor.lusername;
+         mesg=cursor.lmessage;
+         status=cursor.statusRead;
+
+
+            String income=senderName+": "+mesg;
+
+
+            if(status.equals("0")){
+                holder.friendindicator.setText(income);
+            }else {
+                holder.friendindicator.setTextColor(Color.BLACK);
+                if(senderName.equals(currentusername)){
+                    String outcome="me: "+mesg;
+                    holder.friendindicator.setText(outcome);
+                }else {
+                    String outcome=senderName+": "+mesg;
+                    holder.friendindicator.setText(outcome);
+                }
+
+            }
+        }else {
+            holder.friendindicator.setText("");
+        }
+
+
+
         String usernam=userlist.get(position).username;
         Bitmap picture=userlist.get(position).picture;
 
@@ -77,7 +112,8 @@ public class ProfileListAdapter extends BaseAdapter
         }
 
         holder.username.setText(usernam);
-        holder.friendindicator.setText("friend");
+
+
 
         holder.checker.setChecked(setstatus(userlist.get(position).status));
         holder.checker.setClickable(false);

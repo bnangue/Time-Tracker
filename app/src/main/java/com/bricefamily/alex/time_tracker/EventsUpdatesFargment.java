@@ -28,6 +28,7 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
     private UserLocalStore userLocalStore;
     InboxEventAdapter inboxEventAdapter;
     ArrayList<IncomingNotification> incominglist;
+    private  SQLPictureHelper sqlPictureHelper;
 
     int[] status ;
     private ListView listView;
@@ -38,6 +39,7 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
 
          db = new MySQLiteHelper(getContext());
 
+        sqlPictureHelper=new SQLPictureHelper(getContext());
         View rootview =inflater.inflate(R.layout.new_update_event_notification,container,false);
         listView=(ListView)rootview.findViewById(R.id.listfriend);
         refreshLayout=(SwipeRefreshLayout)rootview.findViewById(R.id.swiperefresh);
@@ -115,7 +117,7 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
     }
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        toupdate(position);
+
         int type=incominglist.get(position).type;
         int status=incominglist.get(position).readStatus;
         String jsodata=incominglist.get(position).body;
@@ -159,6 +161,7 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
                     intent.putExtra("recieverName", jsonObject.getString("sender"));
                     intent.putExtra("recieverregId", jsonObject.getString("recieverregId"));
                     intent.putExtra("messagefromgcm", jsonObject.getString("message"));
+                    intent.putExtra("friendPicture",sqlPictureHelper.getfriendPicture(jsonObject.getString("sender")));
 
                     startActivity(intent);
 
@@ -217,6 +220,7 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
 
                 break;
         }
+        toupdate(position);
     }
 
     void getAllEventsFromDatabase(final String username) {

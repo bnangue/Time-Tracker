@@ -38,20 +38,33 @@ public class DrawerListAdapter extends BaseAdapter{
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view;
-        if(convertView==null){
-            LayoutInflater inflater=(LayoutInflater)mcontext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view=inflater.inflate(R.layout.drawer_item,null);
-        }else {
-            view=convertView;
-        }
-        TextView titelview=(TextView)view.findViewById(R.id.titel);
-        TextView subtitelview=(TextView)view.findViewById(R.id.subtitel);
-        ImageView iconView=(ImageView)view.findViewById(R.id.icon);
 
-        titelview.setText(mNavItems.get(position).mTitel);
-        subtitelview.setText(mNavItems.get(position).mSubTitel);
-        iconView.setImageResource(mNavItems.get(position).micon);
-        return view;
+        final ViewHolder holder;
+        if(convertView==null){
+
+            LayoutInflater inflater=(LayoutInflater)mcontext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView=inflater.inflate(R.layout.drawer_item,null);
+            holder=new ViewHolder();
+            holder.titelview=(TextView)convertView.findViewById(R.id.titel);
+            holder.subtitelview=(TextView)convertView.findViewById(R.id.subtitel);
+            holder.iconView=(ImageView)convertView.findViewById(R.id.icon);
+            convertView.setTag(holder);
+        }else {
+            holder=(ViewHolder)convertView.getTag();
+        }
+
+
+        holder.titelview.setText(mNavItems.get(position).mTitel);
+        holder.subtitelview.setText(mNavItems.get(position).mSubTitel);
+        holder.iconView.setImageResource(mNavItems.get(position).micon);
+
+        return convertView;
+    }
+
+    public class ViewHolder{
+        TextView titelview;
+        TextView subtitelview;
+        ImageView iconView;
+
     }
 }

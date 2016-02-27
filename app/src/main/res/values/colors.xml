@@ -19,9 +19,23 @@
     <color name="ColorPrimaryDark">#cf55a0ec</color>
     <color name="tabsScrollColor">#cff5f6f7</color>
     <color name="inboxunread">#cf83bcf5</color>
-    <color name="colorPrimaryDark">#FF9800</color>
     <color name="actionbar_color">#607D8B</color>
     <color name="livechatdividercolor">#c7e5f4</color>
+    <color name="fill_color">#fff</color>
+    <color name="stroke_color">#000</color>
+
+    <item name="transparent" type="color">#00FFFFFF</item>
+    <item name="grey" type="color">#555555</item>
+    <item name="green" type="color">#4499CC00</item>
+    <item name="darkgreen" type="color">#FF669900</item>
+    <color name="colorPrimary">#2196F3</color>
+
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorPrimaryLight">#BBDEFB</color>
+    <color name="colorAccent">#2196F3</color>
+    <color name="textColorPrimary">@android:color/primary_text_light</color>
+    <color name="textColorSecondary">@android:color/secondary_text_light</color>
+
 
 
 

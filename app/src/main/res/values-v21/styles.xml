@@ -14,11 +14,20 @@
 
         <!-- Customize your theme here. -->
     </style>
+
     <style name="custom" parent="Theme.AppCompat.Light">
 
         <item name="android:statusBarColor">#cf0c81f7</item>
 
         <!-- Customize your theme here. -->
+    </style>
+    >
+
+    <style name="custom.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
 </resources>

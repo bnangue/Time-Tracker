@@ -11,6 +11,14 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <permission
         android:name="com.bricefamily.alex.time_tracker.permission.C2D_MESSAGE"
@@ -38,9 +46,6 @@
         <activity
             android:name=".CreateUserActivity"
             android:label="@string/title_activity_create_user" />
-        <activity
-            android:name=".PreferenceActivity"
-            android:label="@string/title_activity_preference" />
         <activity
             android:name=".CompleteProfileActivity"
             android:label="@string/title_activity_complete_profile"
@@ -126,10 +131,13 @@
             android:name=".NewUserTabsActivity"
             android:label="@string/title_activity_new_user_tabs"
             android:parentActivityName=".HomeScreenActivity"
-            android:theme="@style/AppTheme">
+            android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".HomeScreenActivity" />
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
         </activity>
         <activity
             android:name=".RequestHandlerActivity"
@@ -138,7 +146,21 @@
             android:taskAffinity="" />
         <activity android:name=".LoginPanelActivity" />
         <activity android:name=".RemovedAsFriendActivity" />
-        <activity android:name=".MessageForShowActivity"></activity>
+        <activity android:name=".MessageForShowActivity" />
+        <activity android:name=".MAPActivity" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_api_key" />
+
+        <activity android:name=".SearchResultActivity" />
+        <activity android:name=".PreferenceAppActivity"></activity>
+        <activity
+            android:name=".TimeSheetActivity"
+            android:label="@string/title_activity_time_sheet"
+            android:theme="@style/custom.NoActionBar"></activity>
+        <activity android:name=".NewCalendarActivty"
+            android:theme="@style/MYAppTheme"></activity>
     </application>
 
 </manifest>

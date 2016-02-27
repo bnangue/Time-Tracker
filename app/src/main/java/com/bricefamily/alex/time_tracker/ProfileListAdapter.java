@@ -66,7 +66,7 @@ public class ProfileListAdapter extends BaseAdapter
             holder.username=(TextView)convertView.findViewById(R.id.usernamefriend);
             holder.userPicture=(ImageView)convertView.findViewById(R.id.avatarfriend);
             holder.checker=(RadioButton)convertView.findViewById(R.id.radioButtonstatus);
-            holder.friendindicator=(TextView)convertView.findViewById(R.id.friendindicator);
+            holder.friendindicator=(TextView)convertView.findViewById(R.id.lastmessageindicator);
 
 
             convertView.setTag(holder);

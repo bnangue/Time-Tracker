@@ -121,7 +121,7 @@ public class UserListActivity extends ActionBarActivity implements AdapterView.O
 
     void prepareListview(ArrayList<User> list,int[] statsus){
         listView=(ListView)findViewById(R.id.userListview);
-        profileListAdapter=new ProfileListAdapter(this,list,"");
+        profileListAdapter=new ProfileListAdapter(this,list,"l");
 
         listView.setAdapter(profileListAdapter);
         profileListAdapter.setUserStatus(statsus);

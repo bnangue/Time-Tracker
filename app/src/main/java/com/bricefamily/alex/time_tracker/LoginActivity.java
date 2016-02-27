@@ -9,7 +9,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.File;
@@ -34,11 +37,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 
-public class LoginActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
+public class LoginActivity extends ActionBarActivity implements TextView.OnEditorActionListener,View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
     private EditText emailed, passworded;
     private String emailstr, passwordstr;
     private PasswordChecker pwchecker;
@@ -47,6 +56,8 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
     UserProfilePicture userProfilePicture;
     GoogleCloudMessaging gcm;
     String regid;
+     GoogleApiClient mGoogleApiClient;
+    private static final int RC_SIGN_IN = 9001;
 
 
 
@@ -59,9 +70,18 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
 
         pwchecker = new PasswordChecker();
 
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
         emailed = (EditText) findViewById(R.id.editTextemail);
         passworded = (EditText) findViewById(R.id.editTextpassword);
         passworded.setOnEditorActionListener(this);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
 
     }
 
@@ -519,20 +539,70 @@ public class LoginActivity extends ActionBarActivity implements TextView.OnEdito
         return bitmap;
     }
 
-    private boolean  storeimageLocaly(Bitmap picture) {
+    @Override
+    public void onClick(View v) {
 
+        switch (v.getId()){
+            case R.id.sign_in_button:
 
-        FileOutputStream fos=null;
-        try {
-            fos=openFileOutput("profile.png",Context.MODE_PRIVATE);
-            picture.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.close();
-            return true;
+                signIn();
 
+                break;
 
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
+        }
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+
+                    }
+                });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+
+        if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount acct = result.getSignInAccount();
+
+            Intent intent= new Intent(LoginActivity.this,HomeScreenActivity.class);
+            intent.putExtra("log",acct.getDisplayName());
+            Toast.makeText(this,"logged in as "+acct.getDisplayName(),Toast.LENGTH_SHORT).show();
+
+            startActivity(intent);
+            String personName = acct.getDisplayName();
+            String personEmail = acct.getEmail();
+            String personId = acct.getId();
+            Uri personPhoto = acct.getPhotoUrl();
+
+        } else {
+            // Signed out, show unauthenticated UI.
+            // updateUI(false);
         }
     }
 

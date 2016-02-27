@@ -14,7 +14,20 @@
           "package_name": "com.bricefamily.alex.time_tracker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1007573335631-t846ks27hcvht6on9nqisqgalt4iuc6c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bricefamily.alex.time_tracker",
+            "certificate_hash": "881B425908AACFFF27E4C3EAC32663F5DE08D1D9"
+          }
+        },
+        {
+          "client_id": "1007573335631-vl6vnvkra15mueibq1jqpvqu6fankb9t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [],
       "services": {
         "analytics_service": {
@@ -29,7 +42,7 @@
           "other_platform_oauth_client": []
         },
         "google_signin_service": {
-          "status": 1
+          "status": 2
         },
         "ads_service": {
           "status": 1

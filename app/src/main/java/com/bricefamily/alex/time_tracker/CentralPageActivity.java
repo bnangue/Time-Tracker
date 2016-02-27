@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,10 +36,18 @@ import android.widget.Toast;
 
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,8 +60,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private ArrayList<NavItem> mNavItems = new ArrayList<>();
-    private UserLocalStore userLocalStore;
-    private String username;
+
+
     private CharSequence drawerTitle;
     private CharSequence title,mtitel;
     private TextView userName;
@@ -66,9 +76,23 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     SwipeRefreshLayout refreshLayout;
     User loggedinUser;
    private MySQLiteHelper mySQLiteHelper;
+    private UserLocalStore userLocalStore;
+    private String username;
 
     int countevent = 0;
     private android.support.v7.view.ActionMode mactionMode;
+
+    public static final String SERVER_ADDRESS = "http://time-tracker.comlu.com/";
+
+
+    String found = "N";
+
+
+    //This arraylist will have data as pulled from server. This will keep cumulating.
+    ArrayList<EventObject> productResults = new ArrayList<EventObject>();
+    //Based on the search string, only filtered products will be moved here from productResults
+    ArrayList<EventObject> filteredProductResults = new ArrayList<EventObject>();
+
 
 
     @Override
@@ -302,6 +326,8 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     private void fillList() {
         mNavItems.add(new NavItem("Home", "MeetUp Destination", R.drawable.colorhome));
         mNavItems.add(new NavItem("Group", "meet your friends", R.drawable.groupuser));
+        mNavItems.add(new NavItem("Timesheet", "plan your life", R.drawable.sundaycalendar));
+        mNavItems.add(new NavItem("GOOGLE MAP", "explore new places", R.drawable.mapgooglebig));
         mNavItems.add(new NavItem("Preferences", "Change your preferences", R.drawable.colorsettings));
         mNavItems.add(new NavItem("About", "learn more about time-tracker", R.drawable.colornfo));
 
@@ -369,11 +395,51 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         }
 
         LayoutInflater inflator = (LayoutInflater) getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
-        View view = inflator.inflate(R.layout.actionbarbackground, null);
+        View view = inflator.inflate(R.layout.actionbackgroundsearch, null);
+        SearchView search=(SearchView)view.findViewById(R.id.actionbarsearch);
+        search.setQueryHint("Start typing to search...");
+        if(search.hasFocus()){
+            search.setBackgroundColor(getResources().getColor(R.color.white));
+        }
+        search.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                // TODO Auto-generated method stub
+
+                //Toast.makeText(activity, String.valueOf(hasFocus),Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        search.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // TODO Auto-generated method stub
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if (newText.length() > 1) {
+
+                    myAsyncTask m = (myAsyncTask) new myAsyncTask().execute(newText);
+                } else {
+                    prepareListview(listEvent);
+                }
+
+
+                return false;
+            }
+
+        });
+
 
 
         //center des ActionBar Titles
-        android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+        android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.RIGHT);
 
         try {
             ab.setDisplayShowCustomEnabled(true);
@@ -417,7 +483,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
             case "Preferences":
-                startActivity(new Intent(CentralPageActivity.this, PreferenceActivity.class));
+                startActivity(new Intent(CentralPageActivity.this, PreferenceAppActivity.class));
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
@@ -431,6 +497,16 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                 startActivity(intent);
 
+                mDrawerList.setItemChecked(position, true);
+                mDrawerLayout.closeDrawer(mDrawerpane);
+                break;
+            case "GOOGLE MAP":
+                startActivity(new Intent(CentralPageActivity.this,MAPActivity.class));
+                mDrawerList.setItemChecked(position, true);
+                mDrawerLayout.closeDrawer(mDrawerpane);
+                break;
+            case "Timesheet":
+                startActivity(new Intent(CentralPageActivity.this,NewCalendarActivty.class));
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
@@ -826,4 +902,154 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         getEventsFromDatabase(userLocalStore.getLoggedInUser().username);
     }
+
+    public void filterProductArray(String newText) {
+
+        String pName;
+
+        filteredProductResults.clear();
+        for (int i = 0; i < productResults.size(); i++) {
+            pName = productResults.get(i).titel.toLowerCase();
+            if (pName.contains(newText.toLowerCase()) ||
+                    productResults.get(i).creator.contains(newText)) {
+                filteredProductResults.add(productResults.get(i));
+
+            }
+        }
+
+    }
+
+
+
+    //in this myAsyncTask, we are fetching data from server for the search string entered by user.
+    class myAsyncTask extends AsyncTask<String, Void, String> {
+        JSONArray productList;
+        String textSearch;
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            productList = new JSONArray();
+        }
+
+        @Override
+        protected String doInBackground(String... sText) {
+
+            // url="http://lawgo.in/lawgo/products/user/1/search/"+sText[0];
+            String returnResult = getProductList();
+            this.textSearch = sText[0];
+            return returnResult;
+
+        }
+
+        public String getProductList() {
+
+            EventObject object;
+            String matchFound = "N";
+            //productResults is an arraylist with all product details for the search criteria
+            //productResults.clear();
+
+            ArrayList<EventObject> returnedEvents = new ArrayList<>();
+            URL url = null;
+            HttpURLConnection urlConnection = null;
+            try {
+
+                url=new URL(SERVER_ADDRESS+ "FetchAllEvents.php");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+
+                InputStream in = urlConnection.getInputStream();
+                String respons = "";
+                StringBuilder bi = new StringBuilder();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    bi.append(line).append("\n");
+                }
+                reader.close();
+                in.close();
+
+                respons = bi.toString();
+                JSONArray jsonArray = new JSONArray(respons);
+
+                productList = jsonArray;
+
+                //parse date for dateList
+                for (int i = 0; i < productList.length(); i++) {
+                    object = null;
+
+                    JSONObject jo_inside = productList.getJSONObject(i);
+
+                    String titel = jo_inside.getString("eventTitel");
+                    String infotext = jo_inside.getString("eventDetails");
+                    String creator = jo_inside.getString("eventCreator");
+                    String creationTime = jo_inside.getString("eventCreationtime");
+                    String eDay = jo_inside.getString("eventDay");
+                    String eMonth = jo_inside.getString("eventMonth");
+                    String eYear = jo_inside.getString("eventYear");
+                    String eventStatus = jo_inside.getString("eventStatus");
+                    String eventHash = jo_inside.getString("eventHash");
+
+
+                    String[] creationtime = creationTime.split(" ");
+                    DateEventObject dateEventObject = new DateEventObject(eDay, eMonth, eYear);
+
+                    object = new EventObject(titel, infotext, creator, creationtime[0],
+                            dateEventObject, eventStatus, eventHash);
+
+                    //check if this product is already there in productResults, if yes, then don't add it again.
+                    matchFound = "N";
+
+                    for (int j = 0; j < productResults.size(); j++) {
+
+                        if (productResults.get(j).titel.equals(object.titel)) {
+                            matchFound = "Y";
+                        }
+                    }
+
+                    if (matchFound == "N") {
+                        productResults.add(object);
+                    }
+
+                }
+
+                return ("OK");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ("Exception Caught");
+            }
+
+
+
+
+        }
+
+        @Override
+        protected void onPostExecute (String result){
+
+            super.onPostExecute(result);
+
+            if (result.equalsIgnoreCase("Exception Caught")) {
+                Toast.makeText(getApplicationContext(), "Unable to connect to server,please try later", Toast.LENGTH_LONG).show();
+
+            } else {
+
+
+                //calling this method to filter the search results from productResults and move them to
+                //filteredProductResults
+                filterProductArray(textSearch);
+                prepareListview(filteredProductResults);
+
+            }
+        }
+
+
+    }
+
+
 }

@@ -40,12 +40,39 @@
     <string name="title_activity_show_message">ShowMessage</string>
     <string name="gcm_recoverable_error">error recovering gcm</string>
     <string name="gcm_error">gcm error</string>
-    <string name="gcm_deleted">gcm delted</string>
+    <string name="gcm_deleted">gcm deleted</string>
     <string name="gcm_unregistered">gcm unregisterd</string>
     <string name="title_activity_home_screen">HomeScreenActivity</string>
     <string name="title_activity_user_list_tabs">UserListTabsActivity</string>
     <string name="action_deletechat">Delete conversation</string>
     <string name="title_activity_new_user_tabs">NewUserTabsActivity</string>
+    <string name="server_client_id">1007573335631-vl6vnvkra15mueibq1jqpvqu6fankb9t.apps.googleusercontent.com</string>
+    <string name="google_api_key">AIzaSyD9X1YxmoAPFqy9d57_CtG8ive7M6OSvMg</string>
+    <string name="search_hint">please enter a keyword</string>
+
+    <string name="pref_send_report">Send crash reports</string>
+    <string name="pref_send_report_summary">Helps to fix bugs</string>
+    <string name="pref_sync_frequency">Sync frequency</string>
+    <string name="pref_sync_frequency_summary">Set the sync frequency</string>
+    <string name="pref_user_name">Set username</string>
+    <string name="pref_user_name_summary">Set your username</string>
+
+    <string name="pref_user_profile">User Profile</string>
+    <string name="pref_update_setting">Private Settings</string>
+    <string name="pref_general_setting">General Settings</string>
+    <string name="title_intent_preference">android</string>
+    <string name="summary_intent_preference">go to android webpage</string>
+    <string name="title_activity_time_sheet">TimeSheetActivity</string>
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Example action</string>
+
 
 
 </resources>

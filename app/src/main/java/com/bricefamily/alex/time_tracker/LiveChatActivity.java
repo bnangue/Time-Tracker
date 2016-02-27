@@ -349,7 +349,7 @@ public class LiveChatActivity extends ActionBarActivity implements TextView.OnEd
 
             Bundle b = intent.getExtras();
 
-            String message = b.getString("message");
+            String message = b.getString("message").replace("\\","");
 
             String sender=b.getString("sender");
             String registration_ids=b.getString("registrationSenderIDs");

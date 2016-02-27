@@ -36,9 +36,9 @@
         android:layout_height="wrap_content"
         android:text="Log in"
         android:id="@+id/buttonlogin"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="14dp"
         android:layout_below="@+id/editTextpassword"
-        style="?android:attr/borderlessButtonStyle"
+        style="@style/buttondelete"
         android:layout_centerHorizontal="true"
         android:onClick="buttonLoginPressed"/>
 
@@ -48,9 +48,9 @@
         android:text="Create User"
         android:id="@+id/buttoncreateuser"
         android:layout_below="@+id/buttonlogin"
-        style="?android:attr/borderlessButtonStyle"
+        style="@style/buttondelete"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="14dp"
         android:onClick="buttonCreateUserPressed"/>
 
     <TextView
@@ -62,4 +62,24 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="6dp" />
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="120dp"
+        android:background="@color/cellSelected"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="or "
+        android:id="@+id/textView11"
+        android:layout_alignBottom="@+id/buttoncreateuser"
+        android:layout_toLeftOf="@+id/sign_in_button"
+        android:layout_toStartOf="@+id/sign_in_button"
+        android:layout_marginRight="25dp"
+        android:layout_marginEnd="25dp" />
 </RelativeLayout>

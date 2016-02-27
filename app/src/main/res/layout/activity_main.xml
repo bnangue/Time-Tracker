@@ -38,7 +38,7 @@
         style="@style/buttondelete"
         android:backgroundTint="@color/cellSelected"
         android:id="@+id/buttonlogin"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="34dp"
         android:layout_below="@+id/editTextpassword"
         android:layout_centerHorizontal="true"
         android:onClick="buttonLoginPressed"/>
@@ -65,4 +65,22 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="46dp" />
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="120dp"
+        android:background="@color/cellSelected"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="or "
+        android:id="@+id/textView11"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

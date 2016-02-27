@@ -114,6 +114,7 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
 
         allUserTabAdapter=new AllUserTabAdapter(getContext(),list,this);
 
+
         listView.setAdapter(allUserTabAdapter);
         allUserTabAdapter.setRequeststatus(statsus);
         allUserTabAdapter.notifyDataSetChanged();

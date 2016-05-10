@@ -23,13 +23,21 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class HomeScreenActivity extends ActionBarActivity implements DialogLogoutFragment.YesNoListenerDeleteAccount,GoogleApiClient.OnConnectionFailedListener{
     User user;
     String username;
     UserLocalStore userLocalStore;
     boolean save=true;
+    private IncomingNotification incomingNotification;
+    private MySQLiteHelper mySQLiteHelper;
     GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 9001;
     @Override
@@ -37,6 +45,7 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         userLocalStore=new UserLocalStore(this);
+        mySQLiteHelper=new MySQLiteHelper(this);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -65,10 +74,10 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
 
     }
     public void homehomePressed(View view){
-        if(user!=null){
-            getEventsFromDatabase(user);
-        }else {getAllEventsFromDatabase(userLocalStore.getLoggedInUser().username);
-        }
+        Intent intent = new Intent(HomeScreenActivity.this, CentralPageActivity.class);
+        intent.putExtra("username", username);
+        intent.putExtra("loggedinUser",user);
+        startActivity(intent);
     }
     public void homegroupPressed(View view){
         Intent intent = new Intent(HomeScreenActivity.this, NewUserTabsActivity.class);
@@ -79,102 +88,6 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
     public void homepreferencePressed(View view){
         startActivity(new Intent(this,PreferenceAppActivity.class));
 
-    }
-
-    void getEventsFromDatabase(final User returneduser) {
-
-        ServerRequest serverRequest = new ServerRequest(this);
-        serverRequest.fetchAllevents(new GetEventsCallbacks() {
-            @Override
-            public void done(ArrayList<EventObject> returnedeventobject) {
-                if (returnedeventobject != null) {
-                    Intent intent = new Intent(HomeScreenActivity.this, CentralPageActivity.class);
-                    intent.putExtra("username", returneduser.username);
-                    intent.putExtra("eventlist", returnedeventobject);
-                    intent.putExtra("loggedinUser", user);
-                    startActivity(intent);
-
-                } else {
-                    showdialg2();
-                }
-            }
-
-            @Override
-            public void updated(String reponse) {
-
-            }
-        });
-    }
-
-    void getAllEventsFromDatabase(final String username) {
-
-        ServerRequest serverRequest = new ServerRequest(this);
-        serverRequest.fetchAllevents(new GetEventsCallbacks() {
-            @Override
-            public void done(ArrayList<EventObject> returnedeventobject) {
-                if (returnedeventobject != null) {
-                    Intent intent = new Intent(HomeScreenActivity.this, CentralPageActivity.class);
-                    intent.putExtra("username", username);
-                    intent.putExtra("eventlist", returnedeventobject);
-                    intent.putExtra("loggedinUser",user);
-                    startActivity(intent);
-
-                } else {
-                    showdialg2();
-                }
-            }
-
-            @Override
-            public void updated(String reponse) {
-
-            }
-        });
-    }
-    private void fetchuserlist(final User user){
-        final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
-        serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
-            @Override
-            public void done(User returneduser) {
-
-            }
-
-            @Override
-            public void deleted(String reponse) {
-
-            }
-
-            @Override
-            public void userlist(ArrayList<User> reponse) {
-                if (reponse.size() != 0) {
-                    ArrayList<User> users = new ArrayList<User>();
-                    users = reponse;
-                    final ArrayList<User> finalUsers = users;
-                    serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
-                        @Override
-                        public void done(User returneduser) {
-
-                        }
-
-                        @Override
-                        public void deleted(String reponse) {
-
-                        }
-
-                        @Override
-                        public void userlist(ArrayList<User> reponse) {
-
-                            if (reponse.size() != 0) {
-                                Intent intent = new Intent(HomeScreenActivity.this, NewUserTabsActivity.class);
-                                intent.putExtra("userlistforgcm", finalUsers);
-                                intent.putExtra("userlist", reponse);
-                                startActivity(intent);
-                            }
-                        }
-                    });
-
-                }
-            }
-        });
     }
 
 
@@ -210,6 +123,11 @@ public class HomeScreenActivity extends ActionBarActivity implements DialogLogou
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
+
             }
 
             @Override

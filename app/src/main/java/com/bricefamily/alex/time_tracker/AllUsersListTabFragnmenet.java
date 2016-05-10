@@ -70,6 +70,11 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             }
 
             @Override
+            public void serverReponse(String reponse) {
+
+            }
+
+            @Override
             public void userlist(ArrayList<User> reponse) {
                 if (reponse.size() != 0) {
                     ArrayList<User> list = new ArrayList<User>();
@@ -289,6 +294,11 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
             }
 
             @Override
+            public void serverReponse(String reponse) {
+
+            }
+
+            @Override
             public void userlist(ArrayList<User> reponse) {
 
             }
@@ -326,6 +336,11 @@ public class AllUsersListTabFragnmenet extends Fragment implements AdapterView.O
                     status[position]=1;
                     allUserTabAdapter.setRequeststatus(status);
                 }
+
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
 
             }
 

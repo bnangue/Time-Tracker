@@ -183,6 +183,11 @@ public class FriendRequest {
             }
 
             @Override
+            public void serverReponse(String reponse) {
+
+            }
+
+            @Override
             public void userlist(ArrayList<User> reponse) {
 
             }
@@ -228,6 +233,11 @@ public class FriendRequest {
                         }
 
                         @Override
+                        public void serverReponse(String reponse) {
+
+                        }
+
+                        @Override
                         public void userlist(ArrayList<User> reponse) {
 
                         }
@@ -241,6 +251,11 @@ public class FriendRequest {
 
 
                 }
+
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
 
             }
 
@@ -267,6 +282,11 @@ public class FriendRequest {
                 if (reponse.contains("Friendlist successfully updated")) {
 
                 }
+
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
 
             }
 

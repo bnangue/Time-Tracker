@@ -46,7 +46,7 @@ public class ServerRequestUser {
 
 
     public void updatefriendFriendList(User user, GetUserCallbacks callbacks){
-        progressDialog.setTitle("removing "+user.username+" your friend list...");
+        progressDialog.setTitle("removing " + user.username + " your friend list...");
         progressDialog.show();
         new UpdatefriendFriendListAsynckTacks(user,callbacks).execute();
     }
@@ -75,6 +75,8 @@ public class ServerRequestUser {
         progressDialog.show();
         new FetchAllUsersAsynckTacks(user,callbacks).execute();
     }
+
+
     public void deleteAlleventfromUser(User user , GetEventsCallbacks callbacks){
         progressDialog.setTitle("Deleting all your records...");
         progressDialog.show();
@@ -147,6 +149,8 @@ public class ServerRequestUser {
             data.add(new Pair<String, String>("email", user.email));
             data.add(new Pair<String, String>("username", user.username));
             data.add(new Pair<String, String>("password",user.password));
+            data.add(new Pair<String, String>("firstname", user.firstname));
+            data.add(new Pair<String, String>("lastname",user.lastname));
 
 
             URL url;
@@ -259,10 +263,14 @@ public class ServerRequestUser {
                     String username=null;
                     if(jsonObject.has("username")){
                         String regId=jsonObject.getString("gcm_regid");
+                        String firstname=jsonObject.getString("firstname");
+                        String lastname=jsonObject.getString("lastname");
                         username=jsonObject.getString("username");
                        String friendlist=jsonObject.getString("friendList");
                         int stat=jsonObject.getInt("onlineStatus");
-                        returneduser=new User(username,user.email,user.password,null,null,stat,regId,null,friendlist);
+                        String imgString=jsonObject.getString("Image");
+                        Bitmap bitmap=decodeBase64(imgString);
+                        returneduser=new User(username,user.email,user.password,firstname,lastname,stat,regId,bitmap,friendlist);
                     }
 
                 }
@@ -908,6 +916,7 @@ public class ServerRequestUser {
             return line;
         }
     }
+
 
 
     public class FetchAllUsersAsynckTacks extends AsyncTask<Void,Void,ArrayList<User>> {

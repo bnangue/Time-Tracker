@@ -12,6 +12,8 @@
     <style name="custom" parent="Theme.AppCompat.Light">
 
         <item name="colorPrimaryDark">#cf0c81f7</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
 
         <!-- Customize your theme here. -->
     </style>

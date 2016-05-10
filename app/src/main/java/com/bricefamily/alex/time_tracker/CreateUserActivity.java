@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -26,8 +27,8 @@ import java.util.ArrayList;
 
 
 public class CreateUserActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
-    private EditText emailed,usernameed,passworded,repeatpassworded;
-    private String emailstr, passwordstr,repeatpasswordstr,usernamestr;
+    private EditText emailed,usernameed,passworded,repeatpassworded,firstnameed,lastnameed;
+    private String emailstr, passwordstr,repeatpasswordstr,usernamestr,firstnamestr,lastnamestr;
 
     private PasswordChecker pwChecker;
     private UserLocalStore userLocalStore;
@@ -45,6 +46,8 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
         emailed=(EditText)findViewById(R.id.editTextcreateemail);
         usernameed=(EditText)findViewById(R.id.editTextcreatename);
         passworded=(EditText)findViewById(R.id.editTextcreatepassword);
+        firstnameed=(EditText)findViewById(R.id.editTextfirstemail);
+        lastnameed=(EditText)findViewById(R.id.editTextlastname);
         repeatpassworded=(EditText)findViewById(R.id.editTextrepeatpassword);
         repeatpassworded.setOnEditorActionListener(this);
 
@@ -63,6 +66,11 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
                 if (reponse.contains("Registration id successfully saved")) {
                     startActivity(new Intent(CreateUserActivity.this, LoginActivity.class));
                 }
+
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
 
             }
 
@@ -101,18 +109,32 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
         usernamestr=usernameed.getText().toString();
         passwordstr=passworded.getText().toString();
         repeatpasswordstr=repeatpassworded.getText().toString();
+        firstnamestr=firstnameed.getText().toString();
+        lastnamestr=lastnameed.getText().toString();
         //do Mysql saving
-        if(pwChecker.checkIfValid(passwordstr,repeatpasswordstr)){
 
-            int password=passwordstr.hashCode();
-            User userRegistered=new User(usernamestr,emailstr,String.valueOf(password));
 
-            register(userRegistered);
+        if(TextUtils.isEmpty(emailstr)){
+            emailed.setError("this field cannot be empty");
+        }else if(TextUtils.isEmpty(passwordstr)){
+            passworded.setError("this field cannot be empty");
 
-        }else{
-            Toast.makeText(this, "Password doesn't match", Toast.LENGTH_SHORT).show();
+        }else if(TextUtils.isEmpty(repeatpasswordstr)){
+            repeatpassworded.setError("this field cannot be empty");
+        }else if(!TextUtils.isEmpty(emailstr) && !TextUtils.isEmpty(passwordstr) && !TextUtils.isEmpty(repeatpasswordstr)){
+            if(passwordstr.equals(repeatpasswordstr)){
+                int password=passwordstr.hashCode();
+                User userRegistered=new User(usernamestr,emailstr,String.valueOf(password));
+                userRegistered.firstname=firstnamestr;
+                userRegistered.lastname=lastnamestr;
 
+                register(userRegistered);
+            }else {
+                Toast.makeText(getApplicationContext(),"password doesn't match. Please check your entry",Toast.LENGTH_SHORT).show();
+            }
         }
+
+
     }
 
     private void register(final User registeredData){
@@ -127,6 +149,11 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
 
             @Override
             public void deleted(String reponse) {
+
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
 
             }
 
@@ -178,21 +205,37 @@ public class CreateUserActivity extends ActionBarActivity implements TextView.On
             usernamestr=usernameed.getText().toString();
             passwordstr=passworded.getText().toString();
             repeatpasswordstr=repeatpassworded.getText().toString();
+            firstnamestr=firstnameed.getText().toString();
+            lastnamestr=lastnameed.getText().toString();
             //do Mysql saving
-            if(pwChecker.checkIfValid(passwordstr,repeatpasswordstr)){
 
-                int password=passwordstr.hashCode();
-                User userRegistered=new User(usernamestr,emailstr,String.valueOf(password));
-                register(userRegistered);
 
-            }else{
-                Toast.makeText(this, "Password doesn't match", Toast.LENGTH_SHORT).show();
+            if(TextUtils.isEmpty(emailstr)){
+                emailed.setError("this field cannot be empty");
+            }else if(TextUtils.isEmpty(passwordstr)){
+                passworded.setError("this field cannot be empty");
 
+            }else if(TextUtils.isEmpty(repeatpasswordstr)){
+                repeatpassworded.setError("this field cannot be empty");
+            }else if(!TextUtils.isEmpty(emailstr) && !TextUtils.isEmpty(passwordstr) && !TextUtils.isEmpty(repeatpasswordstr)){
+                if(passwordstr.equals(repeatpasswordstr)){
+                    int password=passwordstr.hashCode();
+                    User userRegistered=new User(usernamestr,emailstr,String.valueOf(password));
+                    userRegistered.firstname=firstnamestr;
+                    userRegistered.lastname=lastnamestr;
+
+                    register(userRegistered);
+                }else {
+                    Toast.makeText(getApplicationContext(),"password doesn't match. Please check your entry",Toast.LENGTH_SHORT).show();
+                }
             }
         }
             return false;
     }
 
+    public void OnGotoLogin(View view){
+        startActivity(new Intent(this,LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+    }
     public void getRegId(final User registeredData){
         new AsyncTask<Void, Void, String>() {
             @Override

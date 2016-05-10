@@ -75,4 +75,48 @@
 
 
 
+
+    //
+
+    <string name="emailloggin">E-Mail Address</string>
+    <string name="passwordlogin">Password</string>
+    <string name="registerbtn">Register</string>
+    <string name="menu_save">save</string>
+    <string name="confirm_newpassword">Confirm password</string>
+    <string name="enter_newpassword">Enter new password</string>
+    <string name="enter_odlpassword">Enter your password</string>
+    <string name="enter_newEmail">Enter your email address</string>
+    <string name="firstnamestring">First Name</string>
+    <string name="lastnamestring">Last Name</string>
+
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="dateformat">YYYY-MM-D</string>
+    <string name="eventDescription">Description</string>
+    <string name="buttonsave">Save</string>
+    <string name="title">Title</string>
+
+    //test
+    <string name="action_today">Today</string>
+    <string name="action_day_view">Day view</string>
+    <string name="action_three_day_view">3 day view</string>
+    <string name="action_week_view">Week view</string>
+    <string name="title_activity_basic">Basic Example</string>
+    <string name="title_activity_asynchronous">Asynchronous Events</string>
+    <string name="async_error">Could not download events from the internet</string>
+
+    //description
+    <string name="createdbyheader">Created by: </string>
+    <string name="creationwhenheader">Date of creation: </string>
+    <string name="creatorname">Cretor full Name</string>
+    <string name="creationtime">2016-27-06 at 23:15</string>
+    <string name="periodeheader">2016-27-06  -  2016-28-06 </string>
+    <string name="periodde">Asynchronous Events</string>
+    <string name="descriptionheader">Description: </string>
+    <string name="descriptiontext">This is a sample text of description which might be quite long and sometimes very short</string>
+    <string name="noteexpandheader">Note: </string>
+    <string name="noteexpand">This is a sample text note</string>
+    <string name="action_view_in_calendar">View in calendar</string>
+
 </resources>

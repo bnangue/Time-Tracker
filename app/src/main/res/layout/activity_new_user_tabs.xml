@@ -30,7 +30,7 @@
 
 
     <RelativeLayout
-        android:layout_width="280dp"
+        android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity="left"
         android:id="@+id/drawerpane"
@@ -38,7 +38,7 @@
         android:clickable="true">
 
         <RelativeLayout
-            android:layout_width="280dp"
+            android:layout_width="300dp"
             android:layout_height="120dp"
             android:id="@+id/profilebox"
             android:background="@color/cellSelected"
@@ -68,8 +68,8 @@
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="42dp"
-                android:layout_marginEnd="42dp">
+                android:layout_marginRight="22dp"
+                android:layout_marginEnd="22dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -98,7 +98,7 @@
 
         <ListView
             android:id="@+id/navlist"
-            android:layout_width="280dp"
+            android:layout_width="300dp"
             android:layout_height="match_parent"
             android:layout_below="@+id/profilebox"
             android:choiceMode="singleChoice"

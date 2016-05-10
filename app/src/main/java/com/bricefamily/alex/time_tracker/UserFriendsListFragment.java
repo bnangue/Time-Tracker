@@ -66,6 +66,11 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
             }
 
             @Override
+            public void serverReponse(String reponse) {
+
+            }
+
+            @Override
             public void userlist(ArrayList<User> reponse) {
 
                 if (reponse.size() != 0) {
@@ -328,6 +333,11 @@ public class UserFriendsListFragment extends Fragment implements AdapterView.OnI
                     profileListAdapter.notifyDataSetChanged();
 
                 }
+
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
 
             }
 

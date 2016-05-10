@@ -52,6 +52,7 @@ public class DialogLogoutFragment  extends DialogFragment {
             @Override
             public void onClick(View v) {
                 ((YesNoListenerDeleteAccount)getActivity()).onYes();
+                alertDialog.dismiss();
             }
         });
         alertDialog.setCancelable(false);

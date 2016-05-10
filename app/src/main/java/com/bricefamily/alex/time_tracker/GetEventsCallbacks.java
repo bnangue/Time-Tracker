@@ -8,6 +8,7 @@ import java.util.List;
  */
 interface GetEventsCallbacks {
     public abstract void done( ArrayList<EventObject> returnedeventobject);
+    public abstract void donec(ArrayList<CalendarCollection> returnedeventobject);
     void updated(String reponse);
 
 }

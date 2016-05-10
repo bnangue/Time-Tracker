@@ -76,6 +76,11 @@ public class ProfileOverviewActivity extends AppCompatActivity {
                                 }
 
                                 @Override
+                                public void donec(ArrayList<CalendarCollection> returnedeventobject) {
+
+                                }
+
+                                @Override
                                 public void updated(String reponse) {
                                     if (reponse.contains("All Events from successfully deleted")) {
                                         userLocalStore.clearUserData();
@@ -90,6 +95,11 @@ public class ProfileOverviewActivity extends AppCompatActivity {
                             });
 
                         }
+                    }
+
+                    @Override
+                    public void serverReponse(String reponse) {
+
                     }
 
                     @Override
@@ -166,6 +176,11 @@ public class ProfileOverviewActivity extends AppCompatActivity {
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
+            }
+
+            @Override
+            public void serverReponse(String reponse) {
+
             }
 
             @Override

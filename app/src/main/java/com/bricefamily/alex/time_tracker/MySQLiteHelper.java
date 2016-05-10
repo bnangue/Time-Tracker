@@ -169,7 +169,32 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     }
 
-    public void deleteIncomingNotification(IncomingNotification incomingNotification) {
+    public void reInitializeSqliteTable(){
+        // 1. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 2. delete
+        db.delete(TABLE_BOOKS, //table name
+                KEY_TYPE+" = 0",  // selections
+                null); //selections args
+
+        // 3. close
+        db.close();
+    }
+
+    public void reInitializeSqliteUsers(){
+        // 1. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 2. delete
+        db.delete(TABLE_BOOKS, //table name
+                KEY_TYPE+" = 6",  // selections
+                null); //selections args
+
+        // 3. close
+        db.close();
+    }
+    public void deleteIncomingNotificationcal(int id) {
 
         // 1. get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
@@ -177,7 +202,26 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         // 2. delete
         db.delete(TABLE_BOOKS, //table name
                 KEY_ID+" = ?",  // selections
-                new String[] { String.valueOf(incomingNotification.id) }); //selections args
+                new String[] { String.valueOf(id) }); //selections args
+
+        // 3. close
+        db.close();
+
+        //log
+        // Log.d("deleteBook", incomingNotification.toString());
+
+    }
+
+
+    public void deleteIncomingNotification(IncomingNotification incomingNotification) {
+
+        // 1. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 2. delete
+        db.delete(TABLE_BOOKS, //table name
+                KEY_ID + " = ?",  // selections
+                new String[]{String.valueOf(incomingNotification.id)}); //selections args
 
         // 3. close
         db.close();
@@ -185,6 +229,76 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         //log
         Log.d("deleteBook", incomingNotification.toString());
 
+    }
+
+    public ArrayList<IncomingNotification> getAllIncomingNotificationEvent() {
+        ArrayList<IncomingNotification> incomingNotifications = new ArrayList<>();
+
+        // 1. build the query
+        String query = "SELECT * FROM " + TABLE_BOOKS +" WHERE type =0";
+
+        // 2. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        // 3. go over each row, build book and add it to list
+        IncomingNotification incomingNotification = null;
+        if (cursor.moveToFirst()) {
+            do {
+                incomingNotification = new IncomingNotification();
+                int iD=Integer.parseInt(cursor.getString(0));
+                int tyPe=Integer.parseInt(cursor.getString(1));
+                int readSttatus=Integer.parseInt(cursor.getString(2));
+                incomingNotification.id=iD;
+                incomingNotification.type=tyPe;
+                incomingNotification.readStatus=readSttatus;
+                incomingNotification.body=cursor.getString(3);
+                incomingNotification.creationDate=cursor.getString(4);
+
+                // Add book to books
+                incomingNotifications.add(incomingNotification);
+            } while (cursor.moveToNext());
+        }
+
+        Log.d("getAllEvents()", incomingNotifications.toString());
+
+        // return books
+        return incomingNotifications;
+    }
+
+    public ArrayList<IncomingNotification> getAllIncomingNotificationUsers() {
+        ArrayList<IncomingNotification> incomingNotifications = new ArrayList<>();
+
+        // 1. build the query
+        String query = "SELECT * FROM " + TABLE_BOOKS +" WHERE type =6";
+
+        // 2. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        // 3. go over each row, build book and add it to list
+        IncomingNotification incomingNotification = null;
+        if (cursor.moveToFirst()) {
+            do {
+                incomingNotification = new IncomingNotification();
+                int iD=Integer.parseInt(cursor.getString(0));
+                int tyPe=Integer.parseInt(cursor.getString(1));
+                int readSttatus=Integer.parseInt(cursor.getString(2));
+                incomingNotification.id=iD;
+                incomingNotification.type=tyPe;
+                incomingNotification.readStatus=readSttatus;
+                incomingNotification.body=cursor.getString(3);
+                incomingNotification.creationDate=cursor.getString(4);
+
+                // Add book to books
+                incomingNotifications.add(incomingNotification);
+            } while (cursor.moveToNext());
+        }
+
+        Log.d("getAllUsers()", incomingNotifications.toString());
+
+        // return books
+        return incomingNotifications;
     }
 
 

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/nulllinearelaout"
+        android:orientation="horizontal"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_alignParentTop="true"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/title"
+            android:layout_weight="2"
+            />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/edtitle"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/firstlinearelaout"
+        android:orientation="horizontal"
+        android:layout_below="@+id/nulllinearelaout"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/eventDescription"
+            android:layout_weight="2"
+            />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/eddescription"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/secondlinearelaout"
+        android:orientation="horizontal"
+        android:layout_below="@+id/firstlinearelaout"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event start:"
+            android:layout_weight="1"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="2016-03-09"
+            android:id="@+id/dateaddeventstart"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_weight="2"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="15:20"
+            android:id="@+id/timeaddeventstart"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_weight="2"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/thirdlinearelaout"
+        android:orientation="horizontal"
+        android:layout_below="@+id/secondlinearelaout"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event end: "
+            android:layout_weight="1"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="2016-04-17"
+            android:id="@+id/dateaddeventend"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_weight="2"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="20:30"
+            android:id="@+id/timeaddeventend"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_weight="2"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/checkboxlinearlayout"
+        android:layout_below="@+id/thirdlinearelaout"
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="All-day event:"
+            />
+
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkboxalldayevent"
+            android:checked="false"
+            android:layout_marginLeft="45dp"
+            />
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/checkboxlinearlayout2"
+        android:layout_below="@+id/checkboxlinearlayout"
+        android:paddingTop="4dp"
+        android:paddingBottom="10dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Repeat every month:"
+            />
+
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkboxeverymonthevent"
+            android:checked="false"
+            />
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/forthlinearelaout"
+        android:orientation="horizontal"
+        android:paddingTop="10dp"
+        android:layout_below="@+id/checkboxlinearlayout2"
+        android:paddingBottom="10dp"
+
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category:"
+            android:layout_weight="2"
+            />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/edspinnercategory"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/buttonsave"
+        android:id="@+id/buttonsavenewevent"
+        style="@style/buttondelete"
+        android:layout_below="@+id/forthlinearelaout"
+        android:layout_marginTop="18dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+</RelativeLayout>

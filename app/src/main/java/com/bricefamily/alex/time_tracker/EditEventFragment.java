@@ -139,6 +139,11 @@ public class EditEventFragment extends Fragment implements View.OnClickListener 
             }
 
             @Override
+            public void donec(ArrayList<CalendarCollection> returnedeventobject) {
+
+            }
+
+            @Override
             public void updated(String reponse) {
                 if(reponse.contains("Event successfully updated")){
                     getActivity().onBackPressed();
@@ -183,6 +188,11 @@ public class EditEventFragment extends Fragment implements View.OnClickListener 
             }
 
             @Override
+            public void donec(ArrayList<CalendarCollection> returnedeventobject) {
+
+            }
+
+            @Override
             public void updated(String reponse) {
 
             }
@@ -195,6 +205,7 @@ public class EditEventFragment extends Fragment implements View.OnClickListener 
         dateed.setText(new StringBuilder().append(day).append(".")
                 .append(month +1).append(".").append(year));
     }
+
 
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {

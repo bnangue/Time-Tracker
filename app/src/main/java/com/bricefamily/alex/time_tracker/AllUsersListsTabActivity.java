@@ -62,7 +62,12 @@ private int[] fetchuserlist(User user){
 
             }
 
-            @Override
+                @Override
+                public void serverReponse(String reponse) {
+
+                }
+
+                @Override
             public void userlist(ArrayList<User> reponse) {
                 if (reponse.size() != 0) {
                         prepareListview(reponse, setstatuslist(reponse));

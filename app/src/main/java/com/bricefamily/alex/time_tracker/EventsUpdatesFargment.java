@@ -242,6 +242,11 @@ public class EventsUpdatesFargment extends Fragment implements SwipeRefreshLayou
             }
 
             @Override
+            public void donec(ArrayList<CalendarCollection> returnedeventobject) {
+
+            }
+
+            @Override
             public void updated(String reponse) {
 
             }

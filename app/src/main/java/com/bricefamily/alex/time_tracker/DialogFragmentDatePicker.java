@@ -33,6 +33,16 @@ public class DialogFragmentDatePicker extends DialogFragment implements DatePick
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try{
+            dateGet=(OnDateGet)activity;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Use the current date as the default date in the picker
             final Calendar c = Calendar.getInstance();

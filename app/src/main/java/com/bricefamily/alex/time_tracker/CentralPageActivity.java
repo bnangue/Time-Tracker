@@ -9,16 +9,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Gravity;
@@ -29,6 +35,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -37,6 +45,7 @@ import android.widget.Toast;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -51,47 +60,70 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 
-public class CentralPageActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,CentralPageAdapter.OnEventSelected,  ActionMode.Callback,DialogLogoutFragment.YesNoListenerDeleteAccount,SwipeRefreshLayout.OnRefreshListener {
+public class CentralPageActivity extends ActionBarActivity implements DialogLogoutFragment.YesNoListenerDeleteAccount,DialogDeleteEventFragment.OnDeleteEventListener, ShareWithFriendAdapter.OnEventSelected {
 
     ListView mDrawerList;
     RelativeLayout mDrawerpane;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private ArrayList<NavItem> mNavItems = new ArrayList<>();
+    private TextView eventpriode, creatorname, createdtime, notes, descriptionexpand;
 
+
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private MyRecyclerViewAdapter.MyClickListener myClickListener;
 
     private CharSequence drawerTitle;
     private CharSequence title,mtitel;
     private TextView userName;
     private CircularImageView profilePicture;
-    ListView evnetListView;
-    CentralPageAdapter centralPageAdapter;
     private Menu menu;
     boolean hideOptions=false;
-    boolean[] selectionevents;
-    private ArrayList<EventObject> listEvent;
+    private ArrayList<CalendarCollection> listEvent;
     FloatingActionButton fab;
-    SwipeRefreshLayout refreshLayout;
     User loggedinUser;
    private MySQLiteHelper mySQLiteHelper;
     private UserLocalStore userLocalStore;
     private String username;
 
-    int countevent = 0;
     private android.support.v7.view.ActionMode mactionMode;
 
     public static final String SERVER_ADDRESS = "http://time-tracker.comlu.com/";
 
 
     String found = "N";
+    private AlertDialog alertDialog;
+
+    private boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if ( "WIFI".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if ("MOBILE".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
+
 
 
     //This arraylist will have data as pulled from server. This will keep cumulating.
-    ArrayList<EventObject> productResults = new ArrayList<EventObject>();
+    ArrayList<CalendarCollection> productResults = new ArrayList<CalendarCollection>();
     //Based on the search string, only filtered products will be moved here from productResults
-    ArrayList<EventObject> filteredProductResults = new ArrayList<EventObject>();
+    ArrayList<CalendarCollection> filteredProductResults = new ArrayList<CalendarCollection>();
 
 
 
@@ -101,23 +133,25 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         setContentView(R.layout.activity_central_page);
 
         prepareView();
+        alertDialog = new android.support.v7.app.AlertDialog.Builder(this).create();
+
         mySQLiteHelper=new MySQLiteHelper(this);
          fab = (FloatingActionButton) findViewById(R.id.fab);
-        refreshLayout=(SwipeRefreshLayout)findViewById(R.id.swiperefresh);
-        refreshLayout.setColorSchemeColors(Color.BLUE);
-        refreshLayout.setOnRefreshListener(this);
+
 
         fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.cellSelected)));
         userLocalStore = new UserLocalStore(this);
         mtitel=drawerTitle = title = getTitle();
         mySQLiteHelper.updateIncomingMessage(1,2);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView = (RecyclerView)findViewById(R.id.my_recycler_viewc);
 
 
-        listEvent = new ArrayList<EventObject>();
+
+        listEvent = new ArrayList<CalendarCollection>();
         Bundle extras = getIntent().getExtras();
         if (getIntent().getExtras()!=null || extras != null) {
             username = extras.getString("username");
-            listEvent=extras.getParcelableArrayList("eventlist");
             loggedinUser=extras.getParcelable("loggedinUser");
 
         }
@@ -128,9 +162,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         if(savedInstanceState!=null){
             username=savedInstanceState.getString("user");
             hideOptions=savedInstanceState.getBoolean("hideOptions");
-            selectionevents=savedInstanceState.getBooleanArray("selectedevents");
             listEvent=savedInstanceState.getParcelableArrayList("eventsArray");
-            countevent = savedInstanceState.getInt("numberOfSelectedevents");
             loggedinUser=savedInstanceState.getParcelable("loggedinUser");
 
             prepareOrientationchange();
@@ -141,33 +173,149 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             Calendar c = Calendar.getInstance();
             SimpleDateFormat df = new SimpleDateFormat("HH:mm");
             String formattedDate = df.format(c.getTime());
-
-            prepareListview(listEvent);
+            listEvent=getCalendarEvents(mySQLiteHelper.getAllIncomingNotificationEvent());
+            prepareRecyclerView(listEvent);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
 
         }
 
-    }
-    void prepareOrientationchange(){
-        if( selectionevents.length!=0){
-            prepareListview(listEvent);
-            if(countevent !=0){
-                centralPageAdapter.setEventSelection(selectionevents,countevent);
-                mactionMode= startSupportActionMode(this);
-                if(hideOptions){
-                    hideOption(R.id.menu_delete);
-                }
-                mactionMode.setTitle(countevent + " selected");
+        myClickListener=new MyRecyclerViewAdapter.MyClickListener() {
+            @Override
+            public void onItemClick(int position, View v) {
+                setViews(v,position);
             }
 
-        }else{
-            prepareListview(listEvent);
+            @Override
+            public void onButtonClick(int position, View v) {
+                int iD = v.getId();
+                switch (iD) {
+                    case R.id.buttondeletecardview:
+                        DialogFragment dialogFragment = DialogDeleteEventFragment.newInstance(position);
+                        dialogFragment.setCancelable(false);
+                        dialogFragment.show(getSupportFragmentManager(), "DELETEALLEVENTFRAGMENT");
+
+
+                        break;
+                    case R.id.buttonsharecardview:
+                        ArrayList<User> arrayList=getUsers(mySQLiteHelper.getAllIncomingNotificationUsers());
+                        showDialogsharewithfriend(arrayList);
+                        break;
+                }
+            }
+        };
+
+    }
+
+
+    void showDialogsharewithfriend(ArrayList<User> users){
+
+
+
+        LayoutInflater inflater = getLayoutInflater();
+        View convertView = (View) inflater.inflate(R.layout.share_friend_layout, null);
+        alertDialog.setView(convertView);
+        alertDialog.setTitle("Share with ");
+        ListView listView=(ListView)convertView.findViewById(R.id.listviewsharefriend);
+        ShareWithFriendAdapter friendAdapter=new ShareWithFriendAdapter(this, users,this);
+        Button btncancel = (Button) convertView.findViewById(R.id.buttonCancelsharewithfriend);
+
+        Button btnok = (Button) convertView.findViewById(R.id.buttonOKsharewithfriend);
+        listView.setAdapter(friendAdapter);
+        listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+
+
+        btncancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+        btnok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+
+                //pass data
+            }
+        });
+
+
+        alertDialog.show();
+    }
+
+    private  ArrayList<User> getUsers(ArrayList<IncomingNotification> incomingNotifications){
+
+        ArrayList<User> arrayList=new ArrayList<>();
+        for (int i=0;i<incomingNotifications.size();i++){
+            JSONObject jo_inside = null;
+            try {
+                jo_inside = new JSONObject(incomingNotifications.get(i).body);
+
+                String username = jo_inside.getString("username");
+                String email = jo_inside.getString("email");
+                String password = jo_inside.getString("password");
+                String firstname = jo_inside.getString("firstname");
+                String lastname = jo_inside.getString("lastname");
+                String regId = jo_inside.getString("regId");
+                String friendlist = jo_inside.getString("friendlist");
+                String picture = jo_inside.getString("picture");
+                Bitmap bitmap=ServerRequests.decodeBase64(picture);
+
+                int status = jo_inside.getInt("status");
+
+                User  object =new User(username,email,password,firstname,lastname,status,regId,bitmap,friendlist);
+                arrayList.add(object);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+        return arrayList;
+    }
+
+    private void setViews(View v, int position){
+        creatorname = (TextView) v.findViewById(R.id.textViewexpandcreator);
+        createdtime = (TextView) v.findViewById(R.id.textViewexpandcreationtime);
+        eventpriode = (TextView) v.findViewById(R.id.textViewexpandperiode);
+        descriptionexpand = (TextView) v.findViewById(R.id.textViewexpanddescription);
+        notes = (TextView) v.findViewById(R.id.textViewexpandnote);
+
+
+        if(listEvent.size()!=0){
+            CalendarCollection ecollection=listEvent.get(position);
+            creatorname.setText(ecollection.creator);
+            createdtime.setText(ecollection.creationdatetime);
+            descriptionexpand.setText(ecollection.description);
+
+            String[] sttime=ecollection.startingtime.split(" ");
+            String[] edtime=ecollection.endingtime.split(" ");
+
+            eventpriode.setText(sttime[0]+"  -  "+edtime[0]);
+            StringBuilder builder=new StringBuilder();
+            if(ecollection.alldayevent.equals("1")){
+                builder.append("All day");
+            }
+            if(ecollection.alldayevent.equals("1")){
+                builder.append(",").append(" repeat every month");
+            }
+            if(builder.toString().isEmpty()){
+                notes.setText("");
+            }else{
+                notes.setText(builder.toString());
+            }
+
         }
     }
 
+
+    void prepareOrientationchange(){
+            prepareRecyclerView(listEvent);
+    }
+
     public void openProfileOverviewClick(View view){
-        Intent intent= new Intent(CentralPageActivity.this,ProfileOverviewActivity.class);
+        Intent intent= new Intent(CentralPageActivity.this,OpenUserProfileActivity.class);
         intent.putExtra("loggedinUser",loggedinUser);
         startActivity(intent);
     }
@@ -186,7 +334,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         luserName.setText(uName);
         profilePicture = (CircularImageView) findViewById(R.id.avatarfriend);
         if(path!=null){
-            Bitmap bitmap=loadImageFromStorage(path,uName);
+            Bitmap bitmap=userLocalStore.loadImageFromStorage(path);
             if(bitmap!=null){
 
                 profilePicture.setImageBitmap(bitmap);
@@ -224,26 +372,22 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    void prepareListview(ArrayList<EventObject> listEvent) {
+    private void prepareRecyclerView(ArrayList<CalendarCollection> arrayList) {
 
-        evnetListView = (ListView) findViewById(R.id.listviewdetails);
-        centralPageAdapter = new CentralPageAdapter(this,listEvent,this);
-        evnetListView.setAdapter(centralPageAdapter);
-        centralPageAdapter.notifyDataSetChanged();
+        mAdapter = new MyRecyclerViewAdapter(this, arrayList, myClickListener);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
 
-        evnetListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        evnetListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                return onLongListItemClick(view, position, id);
-            }
-        });
 
-        evnetListView.setOnItemClickListener(this);
 
-        if(selectionevents==null){
-            selectionevents=new boolean[listEvent.size()];
-        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(myClickListener);
 
     }
 
@@ -266,54 +410,18 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             }
 
             @Override
+            public void serverReponse(String reponse) {
+
+            }
+
+            @Override
             public void userlist(ArrayList<User> reponse) {
 
             }
         });
     }
 
-    void getUserPicture(final UserProfilePicture u){
-        if(u.username!=null|| !u.username.isEmpty()){
 
-            ServerRequestUser serverRequest=new ServerRequestUser(this);
-            serverRequest.fetchUserPicture(u, new GetImageCallBacks() {
-                @Override
-                public void done(String reponse) {
-
-                }
-
-                @Override
-                public void image(UserProfilePicture reponse) {
-                    if (reponse != null) {
-                        Bitmap bitmap = reponse.uProfilePicture;
-                        profilePicture.setImageBitmap(bitmap);
-                        storeimageLocaly(reponse.uProfilePicture);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "No Picture save for this user", Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-            });
-        }
-
-    }
-
-    private boolean  storeimageLocaly(Bitmap picture) {
-
-
-        FileOutputStream fos=null;
-        try {
-            fos=openFileOutput("profile.png", Context.MODE_PRIVATE);
-            picture.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.close();
-            return true;
-
-
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-    }
 
 
     protected boolean onLongListItemClick(View v, int pos, long id) {
@@ -376,8 +484,17 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                 break;
             case R.id.action_refresh:
-                refreshLayout.setRefreshing(true);
-                getEventsFromDatabase(username);
+                if(haveNetworkConnection()){
+                    getEventsFromDatabase();
+
+                }else {
+                    Toast.makeText(getApplicationContext(), "No internet connection, please try again later", Toast.LENGTH_LONG).show();
+
+                }
+                break;
+            case R.id.action_view_in_calendar:
+                startActivity(new Intent(CentralPageActivity.this,BaseActivity.class));
+
                 break;
         }
 
@@ -427,7 +544,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                     myAsyncTask m = (myAsyncTask) new myAsyncTask().execute(newText);
                 } else {
-                    prepareListview(listEvent);
+                    prepareRecyclerView(getCalendarEvents(mySQLiteHelper.getAllIncomingNotificationEvent()));
                 }
 
 
@@ -465,10 +582,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         menu.findItem(R.id.action_settings).setVisible(drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
+
     public void buttonCreateNewEventPressed(View view){
-        Intent intent= new Intent(CentralPageActivity.this, CreateNewEventActivity.class);
-        intent.putExtra("username", username);
-        intent.putExtra("loggedinUser",loggedinUser);
+        Intent intent= new Intent(CentralPageActivity.this, AddNewEventActivity.class);
         startActivity(intent);
 
     }
@@ -515,70 +631,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
 
-    private void fetchuserlist(final User user){
-        final ServerRequestUser serverRequestUser=new ServerRequestUser(this);
-        serverRequestUser.fetchallUserForGcm(user, new GetUserCallbacks() {
-            @Override
-            public void done(User returneduser) {
 
-            }
-
-            @Override
-            public void deleted(String reponse) {
-
-            }
-
-            @Override
-            public void userlist(ArrayList<User> reponse) {
-                if (reponse.size() != 0) {
-                    ArrayList<User> users = new ArrayList<User>();
-                    users = reponse;
-                    final ArrayList<User> finalUsers = users;
-                    serverRequestUser.fetchallUsers(user,new GetUserCallbacks() {
-                        @Override
-                        public void done(User returneduser) {
-
-                        }
-
-                        @Override
-                        public void deleted(String reponse) {
-
-                        }
-
-                        @Override
-                        public void userlist(ArrayList<User> reponse) {
-
-                            if (reponse.size() != 0) {
-                                Intent intent = new Intent(CentralPageActivity.this, UserListTabsActivity.class);
-                                intent.putExtra("userlistforgcm", finalUsers);
-                                intent.putExtra("userlist", reponse);
-                                startActivity(intent);
-                            }
-                        }
-                    });
-
-                }
-            }
-        });
-    }
-
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        Intent intent=new Intent(CentralPageActivity.this,DetailsEventsActivity.class);
-        intent.putExtra("titel", listEvent.get(position).titel);
-        intent.putExtra("textinfo", listEvent.get(position).infotext);
-        intent.putExtra("time", listEvent.get(position).creationTime);
-        intent.putExtra("creator", listEvent.get(position).creator);
-        intent.putExtra("day", listEvent.get(position).eDay);
-        intent.putExtra("month", listEvent.get(position).eMonth);
-        intent.putExtra("year", listEvent.get(position).eYear);
-        intent.putExtra("hash", listEvent.get(position).eventHash);
-
-
-        startActivity(intent);
-    }
 
 
 
@@ -587,8 +640,6 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     protected void onSaveInstanceState(Bundle state) {
 
         super.onSaveInstanceState(state);
-         state.putBooleanArray("selectedevents", selectionevents);
-            state.putInt("numberOfSelectedevents", countevent);
             state.putParcelableArrayList("eventsArray", listEvent);
             state.putString("user", username);
         state.putBoolean("hideOptions", hideOptions);
@@ -622,208 +673,39 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     }
 
 
-    public Bitmap getThumbnail(String filename) {
-
-        //String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD + APP_THUMBNAIL_PATH_SD_CARD;
-        Bitmap thumbnail = null;
-
-// Look for the file on the external storage
-        //try {
-        //if (tools.isSdReadable() == true) {
-        //thumbnail = BitmapFactory.decodeFile(fullPath + "/" + filename);
-        // }
-        // } catch (Exception e) {
-        // Log.e("getThumbnail() on external storage", e.getMessage());
-        // }
-
-// If no file on external storage, look in internal storage
-        // if (thumbnail == null) {
-
-        Bitmap bitmap;
-            try {
-
-                File filePath = getFileStreamPath(filename);
-                FileInputStream fi = new FileInputStream(filePath);
-                bitmap = BitmapFactory.decodeStream(fi);
-
-
-               thumbnail=bitmap;
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-        return thumbnail;
-    }
-
     private void hideOption(int id){
         MenuItem item=menu.findItem(id);
         item.setVisible(false);
     }
     private void showOption(int id){
         MenuItem item=menu.findItem(id);
-        item.setVisible(false);
-    }
-
-    @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        this.menu=menu;
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.contxt_menu, menu);
-        fab.setVisibility(View.INVISIBLE);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return false;
-    }
-
-    @Override
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_delete:
-
-
-
-
-                int size=0;
-                for (int i = selectionevents.length-1; i >=0; i--) {
-                    if (selectionevents[i]) {
-                        size++;
-                    }
-                }
-                final int[] eventtodelete= new int[size];
-                int j=0;
-                for (int i = 0; i <selectionevents.length; i++){
-                    if(selectionevents[i]){
-
-                        eventtodelete[j]=i;
-                        j++;
-                    }
-                }
-                for(int k=0;k<eventtodelete.length;k++){
-                    String hash=listEvent.get(eventtodelete[k]).eventHash;
-                    ServerRequest serverRequest=new ServerRequest(this);
-                    final int finalK = k;
-                    serverRequest.deleteEvents(listEvent.get(eventtodelete[k]), new GetEventsCallbacks() {
-                        @Override
-                        public void done(ArrayList<EventObject> returnedeventobject) {
-
-                        }
-
-                        @Override
-                        public void updated(String reponse) {
-
-                            if (reponse.contains("Event successfully deleted")) {
-                                listEvent.remove(eventtodelete[finalK]);
-                                centralPageAdapter.notifyDataSetChanged();
-
-
-                            }
-
-                        }
-                    },hash);
-                }
-
-                centralPageAdapter.notifyDataSetChanged();
-                mode.finish(); // Action picked, so close the CAB
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    public void onDestroyActionMode(ActionMode mode) {
-        //centralPageAdapter.clearSelection();
-        // centralPageAdapter.removeSelection();
-        mactionMode=null;
-        countevent =0;
-        selectionevents=new boolean[listEvent.size()];
-        centralPageAdapter.setEventSelection(selectionevents, countevent);
-        fab.setVisibility(View.VISIBLE);
+        item.setVisible(true);
     }
 
 
 
-    @Override
-    public void selected(int count, boolean[] events) {
-        countevent =count;
-        selectionevents=events;
+    void  getEventsFromDatabase(){
 
-        if(mactionMode==null){
-            mactionMode=startSupportActionMode(this);
-            int size=0;
-            for (int i = selectionevents.length-1; i >=0; i--) {
-                if (selectionevents[i]) {
-                    size++;
-                }
-            }
-            final int[] eventtodelete= new int[size];
-            int j=0;
-            for (int i = 0; i <selectionevents.length; i++){
-                if(selectionevents[i]){
-
-                    eventtodelete[j]=i;
-                    j++;
-                }
-            }
-            for(int k=0;k<eventtodelete.length;k++){
-                if(!listEvent.get(eventtodelete[k]).creator.equals(userLocalStore.getLoggedInUser().username)){
-                    hideOption(R.id.menu_delete);
-                    hideOptions=true;
-                    break;
-                }
-
-            }
-
-        }
-
-        if(countevent!=0){
-            mactionMode.setTitle(countevent + " selected");
-            fab.setVisibility(View.INVISIBLE);
-
-        }else {
-            hideOptions=false;
-            showOption(R.id.menu_delete);
-            mactionMode.finish();
-            fab.setVisibility(View.VISIBLE);
-            mactionMode=null;
-            countevent=0;
-        }
-
-        centralPageAdapter.setEventSelection(selectionevents, countevent);
-    }
-
-    void refresh(final String username){
-        final android.os.Handler h=new android.os.Handler();
-        final int delay=1000;
-        h.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getEventsFromDatabase(username);
-                h.postDelayed(this, delay);
-            }
-        }, delay);
-    }
-
-
-    void  getEventsFromDatabase(final String username){
-
-        ServerRequest serverRequest = new ServerRequest(this);
-        serverRequest.fetchAlleventscentralpage(new GetEventsCallbacks() {
+        ServerRequests serverRequest = new ServerRequests(this);
+        serverRequest.getCalenderEventInBackgroung(new GetEventsCallbacks() {
             @Override
             public void done(ArrayList<EventObject> returnedeventobject) {
+
+            }
+
+            @Override
+            public void donec(ArrayList<CalendarCollection> returnedeventobject) {
                 if (returnedeventobject != null) {
+                    mySQLiteHelper.reInitializeSqliteTable();
+                    saveeventtoSQl(returnedeventobject);
                     Intent intent = new Intent(CentralPageActivity.this, CentralPageActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     intent.putExtra("username", username);
                     intent.putExtra("eventlist", returnedeventobject);
                     startActivity(intent);
-                    refreshLayout.setRefreshing(false);
 
                 } else {
+                    Toast.makeText(getApplicationContext(), "Unable to connect to server,please try again later", Toast.LENGTH_LONG).show();
 
                 }
             }
@@ -833,6 +715,45 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
             }
         });
+    }
+    private void saveeventtoSQl(ArrayList<CalendarCollection> calendarCollections) {
+        IncomingNotification incomingNotification;
+
+        if(calendarCollections.size()!=0){
+
+        }
+        for(int i=0;i<calendarCollections.size();i++){
+            try {
+                JSONObject jsonObject=new JSONObject();
+                jsonObject.put("title",calendarCollections.get(i).title);
+                jsonObject.put("description",calendarCollections.get(i).description);
+                jsonObject.put("datetime",calendarCollections.get(i).datetime);
+                jsonObject.put("creator",calendarCollections.get(i).creator);
+                jsonObject.put("category",calendarCollections.get(i).category);
+                jsonObject.put("startingtime",calendarCollections.get(i).startingtime);
+                jsonObject.put("endingtime",calendarCollections.get(i).endingtime);
+                jsonObject.put("hashid",calendarCollections.get(i).hashid);
+                jsonObject.put("alldayevent",calendarCollections.get(i).alldayevent);
+                jsonObject.put("everymonth",calendarCollections.get(i).everymonth);
+                jsonObject.put("defaulttime",calendarCollections.get(i).creationdatetime);
+
+                Calendar c=new GregorianCalendar();
+                Date dat=c.getTime();
+                //String day= String.valueOf(dat.getDay());
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                String date = (String) android.text.format.DateFormat.format("yyyy-MM-dd", dat);
+                incomingNotification=new IncomingNotification(0,0,jsonObject.toString(),date);
+                int incomingNotifiId =  mySQLiteHelper.addIncomingNotification(incomingNotification);
+
+            }catch (Exception e){
+                e.printStackTrace();
+
+            }
+
+
+        }
+
     }
 
 
@@ -864,9 +785,14 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
     public void onYes() {
         User us=new User(userLocalStore.getLoggedInUser().username,userLocalStore.getLoggedInUser().email,userLocalStore.getLoggedInUser().password,0,userLocalStore.getUserRegistrationId());
 
-        updatestatus(us);
-        userLocalStore.clearUserData();
-        userLocalStore.setUserLoggedIn(false);
+        if(haveNetworkConnection()){
+            updatestatus(us);
+            userLocalStore.clearUserData();
+            userLocalStore.setUserLoggedIn(false);
+        }else {
+            Toast.makeText(getApplicationContext(), "No internet connection, please try again later", Toast.LENGTH_LONG).show();
+
+        }
 
     }
 
@@ -875,19 +801,6 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
 
-    private Bitmap loadImageFromStorage(String path,String username)
-    {
-        Bitmap bitmap=null;
-        try {
-            File f=new File(path, username+".jpg");
-            bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        return bitmap;
-    }
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -897,11 +810,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
         startActivity(intent);
     }
 
-    @Override
-    public void onRefresh() {
 
-        getEventsFromDatabase(userLocalStore.getLoggedInUser().username);
-    }
 
     public void filterProductArray(String newText) {
 
@@ -909,9 +818,9 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         filteredProductResults.clear();
         for (int i = 0; i < productResults.size(); i++) {
-            pName = productResults.get(i).titel.toLowerCase();
-            if (pName.contains(newText.toLowerCase()) ||
-                    productResults.get(i).creator.contains(newText)) {
+            pName = productResults.get(i).title.toLowerCase();
+            if (pName.contains(newText.toLowerCase()) || productResults.get(i).creator.contains(newText.toLowerCase()) ||
+                    productResults.get(i).category.contains(newText.toLowerCase()) || productResults.get(i).datetime.contains(newText.toLowerCase())) {
                 filteredProductResults.add(productResults.get(i));
 
             }
@@ -919,6 +828,16 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
     }
 
+    @Override
+    public void delete(int position) {
+        ((MyRecyclerViewAdapter)mAdapter).deleteItem(position);
+
+    }
+
+    @Override
+    public void selected(int count, boolean[] events, int position) {
+
+    }
 
 
     //in this myAsyncTask, we are fetching data from server for the search string entered by user.
@@ -945,36 +864,36 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
         public String getProductList() {
 
-            EventObject object;
+            CalendarCollection object;
             String matchFound = "N";
             //productResults is an arraylist with all product details for the search criteria
             //productResults.clear();
 
-            ArrayList<EventObject> returnedEvents = new ArrayList<>();
+            ArrayList<CalendarCollection> returnedEvents = new ArrayList<>();
             URL url = null;
             HttpURLConnection urlConnection = null;
             try {
 
-                url=new URL(SERVER_ADDRESS+ "FetchAllEvents.php");
-                urlConnection = (HttpURLConnection) url.openConnection();
+                url=new URL(ServerRequest.SERVER_ADDRESS + "FetchEventCalendar.php");
+                urlConnection=(HttpURLConnection)url.openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
 
 
-                InputStream in = urlConnection.getInputStream();
-                String respons = "";
-                StringBuilder bi = new StringBuilder();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                InputStream in =urlConnection.getInputStream();
+                String respons="";
+                StringBuilder bi=new StringBuilder();
+                BufferedReader reader=new BufferedReader(new InputStreamReader(in));
                 String line;
-                while ((line = reader.readLine()) != null) {
+                while((line=reader.readLine())!=null){
                     bi.append(line).append("\n");
                 }
                 reader.close();
                 in.close();
 
-                respons = bi.toString();
-                JSONArray jsonArray = new JSONArray(respons);
+                respons =bi.toString();
+                JSONArray jsonArray= new JSONArray(respons);
 
                 productList = jsonArray;
 
@@ -984,29 +903,30 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
 
                     JSONObject jo_inside = productList.getJSONObject(i);
 
-                    String titel = jo_inside.getString("eventTitel");
-                    String infotext = jo_inside.getString("eventDetails");
-                    String creator = jo_inside.getString("eventCreator");
-                    String creationTime = jo_inside.getString("eventCreationtime");
-                    String eDay = jo_inside.getString("eventDay");
-                    String eMonth = jo_inside.getString("eventMonth");
-                    String eYear = jo_inside.getString("eventYear");
-                    String eventStatus = jo_inside.getString("eventStatus");
-                    String eventHash = jo_inside.getString("eventHash");
+
+                    String titel = jo_inside.getString("title");
+                    String infotext = jo_inside.getString("description");
+                    String creator = jo_inside.getString("creator");
+                    String creationTime = jo_inside.getString("datetime");
+                    String category = jo_inside.getString("category");
+                    String startingtime = jo_inside.getString("startingtime");
+                    String endingtime = jo_inside.getString("endingtime");
+                    String alldayevent = jo_inside.getString("alldayevent");
+                    String eventHash = jo_inside.getString("hashid");
+                    String everymonth = jo_inside.getString("everymonth");
+                    String creationdatetime = jo_inside.getString("defaulttime");
 
 
-                    String[] creationtime = creationTime.split(" ");
-                    DateEventObject dateEventObject = new DateEventObject(eDay, eMonth, eYear);
+                    String[] creationtime=creationTime.split(" ");
 
-                    object = new EventObject(titel, infotext, creator, creationtime[0],
-                            dateEventObject, eventStatus, eventHash);
+                      object =new CalendarCollection(titel,infotext,creator,creationTime,startingtime,endingtime,eventHash,category,alldayevent,everymonth,creationdatetime);
 
                     //check if this product is already there in productResults, if yes, then don't add it again.
                     matchFound = "N";
 
                     for (int j = 0; j < productResults.size(); j++) {
 
-                        if (productResults.get(j).titel.equals(object.titel)) {
+                        if (productResults.get(j).title.equals(object.title)) {
                             matchFound = "Y";
                         }
                     }
@@ -1035,7 +955,7 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
             super.onPostExecute(result);
 
             if (result.equalsIgnoreCase("Exception Caught")) {
-                Toast.makeText(getApplicationContext(), "Unable to connect to server,please try later", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Unable to connect to server,please try again later", Toast.LENGTH_LONG).show();
 
             } else {
 
@@ -1043,13 +963,46 @@ public class CentralPageActivity extends ActionBarActivity implements AdapterVie
                 //calling this method to filter the search results from productResults and move them to
                 //filteredProductResults
                 filterProductArray(textSearch);
-                prepareListview(filteredProductResults);
+                prepareRecyclerView(filteredProductResults);
 
             }
         }
 
 
     }
+
+    private ArrayList<CalendarCollection> getCalendarEvents(ArrayList<IncomingNotification> incomingNotifications){
+
+        ArrayList<CalendarCollection> a =new ArrayList<>();
+        for (int i=0;i<incomingNotifications.size();i++){
+            JSONObject jo_inside = null;
+            try {
+                jo_inside = new JSONObject(incomingNotifications.get(i).body);
+
+                String titel = jo_inside.getString("title");
+                String infotext = jo_inside.getString("description");
+                String creator = jo_inside.getString("creator");
+                String creationTime = jo_inside.getString("datetime");
+                String category = jo_inside.getString("category");
+                String startingtime = jo_inside.getString("startingtime");
+                String endingtime = jo_inside.getString("endingtime");
+                String alldayevent = jo_inside.getString("alldayevent");
+                String eventHash = jo_inside.getString("hashid");
+                String everymonth = jo_inside.getString("everymonth");
+                String creationdatetime = jo_inside.getString("defaulttime");
+
+                CalendarCollection  object =new CalendarCollection(titel,infotext,creator,creationTime,startingtime,endingtime,eventHash,category,alldayevent,everymonth,creationdatetime);
+                object.incomingnotifictionid = incomingNotifications.get(i).id;
+                a.add(object);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+        return a;
+    }
+
 
 
 }

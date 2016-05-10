@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/titelwarningerror"
+        android:text="TiTeL"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/messagewarningerror"
+        android:text="messsage"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_below="@+id/titelwarningerror"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/messagewarningerror"
+        android:id="@+id/linearLayout2"
+        android:layout_marginTop="15dp"
+        android:layout_centerHorizontal="true"  >
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:id="@+id/buttonchangeerroCancel"
+            android:layout_centerVertical="true"
+            style="@style/buttondelete"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Exit"
+            android:id="@+id/buttonchangeerrorOk"
+            style="@style/buttondelete"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+
+</RelativeLayout>

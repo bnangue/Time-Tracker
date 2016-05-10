@@ -148,6 +148,11 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
             }
 
             @Override
+            public void donec(ArrayList<CalendarCollection> returnedeventobject) {
+
+            }
+
+            @Override
             public void updated(String reponse) {
 
                 if(reponse.contains("Event added successfully")){
@@ -160,6 +165,11 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
 
                         @Override
                         public void deleted(String reponse) {
+
+                        }
+
+                        @Override
+                        public void serverReponse(String reponse) {
 
                         }
 
@@ -227,6 +237,11 @@ public class CreateNewEventActivity extends ActionBarActivity implements DatePic
                 } else {
 
                 }
+            }
+
+            @Override
+            public void donec(ArrayList<CalendarCollection> returnedeventobject) {
+
             }
 
             @Override

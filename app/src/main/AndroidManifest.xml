@@ -31,14 +31,16 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/custom">
-        <activity
-            android:name=".LoginActivity"
-            android:label="@string/app_name">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/app_name">
         </activity>
         <activity
             android:name=".CentralPageActivity"
@@ -61,9 +63,6 @@
             android:name=".DetailsEventsActivity"
             android:label="@string/title_activity_details_events"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".UserListActivity"
-            android:label="@string/title_activity_user_list" />
 
         <receiver
             android:name=".GCMBroadcastReceiver"
@@ -116,16 +115,6 @@
             android:name=".HomeScreenActivity"
             android:label="@string/title_activity_home_screen"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity
-            android:name=".UserListTabsActivity"
-            android:label="@string/title_activity_user_list_tabs"
-            android:parentActivityName=".HomeScreenActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomeScreenActivity" />
-        </activity>
-        <activity android:name=".UserFriendListTabActivity" />
         <activity android:name=".AllUsersListsTabActivity" />
         <activity
             android:name=".NewUserTabsActivity"
@@ -154,13 +143,32 @@
             android:value="@string/google_api_key" />
 
         <activity android:name=".SearchResultActivity" />
-        <activity android:name=".PreferenceAppActivity"></activity>
+        <activity android:name=".PreferenceAppActivity"/>
         <activity
             android:name=".TimeSheetActivity"
             android:label="@string/title_activity_time_sheet"
-            android:theme="@style/custom.NoActionBar"></activity>
+            android:theme="@style/custom.NoActionBar"/>
         <activity android:name=".NewCalendarActivty"
-            android:theme="@style/MYAppTheme"></activity>
+            android:theme="@style/MYAppTheme"/>
+
+        <activity android:name=".BaseActivity"
+            android:parentActivityName=".NewCalendarActivty">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".NewCalendarActivty" />
+
+        </activity>
+
+        <activity android:name=".OpenUserProfileActivity" />
+        <activity android:name=".AddNewEventActivity"
+            android:parentActivityName=".CentralPageActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CentralPageActivity" />
+
+        </activity>
+        <activity android:name=".AddNewEventFragment" />
+
     </application>
 
 </manifest>

@@ -340,7 +340,7 @@ public class NewUserTabsActivity extends ActionBarActivity {
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;
             case "Timesheet":
-                startActivity(new Intent(NewUserTabsActivity.this,TimeSheetActivity.class));
+                startActivity(new Intent(NewUserTabsActivity.this,NewCalendarActivty.class));
                 mDrawerList.setItemChecked(position, true);
                 mDrawerLayout.closeDrawer(mDrawerpane);
                 break;

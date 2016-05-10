@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public interface GetUserCallbacks {
     public abstract void done( User returneduser);
     public abstract void deleted( String reponse);
+    public abstract void serverReponse(String reponse);
     public abstract void userlist( ArrayList<User> reponse);
 
 

@@ -62,6 +62,11 @@ public class LoginPanelActivity extends AppCompatActivity {
             }
 
             @Override
+            public void serverReponse(String reponse) {
+
+            }
+
+            @Override
             public void userlist(ArrayList<User> reponse) {
 
             }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_menu_save"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:title="@string/menu_save"
+        android:icon="@mipmap/ic_save_ok"/>
+    <item android:id="@+id/action_menu_delete_account"
+        android:title="@string/action_delete_account"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+</menu>

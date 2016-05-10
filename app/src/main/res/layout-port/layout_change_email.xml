@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textEmailAddress"
+        android:ems="10"
+
+        android:hint="@string/enter_newEmail"
+        android:paddingTop="14dp"
+        android:id="@+id/editTextenterNewemail"
+        android:layout_below="@+id/editTextnewPaword"
+        android:layout_centerHorizontal="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/editTextconfirmNewpassowrd"
+        android:id="@+id/linearLayout2"
+        android:layout_marginTop="15dp">
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:id="@+id/buttonchangeemailCancel"
+            android:layout_centerVertical="true"
+            style="@style/buttondelete"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Confirm"
+            android:id="@+id/buttonchangeemailOk"
+            style="@style/buttondelete"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+
+</LinearLayout>

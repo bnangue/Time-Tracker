@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView11"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You will not be able to retrieve this event. Delete?"
+        android:gravity="center_horizontal"
+        android:id="@+id/textViewMessageinfo"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="45dp"
+        android:layout_marginLeft="45dp"
+        android:layout_below="@+id/textViewTitelinfo"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Delete this event? "
+        android:id="@+id/textViewTitelinfo"
+        android:layout_marginTop="5dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/imageView11"
+        android:textStyle="bold|normal"
+        android:textSize="18sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DELETE"
+        style="@style/buttondelete"
+        android:id="@+id/buttonDeleteaccount"
+        android:layout_marginTop="24dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginLeft="60dp"
+        android:layout_below="@+id/textViewMessageinfo"
+        android:layout_centerHorizontal="true" />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CANCEL"
+        style="@style/buttondelete"
+        android:id="@+id/buttonCancelaccount"
+        android:layout_marginTop="14dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginLeft="60dp"
+        android:layout_below="@+id/buttonDeleteaccount"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>

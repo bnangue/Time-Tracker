@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:id="@+id/linearLayout3"
+       >
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            app:civ_border="true"
+            app:civ_border_width="1dp"
+            app:civ_border_color="#ffff"
+            android:id="@+id/avatar"
+            android:src="@mipmap/ic_launcher"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+           />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/linearLayoutfirstlastname"
+        android:orientation="vertical"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="50dp">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:hint="@string/firstnamestring"
+            android:id="@+id/editTextfirstname"
+            android:layout_marginTop="38dp"
+            android:layout_below="@+id/linearLayout3"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:layout_marginTop="15dp"
+            android:hint="@string/lastnamestring"
+            android:id="@+id/editTextlastname"
+            android:layout_below="@+id/editText"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/linearLayoutfirstlastname"
+        android:id="@+id/linearLayout2"
+        android:layout_marginTop="45dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp">
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:id="@+id/buttonchangeCancelfirstlastname"
+            android:layout_centerVertical="true"
+            style="@style/buttondelete"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Confirm"
+            android:id="@+id/buttonchangefirstlastname"
+            style="@style/buttondelete"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Enter your full name."
+        android:id="@+id/textView3"
+        android:layout_below="@+id/linearLayout3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="38dp"
+        android:layout_marginTop="10dp"/>
+
+
+</RelativeLayout>
